@@ -2,15 +2,23 @@ import React, { useState, useEffect, useRef } from 'react';
 import runningBannerImg from './assets/running_banner.png';
 import ballSportsBannerImg from './assets/ball_sports_banner.png';
 import swimmingBannerImg from './assets/swimming_banner.png';
+import Running from './shopping/running.jsx';
+import Football from './shopping/football.jsx';
+import Swimming from './shopping/swimimg.jsx';
 
 export default function MainPage() {
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const [searchValue, setSearchValue] = useState('');
   const [isMobileNavLowOpacity, setIsMobileNavLowOpacity] = useState(false);
   const [activeCategory, setActiveCategory] = useState('men');
+  const [currentView, setCurrentView] = useState('home');
   
   const searchContainerRef = useRef(null);
   const searchInputRef = useRef(null);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const handleSearchTriggerClick = (e) => {
     if (!isSearchExpanded) {
@@ -60,6 +68,16 @@ export default function MainPage() {
       document.removeEventListener('keydown', handleKeyDown);
     };
   }, [isSearchExpanded]);
+
+  if (currentView === 'running') {
+    return <Running onViewChange={setCurrentView} />;
+  }
+  if (currentView === 'football') {
+    return <Football onViewChange={setCurrentView} />;
+  }
+  if (currentView === 'swimming') {
+    return <Swimming onViewChange={setCurrentView} />;
+  }
 
   return (
     <div className="selection:bg-primary selection:text-white min-h-screen bg-background text-on-background">
@@ -170,7 +188,7 @@ export default function MainPage() {
         <section className="max-w-[1440px] mx-auto px-6 lg:px-12 py-32 space-y-16">
           <div className="grid grid-cols-1 gap-12">
             {/* Running Banner */}
-            <div className="relative h-[450px] group cursor-pointer overflow-hidden border border-white/5">
+            <div onClick={() => setCurrentView('running')} className="relative h-[450px] group cursor-pointer overflow-hidden border border-white/5">
               <img 
                 alt="Running" 
                 className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
@@ -187,7 +205,7 @@ export default function MainPage() {
             </div>
 
             {/* Ball Sports Banner */}
-            <div className="relative h-[450px] group cursor-pointer overflow-hidden border border-white/5">
+            <div onClick={() => setCurrentView('football')} className="relative h-[450px] group cursor-pointer overflow-hidden border border-white/5">
               <img 
                 alt="Ball Sports" 
                 className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
@@ -195,7 +213,7 @@ export default function MainPage() {
               />
               <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-all duration-500"></div>
               <div className="absolute bottom-12 right-12 text-right">
-                <h3 className="text-white text-5xl md:text-7xl font-anybody font-black italic uppercase tracking-tighter text-stroke">บอล / BALL SPORTS</h3>
+                <h3 className="text-white text-5xl md:text-7xl font-anybody font-black italic uppercase tracking-tighter">บอล / BALL SPORTS</h3>
                 <div className="mt-6 flex items-center justify-end gap-4 text-white font-bold text-xs uppercase tracking-[0.3em]">
                   <span>Explore Gear</span>
                   <span className="material-symbols-outlined">arrow_forward</span>
@@ -204,7 +222,7 @@ export default function MainPage() {
             </div>
 
             {/* Swimming Banner */}
-            <div className="relative h-[450px] group cursor-pointer overflow-hidden border border-white/5">
+            <div onClick={() => setCurrentView('swimming')} className="relative h-[450px] group cursor-pointer overflow-hidden border border-white/5">
               <img 
                 alt="Swimming" 
                 className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
