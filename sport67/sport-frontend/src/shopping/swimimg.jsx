@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import Navbar from '../navbar.jsx';
 
 const PRODUCTS = [
   {
@@ -56,128 +57,14 @@ const PRODUCTS = [
 ];
 
 export default function Swimming({ onViewChange }) {
-  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
-  const [searchValue, setSearchValue] = useState('');
-  const [isMobileNavLowOpacity, setIsMobileNavLowOpacity] = useState(false);
-  
-  const searchContainerRef = useRef(null);
-  const searchInputRef = useRef(null);
-
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-  const handleSearchTriggerClick = (e) => {
-    if (!isSearchExpanded) {
-      e.preventDefault();
-      setIsSearchExpanded(true);
-      if (window.innerWidth < 1024) {
-        setIsMobileNavLowOpacity(true);
-      }
-      setTimeout(() => {
-        searchInputRef.current?.focus();
-      }, 50);
-    } else {
-      if (searchValue === '') {
-        setIsSearchExpanded(false);
-        setIsMobileNavLowOpacity(false);
-      } else {
-        console.log('Searching for:', searchValue);
-      }
-    }
-  };
-
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (
-        searchContainerRef.current &&
-        !searchContainerRef.current.contains(e.target) &&
-        isSearchExpanded
-      ) {
-        setIsSearchExpanded(false);
-        setIsMobileNavLowOpacity(false);
-        setSearchValue('');
-      }
-    };
-
-    const handleKeyDown = (e) => {
-      if (e.key === 'Escape' && isSearchExpanded) {
-        setIsSearchExpanded(false);
-        setIsMobileNavLowOpacity(false);
-        setSearchValue('');
-      }
-    };
-
-    document.addEventListener('click', handleClickOutside);
-    document.addEventListener('keydown', handleKeyDown);
-    return () => {
-      document.removeEventListener('click', handleClickOutside);
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [isSearchExpanded]);
-
   return (
     <div className="bg-background text-on-background font-body-md min-h-screen overflow-x-hidden selection:bg-primary selection:text-white">
       {/* TopNavBar */}
-      <header className="fixed top-0 w-full z-50 transition-all duration-300 glass border-b border-white/5">
-        <div className="max-w-[1440px] mx-auto px-6 lg:px-12 h-20 flex items-center justify-between relative">
-          <div className="flex-shrink-0 cursor-pointer" onClick={() => onViewChange && onViewChange('home')}>
-            <h1 className="text-3xl font-anybody font-black italic tracking-tighter uppercase">gogo</h1>
-          </div>
-          {/* Navigation Menu */}
-          <nav 
-            className="hidden md:flex items-center space-x-12 text-[11px] font-bold uppercase tracking-[0.2em] transition-all duration-300" 
-            id="main-nav"
-            style={{ opacity: isMobileNavLowOpacity ? 0.1 : 1 }}
-          >
-            <a className="hover:text-primary transition" href="#">Men</a>
-            <a className="hover:text-primary transition" href="#">Women</a>
-            <a className="hover:text-primary transition" href="#">Kids</a>
-            <a className="text-primary" href="#">Brands</a>
-          </nav>
-          
-          <div className="flex items-center space-x-8">
-            {/* Search Container */}
-            <div 
-              ref={searchContainerRef}
-              className={`relative flex items-center h-10 transition-all duration-400 group ${isSearchExpanded ? 'expanded w-[280px]' : ''}`} 
-              id="search-container"
-            >
-              <input 
-                ref={searchInputRef}
-                className="bg-white/5 border border-white/10 rounded-none px-4 py-2 text-xs text-white/50 w-64 font-bold tracking-widest placeholder:text-white/30 focus:ring-1 focus:ring-primary h-full uppercase" 
-                id="search-input" 
-                placeholder="SEARCH COLLECTION..." 
-                type="text"
-                value={searchValue}
-                onChange={(e) => setSearchValue(e.target.value)}
-              />
-              <button 
-                onClick={handleSearchTriggerClick}
-                className="absolute right-0 hover:text-primary transition-colors flex items-center justify-center w-10 h-10" 
-                id="search-trigger"
-              >
-                <span className="material-symbols-outlined text-[22px]" id="search-icon">search</span>
-              </button>
-            </div>
-            
-            <button 
-              className="flex items-center gap-2 font-bold text-[11px] uppercase tracking-widest hover:text-primary transition" 
-              onClick={() => console.log('Login clicked')}
-            >
-              <span className="material-symbols-outlined text-[22px]" style={{ fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24" }}>person</span>
-              <span className="hidden sm:inline">Login</span>
-            </button>
-            <a className="flex items-center gap-2 font-bold text-[11px] uppercase tracking-widest hover:text-primary transition" href="#">
-              <span className="material-symbols-outlined text-[22px]" style={{ fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24" }}>shopping_bag</span>
-              <span className="hidden sm:inline">Bag (0)</span>
-            </a>
-            <button className="md:hidden">
-              <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24" }}>menu</span>
-            </button>
-          </div>
-        </div>
-      </header>
+      <Navbar setCurrentView={onViewChange} />
 
       <main className="max-w-max-width mx-auto px-6 lg:px-12 py-base pt-28">
         {/* Breadcrumbs */}
