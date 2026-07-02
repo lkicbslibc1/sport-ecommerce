@@ -6,6 +6,7 @@ import Running from './shopping/running.jsx';
 import Football from './shopping/football.jsx';
 import Swimming from './shopping/swimimg.jsx';
 import Navbar from './navbar.jsx';
+import Dashboard from './admin/dashboard.jsx';
 
 export default function MainPage() {
   const [activeCategory, setActiveCategory] = useState('men');
@@ -24,6 +25,9 @@ export default function MainPage() {
   if (currentView === 'swimming') {
     return <Swimming onViewChange={setCurrentView} />;
   }
+  if (currentView === 'dashboard') {
+    return <Dashboard onViewChange={setCurrentView} />;
+  }
 
   return (
     <div className="selection:bg-primary selection:text-white min-h-screen bg-background text-on-background">
@@ -34,10 +38,10 @@ export default function MainPage() {
       <main className="pt-20">
         {/* BEGIN: HeroSection */}
         <section className="relative h-[90vh] min-h-[700px] w-full overflow-hidden">
-          <img 
-            alt="Hero Runner" 
-            className="absolute inset-0 w-full h-full object-cover" 
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuDvnyX2uWeWErduCcq6jGLNvAq-RdhA4hl5IIkz-m1I1LBulRb10pDPzwKy7v9WoGRbplpUE7SYXWQgnkbPcVCV3od0Wce07Jl7Qo5NaGCSr0NCym_hrURV5Zm5Z0OhmPzQBEFpZsNk3J22mEWjhp58473X49LNl5fuWJzGewGDyzEGlyIBIbWRW6QHoZ7QForMXenC6XFvGMXdJmnZQEfrKfnhemT_5o8Ex3LQEeh6oWmun53HfsPP2Wc4oKZnTxdeaokyLXbjcns" 
+          <img
+            alt="Hero Runner"
+            className="absolute inset-0 w-full h-full object-cover"
+            src="https://lh3.googleusercontent.com/aida-public/AB6AXuDvnyX2uWeWErduCcq6jGLNvAq-RdhA4hl5IIkz-m1I1LBulRb10pDPzwKy7v9WoGRbplpUE7SYXWQgnkbPcVCV3od0Wce07Jl7Qo5NaGCSr0NCym_hrURV5Zm5Z0OhmPzQBEFpZsNk3J22mEWjhp58473X49LNl5fuWJzGewGDyzEGlyIBIbWRW6QHoZ7QForMXenC6XFvGMXdJmnZQEfrKfnhemT_5o8Ex3LQEeh6oWmun53HfsPP2Wc4oKZnTxdeaokyLXbjcns"
           />
           <div className="absolute inset-0 hero-gradient flex items-center">
             <div className="max-w-[1440px] mx-auto px-6 lg:px-12 w-full text-white">
@@ -73,10 +77,10 @@ export default function MainPage() {
           <div className="grid grid-cols-1 gap-12">
             {/* Running Banner */}
             <div onClick={() => setCurrentView('running')} className="relative h-[450px] group cursor-pointer overflow-hidden border border-white/5">
-              <img 
-                alt="Running" 
-                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
-                src={runningBannerImg} 
+              <img
+                alt="Running"
+                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                src={runningBannerImg}
               />
               <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-all duration-500"></div>
               <div className="absolute bottom-12 left-12">
@@ -90,10 +94,10 @@ export default function MainPage() {
 
             {/* Ball Sports Banner */}
             <div onClick={() => setCurrentView('football')} className="relative h-[450px] group cursor-pointer overflow-hidden border border-white/5">
-              <img 
-                alt="Ball Sports" 
-                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
-                src={ballSportsBannerImg} 
+              <img
+                alt="Ball Sports"
+                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                src={ballSportsBannerImg}
               />
               <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-all duration-500"></div>
               <div className="absolute bottom-12 right-12 text-right">
@@ -107,10 +111,10 @@ export default function MainPage() {
 
             {/* Swimming Banner */}
             <div onClick={() => setCurrentView('swimming')} className="relative h-[450px] group cursor-pointer overflow-hidden border border-white/5">
-              <img 
-                alt="Swimming" 
-                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
-                src={swimmingBannerImg} 
+              <img
+                alt="Swimming"
+                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                src={swimmingBannerImg}
               />
               <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-all duration-500"></div>
               <div className="absolute bottom-12 left-12">
@@ -134,41 +138,38 @@ export default function MainPage() {
                 <p className="text-on-surface-variant mt-4 text-sm font-light tracking-wide">TRENDING PERFORMANCE FOOTWEAR &amp; APPAREL</p>
               </div>
               <div className="flex gap-2">
-                <button 
+                <button
                   onClick={() => setActiveCategory('men')}
-                  className={`font-bold text-[10px] px-8 py-3 uppercase tracking-widest transition-all ${
-                    activeCategory === 'men' ? 'bg-primary text-white' : 'glass text-white hover:bg-white/10'
-                  }`}
+                  className={`font-bold text-[10px] px-8 py-3 uppercase tracking-widest transition-all ${activeCategory === 'men' ? 'bg-primary text-white' : 'glass text-white hover:bg-white/10'
+                    }`}
                 >
                   Men / ผู้ชาย
                 </button>
-                <button 
+                <button
                   onClick={() => setActiveCategory('women')}
-                  className={`font-bold text-[10px] px-8 py-3 uppercase tracking-widest transition-all ${
-                    activeCategory === 'women' ? 'bg-primary text-white' : 'glass text-white hover:bg-white/10'
-                  }`}
+                  className={`font-bold text-[10px] px-8 py-3 uppercase tracking-widest transition-all ${activeCategory === 'women' ? 'bg-primary text-white' : 'glass text-white hover:bg-white/10'
+                    }`}
                 >
                   Women / ผู้หญิง
                 </button>
-                <button 
+                <button
                   onClick={() => setActiveCategory('kids')}
-                  className={`font-bold text-[10px] px-8 py-3 uppercase tracking-widest transition-all ${
-                    activeCategory === 'kids' ? 'bg-primary text-white' : 'glass text-white hover:bg-white/10'
-                  }`}
+                  className={`font-bold text-[10px] px-8 py-3 uppercase tracking-widest transition-all ${activeCategory === 'kids' ? 'bg-primary text-white' : 'glass text-white hover:bg-white/10'
+                    }`}
                 >
                   Kids / เด็ก
                 </button>
               </div>
             </div>
-            
+
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
               {/* Product 1 */}
               <div className="group">
                 <div className="aspect-[4/5] bg-[#111] mb-6 relative overflow-hidden flex items-center justify-center p-8 border border-white/5">
-                  <img 
-                    alt="Salomon XT-6" 
-                    className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-110" 
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuDUvCVnJTx-gEfawY8-FNPOPr00pKOBMvmflTb-xYd8__gKctCW26c1LaYIcCaq16LWFoTHmQpesUOqaqwlpBvKGxnXS2r3WPxFr_SNDjGnYvMXsP7cTh7ubn8ov9wu8eZQM_Cx4TobM4_TmamPyteS3DI3t4NT82KjajcGOYAlOHvaZRixRLMRGNFcI1yr6nghM7n3yF-4XVNs4NZeFiXNPVCZtgbksZCXySqnAF2FS_FNABYcR1gkp_F57g8IsnunmENM-V82bhg" 
+                  <img
+                    alt="Salomon XT-6"
+                    className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-110"
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuDUvCVnJTx-gEfawY8-FNPOPr00pKOBMvmflTb-xYd8__gKctCW26c1LaYIcCaq16LWFoTHmQpesUOqaqwlpBvKGxnXS2r3WPxFr_SNDjGnYvMXsP7cTh7ubn8ov9wu8eZQM_Cx4TobM4_TmamPyteS3DI3t4NT82KjajcGOYAlOHvaZRixRLMRGNFcI1yr6nghM7n3yF-4XVNs4NZeFiXNPVCZtgbksZCXySqnAF2FS_FNABYcR1gkp_F57g8IsnunmENM-V82bhg"
                   />
                   <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
                     <button className="w-12 h-12 bg-white text-black flex items-center justify-center hover:bg-primary hover:text-white transition-colors">
@@ -188,10 +189,10 @@ export default function MainPage() {
               {/* Product 2 */}
               <div className="group">
                 <div className="aspect-[4/5] bg-[#111] mb-6 relative overflow-hidden flex items-center justify-center p-8 border border-white/5">
-                  <img 
-                    alt="Salomon XA PRO" 
-                    className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-110" 
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuDvDlfDKJ6M6AvtB8Wjm5TXBYFTejSvC00Mi7xXb-OUwDa-UcgKHj7oSV9zwsF3qbH_XWY4VyD4BRAhk9tejEjV89PiRb6sXZqWA_zWYY2QV-5V3EMwQ7E1IpDtfakV3Q888sH4iyzmC0I0yUdG0fIDz9czCAsdlE5GuFLBtK7zggqqLthgO9Q6u-hCrmuhokAEM9LIj9K-69k7bhZTi8y8T9CHvZ8xUEaiVhPmtcMpaPTUQD84jD_fH7RMVqa-PzS9oOyFwfI6q3Y" 
+                  <img
+                    alt="Salomon XA PRO"
+                    className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-110"
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuDvDlfDKJ6M6AvtB8Wjm5TXBYFTejSvC00Mi7xXb-OUwDa-UcgKHj7oSV9zwsF3qbH_XWY4VyD4BRAhk9tejEjV89PiRb6sXZqWA_zWYY2QV-5V3EMwQ7E1IpDtfakV3Q888sH4iyzmC0I0yUdG0fIDz9czCAsdlE5GuFLBtK7zggqqLthgO9Q6u-hCrmuhokAEM9LIj9K-69k7bhZTi8y8T9CHvZ8xUEaiVhPmtcMpaPTUQD84jD_fH7RMVqa-PzS9oOyFwfI6q3Y"
                   />
                   <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                     <button className="px-8 py-3 bg-white text-black font-black text-[10px] uppercase tracking-widest hover:bg-primary hover:text-white transition-all">Quick Add</button>
@@ -206,10 +207,10 @@ export default function MainPage() {
               {/* Product 3 */}
               <div className="group">
                 <div className="aspect-[4/5] bg-[#111] mb-6 relative overflow-hidden flex items-center justify-center p-8 border border-white/5">
-                  <img 
-                    alt="Solamphibian" 
-                    className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-110" 
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuCYC0irg4q1tFBSf5CRVa9CNPvXLRkb34BE5N0qBpo0U5KHttTas2tpwBr4QBoCntDuOVL78tkJDf6Y_nO0Vj86T0_B1L1-I0rIVOmvbBNsUxonKn-JC4x9ImrmcC5_VSgrvnX8cn3KwWUjOWFOKnYc7uZr0yqJjZ0p-iWTyx6dsUz50UahnY-5DFE9bD4KIrquc44L3EcOr8Lo_0aMERQTBsNuRVgVeGao_KYw1k8T-QGI8mu6OKPvKxI-UXQqKrNXu0kuu9BKPjo" 
+                  <img
+                    alt="Solamphibian"
+                    className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-110"
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuCYC0irg4q1tFBSf5CRVa9CNPvXLRkb34BE5N0qBpo0U5KHttTas2tpwBr4QBoCntDuOVL78tkJDf6Y_nO0Vj86T0_B1L1-I0rIVOmvbBNsUxonKn-JC4x9ImrmcC5_VSgrvnX8cn3KwWUjOWFOKnYc7uZr0yqJjZ0p-iWTyx6dsUz50UahnY-5DFE9bD4KIrquc44L3EcOr8Lo_0aMERQTBsNuRVgVeGao_KYw1k8T-QGI8mu6OKPvKxI-UXQqKrNXu0kuu9BKPjo"
                   />
                   <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                     <button className="px-8 py-3 bg-white text-black font-black text-[10px] uppercase tracking-widest hover:bg-primary hover:text-white transition-all">Quick Add</button>
@@ -224,10 +225,10 @@ export default function MainPage() {
               {/* Product 4 */}
               <div className="group">
                 <div className="aspect-[4/5] bg-[#111] mb-6 relative overflow-hidden flex items-center justify-center p-8 border border-white/5">
-                  <img 
-                    alt="XT-6 White" 
-                    className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-110" 
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuBPkmZVK4JCzWO1WtwoD85bsMpwvTPU2P4godiD-X2aDw6oj9A5NX8aIHfikh3YW9QTBrTQaXkYCs7CcEfBm_UHQ-PUFmDQcrMMqOSz7TCK57ILOAGNPi62HfXMpjJ07AWtaAG2eLvuQbBRgz4Dm4ZKyE2TOWG6SJif8kmCvTrmlcPor5tuDMHG8dqXW41wSFig-DpBZaUwscOvwwWLCTiKMOK6V8zUM9A_jxVfL5DWS2E6vruJBnhxmBDPyk-oyWdIx9-3LW2Fzk8" 
+                  <img
+                    alt="XT-6 White"
+                    className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-110"
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuBPkmZVK4JCzWO1WtwoD85bsMpwvTPU2P4godiD-X2aDw6oj9A5NX8aIHfikh3YW9QTBrTQaXkYCs7CcEfBm_UHQ-PUFmDQcrMMqOSz7TCK57ILOAGNPi62HfXMpjJ07AWtaAG2eLvuQbBRgz4Dm4ZKyE2TOWG6SJif8kmCvTrmlcPor5tuDMHG8dqXW41wSFig-DpBZaUwscOvwwWLCTiKMOK6V8zUM9A_jxVfL5DWS2E6vruJBnhxmBDPyk-oyWdIx9-3LW2Fzk8"
                   />
                   <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                     <button className="px-8 py-3 bg-white text-black font-black text-[10px] uppercase tracking-widest hover:bg-primary hover:text-white transition-all">Quick Add</button>
@@ -253,10 +254,10 @@ export default function MainPage() {
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4 h-[600px]">
             {/* Gravel */}
             <div className="relative group cursor-pointer overflow-hidden border border-white/5">
-              <img 
-                alt="Gravel" 
-                className="w-full h-full object-cover transition duration-1000 group-hover:scale-110" 
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuDwI1BJkcmMfFeHFHjL9hGFa114fWssQJ1ZV1k5-QGR7rvpTnzh0FxWHzIWCzvtKUe8g5bj1mKSgQc-_TBVnbwo4UNJKiU7d1zYk7LiEYmY0RhjPqmnaSiqN984BN4umgnHOME544H71UeP6nzDAb1bvQNwnz8IeI0UcEb-B52roEISKJ6_wr-fdG3byAzSsYMEjZuD_xv2d0veukGDMpG_O9UvnJBBlySpdYWfYHXLKZagrNnpUw4af0NOO0tQ5Kkwpnf-hEDrQEw" 
+              <img
+                alt="Gravel"
+                className="w-full h-full object-cover transition duration-1000 group-hover:scale-110"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuDwI1BJkcmMfFeHFHjL9hGFa114fWssQJ1ZV1k5-QGR7rvpTnzh0FxWHzIWCzvtKUe8g5bj1mKSgQc-_TBVnbwo4UNJKiU7d1zYk7LiEYmY0RhjPqmnaSiqN984BN4umgnHOME544H71UeP6nzDAb1bvQNwnz8IeI0UcEb-B52roEISKJ6_wr-fdG3byAzSsYMEjZuD_xv2d0veukGDMpG_O9UvnJBBlySpdYWfYHXLKZagrNnpUw4af0NOO0tQ5Kkwpnf-hEDrQEw"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent"></div>
               <div className="absolute bottom-6 left-6">
@@ -266,10 +267,10 @@ export default function MainPage() {
 
             {/* Trail Running */}
             <div className="relative group cursor-pointer overflow-hidden border border-white/5">
-              <img 
-                alt="Trail Running" 
-                className="w-full h-full object-cover transition duration-1000 group-hover:scale-110" 
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuC--eJwzzF_DIGIN03c_n27fJ28usAuxwfxm9TFLO4XYv0T1x1z92-CjChPdPbyp8RlbsaHFplKVlsOvBMz9FcYpIdTTbPLtC_oE9Ei4rq7ReNJWbpQjFnKUM_3umf3698xYTQrr7hl_tfUum_uxgnmKUiTNFcQm9vqo02KvuR9bqO5XPz3V-XBS3U8tXWVwdk_LLhEau3iC0XB1yEuRAkhhFDSaY3KlZDTOW0KB6VcPYi2hi4jJh0TeAMV6BoxyGegj0l7gIWpp_Y" 
+              <img
+                alt="Trail Running"
+                className="w-full h-full object-cover transition duration-1000 group-hover:scale-110"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuC--eJwzzF_DIGIN03c_n27fJ28usAuxwfxm9TFLO4XYv0T1x1z92-CjChPdPbyp8RlbsaHFplKVlsOvBMz9FcYpIdTTbPLtC_oE9Ei4rq7ReNJWbpQjFnKUM_3umf3698xYTQrr7hl_tfUum_uxgnmKUiTNFcQm9vqo02KvuR9bqO5XPz3V-XBS3U8tXWVwdk_LLhEau3iC0XB1yEuRAkhhFDSaY3KlZDTOW0KB6VcPYi2hi4jJh0TeAMV6BoxyGegj0l7gIWpp_Y"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent"></div>
               <div className="absolute bottom-6 left-6">
@@ -279,10 +280,10 @@ export default function MainPage() {
 
             {/* Road Running */}
             <div className="relative group cursor-pointer overflow-hidden border border-white/5 md:col-span-1">
-              <img 
-                alt="Road Running" 
-                className="w-full h-full object-cover transition duration-1000 group-hover:scale-110" 
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBZhb-q_KAYbqBH6599uwZ6hkkqxYG15hXMpjUOSOXUvI3supurXQp37FA-K-qJLGQF6afWoGFQkFtaZT38aOuUbwQ7eDgyfFTxGt1MdzKxagVWszJ8RPeGu7uvVZlZf8C8h-l4UJ3iclI1WJJKwfrCIjkMf6yEsUTbnBb5BzPcd2-pq78BZgNuz1KjVL7ZH7LO4C76VUImcOFjis3kDaf-FsSiW5ed2dHE1-BnRpk6k2pTgf-qeivmRxQfYoFlsx5Em-UGuiTgIl4" 
+              <img
+                alt="Road Running"
+                className="w-full h-full object-cover transition duration-1000 group-hover:scale-110"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBZhb-q_KAYbqBH6599uwZ6hkkqxYG15hXMpjUOSOXUvI3supurXQp37FA-K-qJLGQF6afWoGFQkFtaZT38aOuUbwQ7eDgyfFTxGt1MdzKxagVWszJ8RPeGu7uvVZlZf8C8h-l4UJ3iclI1WJJKwfrCIjkMf6yEsUTbnBb5BzPcd2-pq78BZgNuz1KjVL7ZH7LO4C76VUImcOFjis3kDaf-FsSiW5ed2dHE1-BnRpk6k2pTgf-qeivmRxQfYoFlsx5Em-UGuiTgIl4"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent"></div>
               <div className="absolute bottom-6 left-6">
@@ -292,10 +293,10 @@ export default function MainPage() {
 
             {/* Sportstyle */}
             <div className="relative group cursor-pointer overflow-hidden border border-white/5">
-              <img 
-                alt="Sportstyle" 
-                className="w-full h-full object-cover transition duration-1000 group-hover:scale-110" 
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuAvWxfAp9lr8iEB7K51T_XKXUg2vlac7IHU8HUFuI6XqzF7NCGXOFDqXCrIMpunWzhRPVsTG8jsNq6bhsJdoAXbw_Fqr9jHN8SIpmY_TXYKe4twX5ns8NW9rYUU7YlCcGHeAyao8bURnrNhPPbtmzJijh5Hg77XouU4T3K-AP9SBeUp_Hc3eYVEQGJQPvCcktUUl5dwBKm578ZFIzL49702ZluC3u5q3gmHV9jvuSw1VIFZ6iKhToVYV2ziANQi4055Z0suzycVYxo" 
+              <img
+                alt="Sportstyle"
+                className="w-full h-full object-cover transition duration-1000 group-hover:scale-110"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuAvWxfAp9lr8iEB7K51T_XKXUg2vlac7IHU8HUFuI6XqzF7NCGXOFDqXCrIMpunWzhRPVsTG8jsNq6bhsJdoAXbw_Fqr9jHN8SIpmY_TXYKe4twX5ns8NW9rYUU7YlCcGHeAyao8bURnrNhPPbtmzJijh5Hg77XouU4T3K-AP9SBeUp_Hc3eYVEQGJQPvCcktUUl5dwBKm578ZFIzL49702ZluC3u5q3gmHV9jvuSw1VIFZ6iKhToVYV2ziANQi4055Z0suzycVYxo"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent"></div>
               <div className="absolute bottom-6 left-6">
@@ -305,10 +306,10 @@ export default function MainPage() {
 
             {/* Outdoor */}
             <div className="relative group cursor-pointer overflow-hidden border border-white/5">
-              <img 
-                alt="Outdoor" 
-                className="w-full h-full object-cover transition duration-1000 group-hover:scale-110" 
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuAQBZiEffmZVFsytTv0jaiwLF3NIN33A2fYhx2hemY0InuMgaGNGf6PyuwVk5wCixk0-qo-Tx53yg85R5Wg7P-ozGfj8hAzeHPXQd0_rZUrPDxdjYe2fjd-jaG8wLMACIRmDIBqIkxXwld2HyfNIEJLQxPALBBfz8rwSdEPqL3iMVsubWuET6inMWwtY8o3xEtWiX7f6RURdzQjq_KZyrP1jIk26z010mCoJ2Ht5ldt5ch_dlNdI6jbMC_CMjdlBw81_x0nThij8Qo" 
+              <img
+                alt="Outdoor"
+                className="w-full h-full object-cover transition duration-1000 group-hover:scale-110"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuAQBZiEffmZVFsytTv0jaiwLF3NIN33A2fYhx2hemY0InuMgaGNGf6PyuwVk5wCixk0-qo-Tx53yg85R5Wg7P-ozGfj8hAzeHPXQd0_rZUrPDxdjYe2fjd-jaG8wLMACIRmDIBqIkxXwld2HyfNIEJLQxPALBBfz8rwSdEPqL3iMVsubWuET6inMWwtY8o3xEtWiX7f6RURdzQjq_KZyrP1jIk26z010mCoJ2Ht5ldt5ch_dlNdI6jbMC_CMjdlBw81_x0nThij8Qo"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent"></div>
               <div className="absolute bottom-6 left-6">
@@ -350,7 +351,7 @@ export default function MainPage() {
                 <li><a className="hover:text-primary transition-colors" href="#">Brand Exclusives</a></li>
               </ul>
             </div>
-            
+
             {/* Sports */}
             <div className="space-y-6">
               <h5 className="font-anybody font-black text-sm uppercase tracking-widest">Sports</h5>

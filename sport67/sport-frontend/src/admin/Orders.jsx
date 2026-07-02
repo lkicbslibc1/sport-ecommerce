@@ -1,0 +1,497 @@
+import React, { useState } from "react";
+import {
+  LayoutDashboard,
+  ShoppingCart,
+  Package,
+  Boxes,
+  Users,
+  Settings,
+  HelpCircle,
+  Search,
+  Bell,
+  UserCircle,
+  Plus,
+  Eye,
+  ChevronLeft,
+  ChevronRight,
+  X,
+} from "lucide-react";
+
+const NAV_ITEMS = [
+  { label: "Dashboard", icon: LayoutDashboard },
+  { label: "Orders", icon: ShoppingCart, active: true },
+  { label: "Inventory", icon: Package },
+  { label: "Products", icon: Boxes },
+  { label: "Team", icon: Users },
+];
+
+const STATUS_STYLES = {
+  Pending: "bg-neutral-700 text-neutral-200",
+  Preparing: "bg-indigo-300 text-indigo-950",
+  Shipped: "bg-orange-600 text-orange-50",
+  Delivered: "bg-orange-300 text-orange-950",
+};
+
+const TIER_STYLES = {
+  ELITE: "text-orange-400 border border-orange-400",
+  PRO: "text-indigo-300 border border-indigo-300",
+  MEMBER: "text-neutral-400 border border-neutral-600",
+};
+
+const ORDERS = [
+  {
+    id: "#GGO-92831",
+    customer: "Dominic Toretto",
+    tier: "ELITE",
+    date: "OCT 24, 2023",
+    total: "$1,240.00",
+    status: "Pending",
+    actions: ["Update Status", "Mark Shipped", "Mark Preparing", "Cancel Order"],
+  },
+  {
+    id: "#GGO-92830",
+    customer: "Sarah Connor",
+    tier: "PRO",
+    date: "OCT 23, 2023",
+    total: "$450.50",
+    status: "Preparing",
+    actions: ["Update Status", "Mark Shipped", "Mark Delivered"],
+  },
+  {
+    id: "#GGO-92829",
+    customer: "Letty Ortiz",
+    tier: "MEMBER",
+    date: "OCT 23, 2023",
+    total: "$89.00",
+    status: "Shipped",
+    actions: ["Update Status", "Mark Delivered", "Track Shipment"],
+  },
+  {
+    id: "#GGO-92828",
+    customer: "Ellen Ripley",
+    tier: "ELITE",
+    date: "OCT 22, 2023",
+    total: "$3,200.00",
+    status: "Delivered",
+    actions: ["Update Status", "Re-open Order", "Archive"],
+  },
+];
+
+const CART_ITEMS = [
+  {
+    name: "Apex Compression V2 - Stealth",
+    sku: "GGO-APX-001 / Size: XL",
+    qty: 2,
+    price: "$180.00",
+  },
+  {
+    name: "Velocity Carbon Runner",
+    sku: "GGO-SH-922 / Size: 11",
+    qty: 1,
+    price: "$1,060.00",
+  },
+];
+
+function GlassPanel({ className = "", children }) {
+  return (
+    <div
+      className={
+        "backdrop-blur-md bg-white/[0.03] border border-white/5 " + className
+      }
+    >
+      {children}
+    </div>
+  );
+}
+
+export default function GogoAthleticOrders({ onNavigate }) {
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const isOpen = selectedOrder !== null;
+
+  return (
+    <div className="min-h-screen w-full bg-neutral-950 text-neutral-100 flex">
+      {/* SIDE NAVIGATION */}
+      <aside className="hidden md:flex md:w-64 shrink-0 h-screen sticky top-0 flex-col border-r border-white/5">
+        <div className="p-8">
+          <h1 className="text-2xl italic font-black text-orange-300 uppercase leading-none">
+            GOGO ATHLETIC
+          </h1>
+          <p className="text-[10px] text-neutral-500 mt-1 opacity-80 tracking-widest uppercase">
+            Admin Suite
+          </p>
+        </div>
+
+        <nav className="flex-1 px-4 space-y-2">
+          {NAV_ITEMS.map(({ label, icon: Icon, active }) => (
+            <button
+              key={label}
+              onClick={() => {
+                if (onNavigate) {
+                  if (label === "Dashboard") onNavigate("dashboard");
+                  else if (label === "Orders") onNavigate("orders");
+                  else if (label === "Products") onNavigate("products");
+                }
+              }}
+              className={
+                "w-full flex items-center gap-4 transition-all duration-200 ease-in-out py-3 pl-4 text-left " +
+                (active
+                  ? "text-orange-300 font-bold border-l-4 border-orange-300 bg-white/[0.02]"
+                  : "text-neutral-400 font-medium pl-5 hover:text-orange-300 hover:bg-white/[0.02]")
+              }
+            >
+              <Icon size={20} strokeWidth={active ? 2.5 : 2} />
+              <span className="text-sm uppercase tracking-widest">{label}</span>
+            </button>
+          ))}
+        </nav>
+
+        <div className="px-8 pb-8 pt-4">
+          <button className="w-full bg-orange-600 text-white text-[10px] font-black py-4 px-2 uppercase tracking-widest hover:scale-105 transition-transform flex items-center justify-center gap-2">
+            <Plus size={16} />
+            New Entry
+          </button>
+        </div>
+
+        <div className="border-t border-white/5 p-4 space-y-1">
+          <a
+            href="#"
+            className="flex items-center gap-4 py-2 pl-5 text-neutral-400 hover:text-orange-300 hover:bg-white/[0.02] transition-colors"
+          >
+            <Settings size={16} />
+            <span className="text-[10px] uppercase tracking-widest">Settings</span>
+          </a>
+          <a
+            href="#"
+            className="flex items-center gap-4 py-2 pl-5 text-neutral-400 hover:text-orange-300 hover:bg-white/[0.02] transition-colors"
+          >
+            <HelpCircle size={16} />
+            <span className="text-[10px] uppercase tracking-widest">Support</span>
+          </a>
+        </div>
+      </aside>
+
+      <div className="flex-1 min-w-0">
+        {/* TOP NAVIGATION */}
+        <header className="sticky top-0 z-40 flex justify-between items-center h-16 px-6 md:px-12 bg-neutral-950/80 backdrop-blur-md border-b border-white/5">
+          <div className="relative">
+            <Search
+              size={16}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500"
+            />
+            <input
+              type="text"
+              placeholder="Search orders, ID, customers..."
+              className="bg-neutral-900 border-none focus:ring-1 focus:ring-orange-300 text-neutral-100 text-sm pl-10 pr-4 py-2 w-56 sm:w-80 placeholder:text-neutral-600"
+            />
+          </div>
+
+          <div className="flex items-center gap-6">
+            <button className="text-neutral-300 hover:scale-110 transition-transform duration-300">
+              <Bell size={20} />
+            </button>
+            <div className="flex items-center gap-3 pl-4 border-l border-white/10">
+              <div className="text-right hidden sm:block">
+                <p className="text-[10px] leading-none tracking-widest">ADMINISTRATOR</p>
+                <p className="text-[10px] text-orange-300 mt-1">Marcus Thorne</p>
+              </div>
+              <button className="text-orange-300 hover:scale-110 transition-transform duration-300">
+                <UserCircle size={30} />
+              </button>
+            </div>
+          </div>
+        </header>
+
+        {/* MAIN CONTENT */}
+        <main className="px-6 md:px-12 py-12">
+          {/* Page Header */}
+          <div className="flex flex-col sm:flex-row justify-between sm:items-end gap-6 mb-12">
+            <div>
+              <h2 className="text-3xl sm:text-4xl italic uppercase font-black leading-none">
+                Order Management
+              </h2>
+              <p className="text-neutral-400 mt-4 max-w-xl text-sm leading-relaxed">
+                Unified logistics interface for real-time inventory synchronization
+                and fulfillment orchestration.
+              </p>
+            </div>
+            <div className="flex gap-4">
+              <GlassPanel className="px-6 py-4 flex flex-col items-center justify-center min-w-[140px]">
+                <span className="text-[10px] text-neutral-400 uppercase tracking-widest">
+                  Today
+                </span>
+                <span className="text-2xl font-black text-orange-300">124</span>
+              </GlassPanel>
+              <GlassPanel className="px-6 py-4 flex flex-col items-center justify-center min-w-[140px]">
+                <span className="text-[10px] text-neutral-400 uppercase tracking-widest">
+                  Revenue
+                </span>
+                <span className="text-2xl font-black">$12.8k</span>
+              </GlassPanel>
+            </div>
+          </div>
+
+          {/* Filters HUD */}
+          <GlassPanel className="p-6 mb-8 flex flex-wrap gap-6 items-center">
+            <div className="flex items-center gap-3">
+              <span className="text-[10px] uppercase tracking-widest text-neutral-400">
+                Filter Status:
+              </span>
+              <select className="bg-neutral-900 border border-white/10 text-neutral-100 text-xs py-2 px-4 focus:ring-orange-300 focus:border-orange-300">
+                <option>All Statuses</option>
+                <option>Pending</option>
+                <option>Preparing</option>
+                <option>Shipped</option>
+                <option>Delivered</option>
+              </select>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="text-[10px] uppercase tracking-widest text-neutral-400">
+                Date Range:
+              </span>
+              <div className="flex items-center bg-neutral-900 border border-white/10">
+                <input
+                  type="date"
+                  className="bg-transparent border-none text-neutral-100 text-xs py-2 px-4 focus:ring-0"
+                />
+                <span className="text-neutral-500">/</span>
+                <input
+                  type="date"
+                  className="bg-transparent border-none text-neutral-100 text-xs py-2 px-4 focus:ring-0"
+                />
+              </div>
+            </div>
+            <div className="sm:ml-auto flex gap-4 w-full sm:w-auto">
+              <button className="bg-neutral-100 text-neutral-950 text-[10px] font-black px-6 py-3 uppercase tracking-widest hover:scale-105 transition-transform">
+                Export CSV
+              </button>
+              <button className="bg-orange-600 text-white text-[10px] font-black px-6 py-3 uppercase tracking-widest hover:scale-105 transition-transform">
+                Run Bulk Action
+              </button>
+            </div>
+          </GlassPanel>
+
+          {/* Orders Table */}
+          <div className="border border-white/10 bg-black overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse min-w-[800px]">
+                <thead className="bg-neutral-900 border-b border-white/10">
+                  <tr>
+                    {["Order ID", "Customer", "Date", "Total", "Status"].map(
+                      (h) => (
+                        <th
+                          key={h}
+                          className="p-6 text-[10px] uppercase text-neutral-400 tracking-widest"
+                        >
+                          {h}
+                        </th>
+                      )
+                    )}
+                    <th className="p-6 text-[10px] uppercase text-neutral-400 tracking-widest text-right">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/5">
+                  {ORDERS.map((order) => (
+                    <tr
+                      key={order.id}
+                      className="hover:bg-orange-600/5 hover:border-l-2 hover:border-orange-400 transition-colors"
+                    >
+                      <td className="p-6 text-sm text-orange-300 tracking-widest">
+                        {order.id}
+                      </td>
+                      <td className="p-6">
+                        <div className="flex items-center gap-3">
+                          <span className="font-bold uppercase tracking-tight text-sm">
+                            {order.customer}
+                          </span>
+                          <span
+                            className={
+                              "px-2 py-0.5 text-[8px] font-black uppercase tracking-tighter " +
+                              TIER_STYLES[order.tier]
+                            }
+                          >
+                            {order.tier}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="p-6 text-neutral-400 text-xs">{order.date}</td>
+                      <td className="p-6 font-bold tracking-tighter">
+                        {order.total}
+                      </td>
+                      <td className="p-6">
+                        <span
+                          className={
+                            "px-3 py-1 text-[10px] font-black uppercase tracking-widest " +
+                            STATUS_STYLES[order.status]
+                          }
+                        >
+                          {order.status}
+                        </span>
+                      </td>
+                      <td className="p-6">
+                        <div className="flex justify-end gap-3">
+                          <button
+                            onClick={() => setSelectedOrder(order)}
+                            className="p-2 border border-white/10 hover:bg-neutral-100 hover:text-neutral-950 transition-colors"
+                          >
+                            <Eye size={16} />
+                          </button>
+                          <select className="bg-neutral-900 border-none text-[10px] uppercase font-black focus:ring-1 focus:ring-orange-300 cursor-pointer px-4">
+                            {order.actions.map((a) => (
+                              <option key={a}>{a}</option>
+                            ))}
+                          </select>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Pagination */}
+            <div className="p-6 border-t border-white/10 bg-neutral-900/60 flex justify-between items-center">
+              <p className="text-[10px] font-black text-neutral-400 uppercase tracking-widest">
+                Showing 1 - 25 of 1,249 orders
+              </p>
+              <div className="flex gap-2">
+                <button className="p-2 border border-white/10 hover:bg-orange-600 hover:text-white transition-all">
+                  <ChevronLeft size={16} />
+                </button>
+                <button className="p-2 border border-white/10 hover:bg-orange-600 hover:text-white transition-all">
+                  <ChevronRight size={16} />
+                </button>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+
+      {/* ORDER DETAILS DRAWER */}
+      {isOpen && (
+        <div className="fixed inset-0 z-[100]">
+          <div
+            className="absolute inset-0 bg-neutral-950/95 backdrop-blur-2xl"
+            onClick={() => setSelectedOrder(null)}
+          />
+          <div className="absolute right-0 top-0 bottom-0 w-full max-w-[500px] bg-neutral-900 border-l border-white/10 shadow-2xl flex flex-col animate-[slideIn_0.3s_ease-out]">
+            <div className="p-8 border-b border-white/10 flex justify-between items-center">
+              <div>
+                <h3 className="text-2xl italic uppercase font-black text-orange-300">
+                  Order Details
+                </h3>
+                <p className="text-[10px] text-neutral-400 tracking-widest">
+                  {selectedOrder.id} / {selectedOrder.customer}
+                </p>
+              </div>
+              <button
+                onClick={() => setSelectedOrder(null)}
+                className="hover:rotate-90 transition-transform duration-300"
+              >
+                <X size={28} />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-8 space-y-8">
+              {/* Status Timeline */}
+              <section>
+                <h4 className="text-[10px] uppercase tracking-[0.2em] mb-4">
+                  Lifecycle Timeline
+                </h4>
+                <div className="space-y-4 relative before:absolute before:left-2 before:top-2 before:bottom-2 before:w-px before:bg-white/10">
+                  <div className="pl-8 relative flex items-start gap-4">
+                    <div className="absolute left-0 top-1 w-4 h-4 bg-orange-300 border-4 border-neutral-900 rounded-full" />
+                    <div>
+                      <p className="font-bold text-xs uppercase">
+                        Payment Confirmed
+                      </p>
+                      <p className="text-[10px] text-neutral-400">
+                        OCT 24, 09:45 AM
+                      </p>
+                    </div>
+                  </div>
+                  <div className="pl-8 relative flex items-start gap-4 opacity-40">
+                    <div className="absolute left-0 top-1 w-4 h-4 bg-neutral-600 border-4 border-neutral-900 rounded-full" />
+                    <div>
+                      <p className="font-bold text-xs uppercase">
+                        Warehouse Picking
+                      </p>
+                      <p className="text-[10px] text-neutral-400">
+                        Pending Allocation
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              {/* Items */}
+              <section>
+                <h4 className="text-[10px] uppercase tracking-[0.2em] mb-4">
+                  Cart Inventory ({CART_ITEMS.length})
+                </h4>
+                <div className="space-y-4">
+                  {CART_ITEMS.map((item) => (
+                    <div
+                      key={item.name}
+                      className="flex gap-4 p-4 bg-neutral-950 border border-white/10"
+                    >
+                      <div className="w-16 h-16 bg-neutral-800 shrink-0 flex items-center justify-center">
+                        <Package size={24} className="text-neutral-600" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-bold text-xs uppercase">{item.name}</p>
+                        <p className="text-[10px] text-neutral-400">{item.sku}</p>
+                        <div className="flex justify-between items-end mt-2">
+                          <span className="text-[10px] text-neutral-400">
+                            Qty: {item.qty}
+                          </span>
+                          <span className="font-bold text-orange-300">
+                            {item.price}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+
+              {/* Summary */}
+              <section className="bg-neutral-950 border border-white/10 p-6 space-y-2">
+                <div className="flex justify-between text-xs text-neutral-400">
+                  <span>Subtotal</span>
+                  <span>{selectedOrder.total}</span>
+                </div>
+                <div className="flex justify-between text-xs text-neutral-400">
+                  <span>Shipping (Priority Express)</span>
+                  <span className="text-orange-300">FREE (ELITE)</span>
+                </div>
+                <div className="flex justify-between text-xs text-neutral-400">
+                  <span>Taxes (Estimated)</span>
+                  <span>$0.00</span>
+                </div>
+                <div className="h-px bg-white/10 my-4" />
+                <div className="flex justify-between text-xl font-black">
+                  <span>TOTAL</span>
+                  <span>{selectedOrder.total}</span>
+                </div>
+              </section>
+            </div>
+
+            <div className="p-8 border-t border-white/10 grid grid-cols-2 gap-4">
+              <button
+                onClick={() => setSelectedOrder(null)}
+                className="border border-neutral-100 text-neutral-100 text-[10px] font-black py-4 uppercase tracking-widest hover:bg-neutral-100 hover:text-neutral-950 transition-colors"
+              >
+                Print Invoice
+              </button>
+              <button className="bg-orange-600 text-white text-[10px] font-black py-4 uppercase tracking-widest hover:scale-105 transition-transform">
+                Push to Carrier
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
