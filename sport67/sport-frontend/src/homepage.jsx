@@ -11,6 +11,11 @@ import Dashboard from './admin/dashboard.jsx';
 export default function MainPage() {
   const [activeCategory, setActiveCategory] = useState('men');
   const [currentView, setCurrentView] = useState('home');
+  const [user, setUser] = useState({
+    name: "Guest User",
+    email: "guest@gogo.com",
+    role: "user" // 'user', 'employee', 'manager'
+  });
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -26,13 +31,17 @@ export default function MainPage() {
     return <Swimming onViewChange={setCurrentView} />;
   }
   if (currentView === 'dashboard') {
-    return <Dashboard onViewChange={setCurrentView} />;
+    if (user.role === 'user') {
+      setCurrentView('home');
+      return null;
+    }
+    return <Dashboard onViewChange={setCurrentView} user={user} />;
   }
 
   return (
     <div className="selection:bg-primary selection:text-white min-h-screen bg-background text-on-background">
       {/* BEGIN: MainHeader */}
-      <Navbar setCurrentView={setCurrentView} />
+      <Navbar setCurrentView={setCurrentView} user={user} setUser={setUser} />
       {/* END: MainHeader */}
 
       <main className="pt-20">

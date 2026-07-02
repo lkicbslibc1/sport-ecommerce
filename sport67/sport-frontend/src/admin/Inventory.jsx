@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import Sidebar from "./Sidebar.jsx";
 import {
   LayoutDashboard,
   ShoppingCart,
@@ -17,13 +18,7 @@ import {
   PackageCheck,
 } from "lucide-react";
 
-const NAV_ITEMS = [
-  { label: "Dashboard", icon: LayoutDashboard },
-  { label: "Orders", icon: ShoppingCart },
-  { label: "Inventory", icon: Package, active: true },
-  { label: "Products", icon: Boxes },
-  { label: "Team", icon: Users },
-];
+
 
 const STOCK_STYLES = {
   "In Stock": {
@@ -90,75 +85,23 @@ function GlassPanel({ className = "", children }) {
   );
 }
 
-export default function GogoAthleticInventory({ onNavigate }) {
+export default function GogoAthleticInventory({ onNavigate, onViewChange }) {
   const [modalOpen, setModalOpen] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
   const [newQty, setNewQty] = useState("");
 
   return (
     <div className="min-h-screen w-full bg-neutral-950 text-neutral-100 flex">
-      {/* SIDE NAVIGATION */}
-      <aside className="hidden md:flex md:w-64 shrink-0 h-screen sticky top-0 flex-col border-r border-white/5">
-        <div className="p-6">
-          <h1 className="text-2xl italic font-black text-orange-300 uppercase leading-none">
-            GOGO ATHLETIC
-          </h1>
-          <p className="text-neutral-500 text-[10px] mt-1 tracking-widest">
-            Admin Suite
-          </p>
-        </div>
-
-        <nav className="mt-8 flex-1 space-y-2">
-          {NAV_ITEMS.map(({ label, icon: Icon, active }) => (
-            <button
-              key={label}
-              onClick={() => {
-                if (onNavigate) {
-                  if (label === "Dashboard") onNavigate("dashboard");
-                  else if (label === "Orders") onNavigate("orders");
-                  else if (label === "Inventory") onNavigate("inventory");
-                  else if (label === "Products") onNavigate("products");
-                }
-              }}
-              className={
-                "w-full flex items-center gap-4 transition-all py-3 text-left " +
-                (active
-                  ? "text-orange-300 font-bold border-l-4 border-orange-300 pl-4"
-                  : "text-neutral-400 font-medium pl-5 hover:text-orange-300 hover:bg-white/[0.02]")
-              }
-            >
-              <Icon size={20} strokeWidth={active ? 2.5 : 2} />
-              <span className="text-sm uppercase tracking-widest">{label}</span>
-            </button>
-          ))}
-        </nav>
-
-        <div className="p-6 border-t border-white/5 space-y-4">
+      <Sidebar
+        activeItem="inventory"
+        onNavigate={onNavigate}
+        onViewChange={onViewChange}
+        actionButton={
           <button className="w-full bg-orange-600 text-white py-3 text-sm uppercase italic font-black hover:scale-105 transition-transform">
             New Entry
           </button>
-          <div className="space-y-2">
-            <a
-              href="#"
-              className="flex items-center gap-4 pl-2 text-neutral-400 hover:text-orange-300 transition-colors"
-            >
-              <Settings size={16} />
-              <span className="text-[10px] uppercase tracking-widest">
-                Settings
-              </span>
-            </a>
-            <a
-              href="#"
-              className="flex items-center gap-4 pl-2 text-neutral-400 hover:text-orange-300 transition-colors"
-            >
-              <HelpCircle size={16} />
-              <span className="text-[10px] uppercase tracking-widest">
-                Support
-              </span>
-            </a>
-          </div>
-        </div>
-      </aside>
+        }
+      />
 
       <div className="flex-1 min-w-0">
         {/* TOP NAVIGATION */}

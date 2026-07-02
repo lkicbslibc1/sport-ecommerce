@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-export default function Navbar({ setCurrentView }) {
+export default function Navbar({ setCurrentView, user, setUser }) {
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const [searchValue, setSearchValue] = useState('');
   const [isMobileNavLowOpacity, setIsMobileNavLowOpacity] = useState(false);
+  const [selectedRole, setSelectedRole] = useState('user');
 
   // Member Login Drawer state
   const [isLoginVisible, setIsLoginVisible] = useState(false);
@@ -96,13 +97,15 @@ export default function Navbar({ setCurrentView }) {
           </nav>
 
           {/* Dashboard Button */}
-          <button
-            onClick={() => setCurrentView && setCurrentView('dashboard')}
-            className="hidden md:flex items-center gap-2 font-bold text-[11px] uppercase tracking-widest bg-primary/10 border border-primary/40 hover:bg-primary hover:text-white px-4 py-2 transition-all duration-300 text-primary"
-          >
-            <span className="material-symbols-outlined text-[18px]">dashboard</span>
-            <span>Dashboard</span>
-          </button>
+          {user && user.role !== 'user' && (
+            <button
+              onClick={() => setCurrentView && setCurrentView('dashboard')}
+              className="hidden md:flex items-center gap-2 font-bold text-[11px] uppercase tracking-widest bg-primary/10 border border-primary/40 hover:bg-primary hover:text-white px-4 py-2 transition-all duration-300 text-primary"
+            >
+              <span className="material-symbols-outlined text-[18px]">dashboard</span>
+              <span>Dashboard</span>
+            </button>
+          )}
 
           <div className="flex items-center space-x-8">
             {/* Search Container */}
@@ -138,13 +141,30 @@ export default function Navbar({ setCurrentView }) {
               </button>
             </div>
 
-            <button
-              onClick={openLogin}
-              className="flex items-center gap-2 font-bold text-[11px] uppercase tracking-widest hover:text-primary transition cursor-pointer"
-            >
-              <span className="material-symbols-outlined text-[22px]">person</span>
-              <span className="hidden sm:inline">Login</span>
-            </button>
+            {user && user.role !== 'user' ? (
+              <div className="flex items-center gap-3">
+                <span className="text-[10px] bg-primary/20 text-primary border border-primary/30 px-2.5 py-1 font-bold uppercase tracking-wider">
+                  {user.role}
+                </span>
+                <span className="hidden sm:inline text-[11px] font-bold uppercase tracking-widest text-white">
+                  {user.name}
+                </span>
+                <button
+                  onClick={() => setUser({ name: 'Guest User', email: 'guest@gogo.com', role: 'user' })}
+                  className="text-white hover:text-primary text-[10px] font-bold uppercase tracking-widest border border-white/20 hover:border-primary px-3 py-1 transition-all"
+                >
+                  Logout
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={openLogin}
+                className="flex items-center gap-2 font-bold text-[11px] uppercase tracking-widest hover:text-primary transition cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-[22px]">person</span>
+                <span className="hidden sm:inline">Login</span>
+              </button>
+            )}
 
             <a className="flex items-center gap-2 font-bold text-[11px] uppercase tracking-widest hover:text-primary transition" href="#">
               <span className="material-symbols-outlined text-[22px]">shopping_bag</span>
@@ -185,21 +205,43 @@ export default function Navbar({ setCurrentView }) {
           </div>
           <div className="flex-grow flex flex-col justify-center">
             <h2 className="text-5xl font-anybody font-black italic uppercase tracking-tighter mb-12">Member Login</h2>
-            <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
+            <form
+              className="space-y-6"
+              onSubmit={(e) => {
+                e.preventDefault();
+                let name = "Guest User";
+                let email = "guest@gogo.com";
+                if (selectedRole === 'employee') {
+                  name = "Dominic Toretto";
+                  email = "dom@gogoathletic.com";
+                } else if (selectedRole === 'manager') {
+                  name = "Marcus Thorne";
+                  email = "marcus@gogoathletic.com";
+                }
+                setUser({ name, email, role: selectedRole });
+                closeLoginDrawer();
+              }}
+            >
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Simulate Role Select</label>
+                <select
+                  value={selectedRole}
+                  onChange={(e) => setSelectedRole(e.target.value)}
+                  className="w-full bg-white/5 border border-white/10 px-6 py-4 text-sm text-white focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all uppercase tracking-widest"
+                >
+                  <option value="user" className="bg-neutral-900">User (Customer)</option>
+                  <option value="employee" className="bg-neutral-900">Employee</option>
+                  <option value="manager" className="bg-neutral-900">Manager</option>
+                </select>
+              </div>
               <div className="space-y-2">
                 <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Email Address</label>
                 <input
                   className="w-full bg-white/5 border border-white/10 px-6 py-4 text-sm focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all uppercase tracking-widest"
                   placeholder="YOURNAME@GMAIL.COM"
                   type="email"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Password</label>
-                <input
-                  className="w-full bg-white/5 border border-white/10 px-6 py-4 text-sm focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all"
-                  placeholder="••••••••"
-                  type="password"
+                  value={selectedRole === 'manager' ? 'marcus@gogoathletic.com' : selectedRole === 'employee' ? 'dom@gogoathletic.com' : 'guest@gogo.com'}
+                  readOnly
                 />
               </div>
               <div className="pt-8 space-y-4">
@@ -208,12 +250,6 @@ export default function Navbar({ setCurrentView }) {
                   type="submit"
                 >
                   Login Now
-                </button>
-                <button
-                  className="w-full border border-white/20 hover:bg-white hover:text-black py-5 font-anybody font-black text-sm uppercase tracking-widest transition-all duration-300 cursor-pointer"
-                  type="button"
-                >
-                  Create Account
                 </button>
               </div>
             </form>

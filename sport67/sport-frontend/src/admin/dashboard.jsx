@@ -20,15 +20,11 @@ import {
 import GogoAthleticOrders from "./Orders.jsx";
 import GogoAthleticInventory from "./Inventory.jsx";
 import GogoAthleticProducts from "./Products.jsx";
+import GogoAthleticTeam from "./Team.jsx";
+import Sidebar from "./Sidebar.jsx";
 
 
-const NAV_ITEMS = [
-  { label: "Dashboard", icon: LayoutDashboard, active: true },
-  { label: "Orders", icon: ShoppingCart },
-  { label: "Inventory", icon: Package },
-  { label: "Products", icon: Boxes },
-  { label: "Team", icon: Users },
-];
+
 
 const WEEK = [
   { day: "Mon", height: "h-2/3", amount: "$32k" },
@@ -116,77 +112,36 @@ function GlassPanel({ className = "", children }) {
   );
 }
 
-export default function GogoAthleticDashboard({ onViewChange }) {
+export default function GogoAthleticDashboard({ onViewChange, user }) {
   const [range, setRange] = useState("daily");
   const [currentPage, setCurrentPage] = useState("dashboard");
 
   if (currentPage === "orders") {
-    return <GogoAthleticOrders onNavigate={setCurrentPage} />;
+    return <GogoAthleticOrders onNavigate={setCurrentPage} onViewChange={onViewChange} user={user} />;
   }
   if (currentPage === "inventory") {
-    return <GogoAthleticInventory onNavigate={setCurrentPage} />;
+    return <GogoAthleticInventory onNavigate={setCurrentPage} onViewChange={onViewChange} user={user} />;
   }
   if (currentPage === "products") {
-    return <GogoAthleticProducts onNavigate={setCurrentPage} />;
+    return <GogoAthleticProducts onNavigate={setCurrentPage} onViewChange={onViewChange} user={user} />;
+  }
+  if (currentPage === "team") {
+    return <GogoAthleticTeam onNavigate={setCurrentPage} onViewChange={onViewChange} user={user} />;
   }
 
   return (
     <div className="min-h-screen w-full bg-neutral-950 text-neutral-100 flex">
-      {/* SIDE NAVIGATION */}
-      <aside className="hidden md:flex md:w-64 shrink-0 h-screen sticky top-0 flex-col py-8 px-4 border-r border-white/5 bg-black">
-        <div className="mb-10">
-          <h1 className="text-2xl italic font-black tracking-tighter text-orange-300">
-            GOGO ATHLETIC
-          </h1>
-          <p className="text-[10px] uppercase tracking-[0.3em] text-neutral-500 mt-1">
-            Back-Office Suite
-          </p>
-        </div>
-
-        <nav className="flex-1 space-y-1">
-          {NAV_ITEMS.map(({ label, icon: Icon, active }) => (
-            <button
-              key={label}
-              onClick={() => {
-                if (label === "Orders") setCurrentPage("orders");
-                else if (label === "Inventory") setCurrentPage("inventory");
-                else if (label === "Products") setCurrentPage("products");
-                else setCurrentPage("dashboard");
-              }}
-              className={
-                "w-full flex items-center gap-4 px-4 py-3 transition-all duration-300 ease-in-out hover:pl-6 text-left " +
-                (active
-                  ? "text-orange-300 font-bold border-r-4 border-orange-300 bg-white/[0.03]"
-                  : "text-neutral-400 hover:text-orange-300")
-              }
-            >
-              <Icon size={20} strokeWidth={active ? 2.5 : 2} />
-              <span className="text-sm tracking-wide uppercase">{label}</span>
-            </button>
-          ))}
-        </nav>
-
-        <div className="mt-auto pt-8 border-t border-white/5 space-y-2">
-          <button className="w-full bg-orange-600 text-white py-3 mb-6 text-xs font-bold uppercase tracking-widest hover:scale-105 transition-transform flex items-center justify-center gap-2">
+      <Sidebar
+        activeItem="dashboard"
+        onNavigate={setCurrentPage}
+        onViewChange={onViewChange}
+        actionButton={
+          <button className="w-full bg-orange-600 text-white py-3 text-xs font-bold uppercase tracking-widest hover:scale-105 transition-transform flex items-center justify-center gap-2">
             <Plus size={16} />
             New Product
           </button>
-          <a
-            href="#"
-            className="flex items-center gap-4 px-4 py-2 text-neutral-400 hover:text-orange-300 transition-colors"
-          >
-            <Settings size={18} />
-            <span className="text-sm tracking-wide uppercase">Settings</span>
-          </a>
-          <a
-            href="#"
-            className="flex items-center gap-4 px-4 py-2 text-neutral-400 hover:text-orange-300 transition-colors"
-          >
-            <HelpCircle size={18} />
-            <span className="text-sm tracking-wide uppercase">Support</span>
-          </a>
-        </div>
-      </aside>
+        }
+      />
 
       <div className="flex-1 min-w-0">
         {/* TOP NAVIGATION */}
