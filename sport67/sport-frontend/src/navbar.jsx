@@ -90,9 +90,9 @@ export default function Navbar({ setCurrentView, user, setUser }) {
             id="main-nav"
             style={{ opacity: isMobileNavLowOpacity ? 0.1 : 1 }}
           >
-            <a className="hover:text-primary transition" href="#" onClick={() => setCurrentView && setCurrentView('home')}>Men</a>
-            <a className="hover:text-primary transition" href="#" onClick={() => setCurrentView && setCurrentView('home')}>Women</a>
-            <a className="hover:text-primary transition" href="#" onClick={() => setCurrentView && setCurrentView('home')}>Kids</a>
+            <a className="hover:text-primary transition" href="#" onClick={() => setCurrentView && setCurrentView('men')}>Men</a>
+            <a className="hover:text-primary transition" href="#" onClick={() => setCurrentView && setCurrentView('women')}>Women</a>
+            <a className="hover:text-primary transition" href="#" onClick={() => setCurrentView && setCurrentView('kid')}>Kids</a>
             <a className="text-primary transition" href="#" onClick={() => setCurrentView && setCurrentView('home')}>Brands</a>
           </nav>
 

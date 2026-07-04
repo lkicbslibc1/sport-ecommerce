@@ -5,6 +5,9 @@ import swimmingBannerImg from './assets/swimming_banner.png';
 import Running from './shopping/running.jsx';
 import Football from './shopping/football.jsx';
 import Swimming from './shopping/swimimg.jsx';
+import Men from './usertype/men.jsx';
+import Women from './usertype/women.jsx';
+import Kid from './usertype/kid.jsx';
 import Navbar from './navbar.jsx';
 import Dashboard from './admin/dashboard.jsx';
 
@@ -29,6 +32,15 @@ export default function MainPage() {
   }
   if (currentView === 'swimming') {
     return <Swimming onViewChange={setCurrentView} />;
+  }
+  if (currentView === 'men') {
+    return <Men onViewChange={setCurrentView} />;
+  }
+  if (currentView === 'women') {
+    return <Women onViewChange={setCurrentView} />;
+  }
+  if (currentView === 'kid') {
+    return <Kid onViewChange={setCurrentView} />;
   }
   if (currentView === 'dashboard') {
     if (user.role === 'user') {
