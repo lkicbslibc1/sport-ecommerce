@@ -51,7 +51,7 @@ function FilterDropdown({ name, label, openFilter, setOpenFilter, activeCount, c
   );
 }
 
-export default function Puma({ onViewChange, user, setUser }) {
+export default function Adidas({ onViewChange, user, setUser }) {
   useEffect(() => { window.scrollTo(0, 0); }, []);
 
   const [openFilter, setOpenFilter] = useState(null);
@@ -69,9 +69,9 @@ export default function Puma({ onViewChange, user, setUser }) {
     setSelectedColors([]);
   };
 
-  // Filter products by Puma brand only
+  // Filter products by Adidas brand only
   const brandProducts = useMemo(() => {
-    return PRODUCTS.filter(p => p.brand === 'Puma');
+    return PRODUCTS.filter(p => p.brand === 'Adidas');
   }, []);
 
   const filteredProducts = useMemo(() => {
@@ -99,13 +99,13 @@ export default function Puma({ onViewChange, user, setUser }) {
           <span className="material-symbols-outlined text-[14px]">chevron_right</span>
           <span className="text-on-surface-variant">Brands</span>
           <span className="material-symbols-outlined text-[14px]">chevron_right</span>
-          <span className="text-primary font-black">Puma</span>
+          <span className="text-primary font-black">Adidas</span>
         </nav>
 
         <div className="mb-10">
-          <h1 className="font-display-lg text-7xl md:text-8xl font-black italic tracking-tighter uppercase text-on-background">Puma</h1>
+          <h1 className="font-display-lg text-7xl md:text-8xl font-black italic tracking-tighter uppercase text-on-background">Adidas</h1>
           <p className="text-on-surface-variant max-w-xl mt-4 font-body-lg font-light leading-relaxed">
-            Forever Faster. Unleash your potential with Puma sports footwear, apparel, and active tracking accessories.
+            Uncompromising quality. Iconic design. Elevate your performance with Adidas elite apparel and accessories.
           </p>
         </div>
 

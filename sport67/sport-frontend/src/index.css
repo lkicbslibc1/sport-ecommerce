@@ -61,3 +61,79 @@ body {
   padding-left: 1rem;
   padding-right: 2.5rem;
 }
+
+/* Login Page Custom Utilities */
+.kinetic-skew {
+  transform: skewX(-5deg);
+}
+.glass-panel {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+.input-border-anim:focus {
+  border-bottom-color: #ff4e00;
+  outline: none;
+}
+
+.font-label-xs { font-family: 'Inter', sans-serif; }
+.text-label-xs {
+  font-size: 10px;
+  line-height: 1.0;
+  letter-spacing: 0.3em;
+  font-weight: 900;
+}
+
+.font-headline-md { font-family: 'Anybody', sans-serif; }
+.text-headline-md {
+  font-size: 32px;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  font-weight: 900;
+}
+
+.font-headline-lg { font-family: 'Anybody', sans-serif; }
+.text-headline-lg {
+  font-size: 64px;
+  line-height: 1.0;
+  letter-spacing: -0.02em;
+  font-weight: 900;
+}
+
+.font-display-xl { font-family: 'Anybody', sans-serif; }
+.text-display-xl {
+  font-size: 128px;
+  line-height: 0.85;
+  letter-spacing: -0.05em;
+  font-weight: 900;
+}
+@media (max-width: 768px) {
+  .text-display-xl {
+    font-size: 72px;
+  }
+}
+
+.font-body-md { font-family: 'Inter', sans-serif; }
+.text-body-md {
+  font-size: 16px;
+  line-height: 1.6;
+  font-weight: 300;
+}
+
+.font-title-sm { font-family: 'Inter', sans-serif; }
+.text-title-sm {
+  font-size: 11px;
+  line-height: 1.2;
+  letter-spacing: 0.2em;
+  font-weight: 700;
+}
+
+/* Override browser autofill styles */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  transition: background-color 5000s ease-in-out 0s;
+  -webkit-text-fill-color: #e5e2e1 !important;
+}
+

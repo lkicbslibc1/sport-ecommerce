@@ -10,6 +10,10 @@ import Women from './usertype/women.jsx';
 import Kid from './usertype/kid.jsx';
 import Navbar from './navbar.jsx';
 import Dashboard from './admin/dashboard.jsx';
+import Login from './login.jsx';
+import Nike from './brand/nike.jsx';
+import Puma from './brand/puma.jsx';
+import Adidas from './brand/adidas.jsx';
 
 export default function MainPage() {
   const [activeCategory, setActiveCategory] = useState('men');
@@ -48,6 +52,18 @@ export default function MainPage() {
       return null;
     }
     return <Dashboard onViewChange={setCurrentView} user={user} />;
+  }
+  if (currentView === 'login') {
+    return <Login onViewChange={setCurrentView} user={user} setUser={setUser} />;
+  }
+  if (currentView === 'nike') {
+    return <Nike onViewChange={setCurrentView} user={user} setUser={setUser} />;
+  }
+  if (currentView === 'puma') {
+    return <Puma onViewChange={setCurrentView} user={user} setUser={setUser} />;
+  }
+  if (currentView === 'adidas') {
+    return <Adidas onViewChange={setCurrentView} user={user} setUser={setUser} />;
   }
 
   return (
@@ -347,12 +363,10 @@ export default function MainPage() {
             <h4 className="text-2xl font-anybody font-black italic uppercase tracking-tighter strikethrough-accent">แบรนด์ / BRANDS</h4>
             <a className="text-[10px] font-bold uppercase underline tracking-[0.3em] hover:text-primary transition" href="#">See All</a>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-12 lg:gap-24 opacity-40">
-            <div className="h-12 bg-contain bg-center bg-no-repeat grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-500 cursor-pointer" style={{ backgroundImage: "url('/image/nike.png')" }}></div>
-            <div className="h-12 bg-contain bg-center bg-no-repeat grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-500 cursor-pointer" style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuD7oAj1YjDxYrfa1ABlqinWqnE76tjLB9CF6cDEqOuQnOnOM2k-rqiZHk3kS9kg2DU90BTQBirwbsYid-f1yzqrkNgbuO4Z-Dpxlb3dVUrUq52LhuHfNGWwjcAyZxOeYQcAlUbMPSdRuxlNQUnwS7q1mKrEpt3oz8klJmd9UoY-TqGwczyWm6GKIzmLmmcCuffChZoH7lHFgfnF0tRbrzQ6w190Vh3tRNT3S2FqudQ5p3ZW9ZkC7otA9u06ULRaH-81YQ8zoQfGTyc')" }}></div>
-            <div className="h-12 bg-contain bg-center bg-no-repeat grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-500 cursor-pointer" style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuA1jSfn7sjZqj8bNKMRKKKNGzN2Gp64iJXeS5-Cltog6EPjBj78q6HsfD6duQl5HriLnXa7oizqu2RrmfxwPd9nM09wsqibUXOu99Lh9ALFDa1oA4HclX-w0ogM3m92RKpkncnznqbU4-pBNYW7E6YYVbH6mBqxmANKBdhHPR35sekXZ4VqX73FkTDtLL84jN4gxoHVfwan2zeoa_18uNVka8S3msT_m2JIypospEtWwMZPiy0lrgV6tTVoOm2d64oQzQcoK23JCo4')" }}></div>
-            <div className="h-12 bg-contain bg-center bg-no-repeat grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-500 cursor-pointer" style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuAwXGhX8po7ry0V0xUMGhdbKoGT4CMmN1ek-rj3jKwFDKBN15rF9cDPg64Ts799pgMkwllFiuXTUjr6rXoGLBMdRQzK498VEzZzf73aQWJ8oIZsRDGGcBDk0oaA0N88TKIe90zvtXSOMjoolhrM6ICTLwSu9Yl5tgrUFDZCx3ayh0XWQ7m4SEcStBZIJCgAWO019wA_ZZVGHi50_M8kknFX6UDQaGmDJcHtg0urhEWtkTvam-8dCvnsdT34o3kej-9A0l4ZEuNHQJY')" }}></div>
-            <div className="h-12 bg-contain bg-center bg-no-repeat grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-500 cursor-pointer" style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuCHqs1n_TMATVkmKFBfkjfYL4bBCw8y21Sk_x1ff_j23a1zRl0TsIfLQjy4IcKBON_HvIXflcug4orRCvg2f8_pV68n6SDFhEfKAmdbWH2tDxgqWo5oYNw3kdr9pWtmxa66PgO78YRiWO72VOSMeomDcOO5UjFtqe3UOtTZgjJnSNe3L9oausUewCEl2kJloED4XQzfbYiSRmAqby4qX_LNLT1r4PS8AujrCH68i32Sa3NhJK9YUY8MHqaH93PwZxmbbp2McsrNT1M')" }}></div>
+          <div className="flex flex-wrap justify-center items-center gap-12 lg:gap-24 opacity-40 max-w-3xl mx-auto">
+            <div onClick={() => setCurrentView('nike')} className="h-12 w-24 bg-contain bg-center bg-no-repeat grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-500 cursor-pointer" style={{ backgroundImage: "url('/image/nike.png')" }}></div>
+            <div onClick={() => setCurrentView('puma')} className="h-12 w-24 bg-contain bg-center bg-no-repeat grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-500 cursor-pointer" style={{ backgroundImage: "url('/image/puma.png')" }}></div>
+            <div onClick={() => setCurrentView('adidas')} className="h-12 w-24 bg-contain bg-center bg-no-repeat grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-500 cursor-pointer" style={{ backgroundImage: "url('/image/adidas.png')" }}></div>
           </div>
         </section>
         {/* END: BrandsSection */}

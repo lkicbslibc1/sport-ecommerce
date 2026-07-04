@@ -251,6 +251,16 @@ export default function Navbar({ setCurrentView, user, setUser }) {
                 >
                   Login Now
                 </button>
+                <button
+                  onClick={() => {
+                    closeLoginDrawer();
+                    if (setCurrentView) setCurrentView('login');
+                  }}
+                  className="w-full border border-white/20 hover:bg-white hover:text-black py-5 font-anybody font-black text-sm uppercase tracking-widest transition-all duration-300 cursor-pointer"
+                  type="button"
+                >
+                  Create Account
+                </button>
               </div>
             </form>
             <div className="mt-12 pt-12 border-t border-white/5">

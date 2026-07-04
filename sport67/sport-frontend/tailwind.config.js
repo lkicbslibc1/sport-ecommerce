@@ -64,6 +64,13 @@ export default {
       fontFamily: {
         "sans": ["Inter", "sans-serif"],
         "anybody": ["Anybody", "sans-serif"]
+      },
+      spacing: {
+        "gutter": "2rem",
+        "section-padding": "8rem",
+        "margin-mobile": "1.5rem",
+        "margin-desktop": "3rem",
+        "container-max": "1440px"
       }
     },
   },
