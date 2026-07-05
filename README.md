@@ -199,7 +199,7 @@ graph TD
     Tier1 -- "HTTP Requests (REST API)" --> Node
     Node -- "JSON Responses" --> Tier1
     Drizzle -- "SQL Queries" <--> DB
-
+```
 ## 17. Data schema
 ![schema](./img/schema1.png)
 ![schema2](./img/schema2.png)
