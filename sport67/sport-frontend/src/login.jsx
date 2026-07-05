@@ -72,7 +72,7 @@ export default function Login({ onViewChange, user, setUser }) {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div className="relative focus-within:scale-[1.01] transition-transform duration-200">
                     <input 
-                      className="w-full bg-transparent border-0 border-b-2 border-[#353534] font-label-xs text-label-xs text-[#e5e2e1] uppercase py-3 input-border-anim placeholder:text-[#353534]" 
+                      className="w-full bg-transparent border-0 border-b-2 border-[#353534] font-label-xs text-label-xs text-[#e5e2e1] uppercase py-3 input-border-anim  placeholder:text-[#bdbdba]" 
                       placeholder="FIRST NAME" 
                       type="text" 
                       name="firstName"
@@ -83,7 +83,7 @@ export default function Login({ onViewChange, user, setUser }) {
                   </div>
                   <div className="relative focus-within:scale-[1.01] transition-transform duration-200">
                     <input 
-                      className="w-full bg-transparent border-0 border-b-2 border-[#353534] font-label-xs text-label-xs text-[#e5e2e1] uppercase py-3 input-border-anim placeholder:text-[#353534]" 
+                      className="w-full bg-transparent border-0 border-b-2 border-[#353534] font-label-xs text-label-xs text-[#e5e2e1] uppercase py-3 input-border-anim placeholder:text-[#bdbdba]" 
                       placeholder="LAST NAME" 
                       type="text" 
                       name="lastName"
@@ -95,7 +95,7 @@ export default function Login({ onViewChange, user, setUser }) {
                 </div>
                 <div className="relative focus-within:scale-[1.01] transition-transform duration-200">
                   <input 
-                    className="w-full bg-transparent border-0 border-b-2 border-[#353534] font-label-xs text-label-xs text-[#e5e2e1] uppercase py-3 input-border-anim placeholder:text-[#353534]" 
+                    className="w-full bg-transparent border-0 border-b-2 border-[#353534] font-label-xs text-label-xs text-[#e5e2e1] uppercase py-3 input-border-anim placeholder:text-[#bdbdba]" 
                     placeholder="EMAIL ADDRESS" 
                     type="email" 
                     name="email"
@@ -107,7 +107,7 @@ export default function Login({ onViewChange, user, setUser }) {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div className="relative focus-within:scale-[1.01] transition-transform duration-200">
                     <input 
-                      className="w-full bg-transparent border-0 border-b-2 border-[#353534] font-label-xs text-label-xs text-[#e5e2e1] uppercase py-3 input-border-anim placeholder:text-[#353534]" 
+                      className="w-full bg-transparent border-0 border-b-2 border-[#353534] font-label-xs text-label-xs text-[#e5e2e1] uppercase py-3 input-border-anim  placeholder:text-[#bdbdba]" 
                       placeholder="PASSWORD" 
                       type="password" 
                       name="password"
@@ -118,7 +118,7 @@ export default function Login({ onViewChange, user, setUser }) {
                   </div>
                   <div className="relative focus-within:scale-[1.01] transition-transform duration-200">
                     <input 
-                      className="w-full bg-transparent border-0 border-b-2 border-[#353534] font-label-xs text-label-xs text-[#e5e2e1] uppercase py-3 input-border-anim placeholder:text-[#353534]" 
+                      className="w-full bg-transparent border-0 border-b-2 border-[#353534] font-label-xs text-label-xs text-[#e5e2e1] uppercase py-3 input-border-anim  placeholder:text-[#bdbdba]" 
                       placeholder="CONFIRM PASSWORD" 
                       type="password" 
                       name="confirmPassword"
