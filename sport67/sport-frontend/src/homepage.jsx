@@ -14,6 +14,8 @@ import Login from './login.jsx';
 import Nike from './brand/nike.jsx';
 import Puma from './brand/puma.jsx';
 import Adidas from './brand/adidas.jsx';
+import GoGoBag from './bag/gogobag.jsx';
+import KineticCheckout from './checkout/KineticCheckout.jsx';
 
 export default function MainPage() {
   const [activeCategory, setActiveCategory] = useState('men');
@@ -24,27 +26,52 @@ export default function MainPage() {
     role: "user" // 'user', 'employee', 'manager'
   });
 
+  const [cart, setCart] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('gogo_cart') || '[]');
+    } catch {
+      return [];
+    }
+  });
+
+  useEffect(() => {
+    localStorage.setItem('gogo_cart', JSON.stringify(cart));
+  }, [cart]);
+
+  const addToCart = (product) => {
+    setCart(prevCart => {
+      const existingItem = prevCart.find(item => item.id === product.id);
+      if (existingItem) {
+        return prevCart.map(item =>
+          item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
+        );
+      }
+      return [...prevCart, { ...product, quantity: 1 }];
+    });
+    alert(`${product.name} has been added to your shopping bag!`);
+  };
+
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, []);
+  }, [currentView]);
 
   if (currentView === 'running') {
-    return <Running onViewChange={setCurrentView} />;
+    return <Running onViewChange={setCurrentView} user={user} setUser={setUser} cart={cart} addToCart={addToCart} />;
   }
   if (currentView === 'football') {
-    return <Football onViewChange={setCurrentView} />;
+    return <Football onViewChange={setCurrentView} user={user} setUser={setUser} cart={cart} addToCart={addToCart} />;
   }
   if (currentView === 'swimming') {
-    return <Swimming onViewChange={setCurrentView} />;
+    return <Swimming onViewChange={setCurrentView} user={user} setUser={setUser} cart={cart} addToCart={addToCart} />;
   }
   if (currentView === 'men') {
-    return <Men onViewChange={setCurrentView} />;
+    return <Men onViewChange={setCurrentView} user={user} setUser={setUser} cart={cart} addToCart={addToCart} />;
   }
   if (currentView === 'women') {
-    return <Women onViewChange={setCurrentView} />;
+    return <Women onViewChange={setCurrentView} user={user} setUser={setUser} cart={cart} addToCart={addToCart} />;
   }
   if (currentView === 'kid') {
-    return <Kid onViewChange={setCurrentView} />;
+    return <Kid onViewChange={setCurrentView} user={user} setUser={setUser} cart={cart} addToCart={addToCart} />;
   }
   if (currentView === 'dashboard') {
     if (user.role === 'user') {
@@ -57,19 +84,25 @@ export default function MainPage() {
     return <Login onViewChange={setCurrentView} user={user} setUser={setUser} />;
   }
   if (currentView === 'nike') {
-    return <Nike onViewChange={setCurrentView} user={user} setUser={setUser} />;
+    return <Nike onViewChange={setCurrentView} user={user} setUser={setUser} cart={cart} addToCart={addToCart} />;
   }
   if (currentView === 'puma') {
-    return <Puma onViewChange={setCurrentView} user={user} setUser={setUser} />;
+    return <Puma onViewChange={setCurrentView} user={user} setUser={setUser} cart={cart} addToCart={addToCart} />;
   }
   if (currentView === 'adidas') {
-    return <Adidas onViewChange={setCurrentView} user={user} setUser={setUser} />;
+    return <Adidas onViewChange={setCurrentView} user={user} setUser={setUser} cart={cart} addToCart={addToCart} />;
+  }
+  if (currentView === 'bag') {
+    return <GoGoBag onViewChange={setCurrentView} cart={cart} setCart={setCart} user={user} setUser={setUser} />;
+  }
+  if (currentView === 'checkout') {
+    return <KineticCheckout onViewChange={setCurrentView} cart={cart} setCart={setCart} user={user} setUser={setUser} />;
   }
 
   return (
     <div className="selection:bg-primary selection:text-white min-h-screen bg-background text-on-background">
       {/* BEGIN: MainHeader */}
-      <Navbar setCurrentView={setCurrentView} user={user} setUser={setUser} />
+      <Navbar setCurrentView={setCurrentView} user={user} setUser={setUser} cart={cart} />
       {/* END: MainHeader */}
 
       <main className="pt-20">

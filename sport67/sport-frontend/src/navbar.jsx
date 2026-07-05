@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-export default function Navbar({ setCurrentView, user, setUser }) {
+export default function Navbar({ setCurrentView, user, setUser, cart = [] }) {
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const [searchValue, setSearchValue] = useState('');
   const [isMobileNavLowOpacity, setIsMobileNavLowOpacity] = useState(false);
@@ -166,10 +166,13 @@ export default function Navbar({ setCurrentView, user, setUser }) {
               </button>
             )}
 
-            <a className="flex items-center gap-2 font-bold text-[11px] uppercase tracking-widest hover:text-primary transition" href="#">
+            <button 
+              onClick={() => setCurrentView && setCurrentView('bag')} 
+              className="flex items-center gap-2 font-bold text-[11px] uppercase tracking-widest hover:text-primary transition cursor-pointer bg-transparent border-none"
+            >
               <span className="material-symbols-outlined text-[22px]">shopping_bag</span>
-              <span className="hidden sm:inline">Bag (0)</span>
-            </a>
+              <span className="hidden sm:inline">Bag ({cart.reduce((sum, item) => sum + item.quantity, 0)})</span>
+            </button>
 
             <button className="md:hidden flex items-center">
               <span className="material-symbols-outlined">menu</span>

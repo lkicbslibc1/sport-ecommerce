@@ -51,7 +51,7 @@ function FilterDropdown({ name, label, openFilter, setOpenFilter, activeCount, c
   );
 }
 
-export default function Puma({ onViewChange, user, setUser }) {
+export default function Puma({ onViewChange, user, setUser, cart, addToCart }) {
   useEffect(() => { window.scrollTo(0, 0); }, []);
 
   const [openFilter, setOpenFilter] = useState(null);
@@ -91,7 +91,7 @@ export default function Puma({ onViewChange, user, setUser }) {
       className="bg-background text-on-background font-body-md min-h-screen overflow-x-hidden selection:bg-primary selection:text-white"
       onClick={() => openFilter && setOpenFilter(null)}
     >
-      <Navbar setCurrentView={onViewChange} user={user} setUser={setUser} />
+      <Navbar setCurrentView={onViewChange} user={user} setUser={setUser} cart={cart} />
 
       <main className="max-w-[1440px] mx-auto px-6 lg:px-12 py-16 pt-28">
         <nav className="py-8 flex items-center gap-2 font-label-sm text-on-surface-variant uppercase tracking-widest">
@@ -185,7 +185,10 @@ export default function Puma({ onViewChange, user, setUser }) {
                 <p className="font-body-md text-on-surface-variant text-sm mb-4 font-light">{product.series}</p>
                 <div className="mt-auto">
                   <p className="font-anybody font-black italic text-primary text-lg mb-4">{formatPrice(product.price)}</p>
-                  <button className="buy-button w-full py-4 border border-white/20 font-anybody font-black text-sm uppercase tracking-widest transition-all duration-300 transform hover:scale-[1.02] group-hover:bg-primary group-hover:text-white group-hover:border-primary">
+                  <button 
+                    onClick={() => addToCart && addToCart(product)}
+                    className="buy-button w-full py-4 border border-white/20 font-anybody font-black text-sm uppercase tracking-widest transition-all duration-300 transform hover:scale-[1.02] group-hover:bg-primary group-hover:text-white group-hover:border-primary"
+                  >
                     Add to Cart
                   </button>
                 </div>
