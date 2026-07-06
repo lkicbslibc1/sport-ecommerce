@@ -7,7 +7,16 @@ export default function Navbar({ setCurrentView, user, setUser, cart = [] }) {
   const [selectedRole, setSelectedRole] = useState('user');
   const [loginIdentifier, setLoginIdentifier] = useState('guest@gogo.com');
   const [loginPassword, setLoginPassword] = useState('guest123');
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const [notifications, setNotifications] = useState([]);
 
+  useEffect(() => {
+    if (isNotificationOpen) {
+      const orders = JSON.parse(localStorage.getItem('gogo_orders') || '[]');
+      const userOrders = user && user.name !== 'Guest User' ? orders.filter(o => o.customer === user.name) : orders.slice(0, 5);
+      setNotifications(userOrders);
+    }
+  }, [isNotificationOpen, user]);
   // Member Login Drawer state
   const [isLoginVisible, setIsLoginVisible] = useState(false);
   const [isLoginActive, setIsLoginActive] = useState(false);
@@ -189,6 +198,56 @@ export default function Navbar({ setCurrentView, user, setUser, cart = [] }) {
                 <span className="hidden sm:inline">Login</span>
               </button>
             )}
+
+            {/* Notification Button */}
+            <div className="relative">
+              <button 
+                onClick={() => setIsNotificationOpen(!isNotificationOpen)} 
+                className="flex items-center gap-2 font-bold text-[11px] uppercase tracking-widest hover:text-primary transition cursor-pointer bg-transparent border-none"
+              >
+                <span className="material-symbols-outlined text-[22px]">notifications</span>
+                <span className="hidden sm:inline">Alerts</span>
+              </button>
+              
+              {/* Notification Dropdown */}
+              {isNotificationOpen && (
+                <div className="absolute right-0 mt-6 w-80 bg-[#131313] border border-white/10 shadow-2xl z-50">
+                  <div className="p-4 border-b border-white/10 flex justify-between items-center bg-[#0e0e0e]">
+                    <h3 className="text-[12px] font-bold uppercase tracking-widest text-white">Notifications</h3>
+                    <button onClick={() => setIsNotificationOpen(false)} className="text-white/50 hover:text-white cursor-pointer bg-transparent border-none">
+                      <span className="material-symbols-outlined text-[16px]">close</span>
+                    </button>
+                  </div>
+                  <div className="max-h-80 overflow-y-auto">
+                    {notifications.length === 0 ? (
+                      <div className="p-6 text-center text-white/50 text-[11px] uppercase tracking-widest">
+                        No recent purchases
+                      </div>
+                    ) : (
+                      notifications.map((order, idx) => (
+                        <div key={idx} className="p-4 border-b border-white/5 hover:bg-white/5 transition-colors cursor-pointer" onClick={() => { setIsNotificationOpen(false); if (setCurrentView) setCurrentView('profile'); }}>
+                          <div className="flex justify-between items-start mb-2">
+                            <span className="text-[10px] text-primary font-bold tracking-wider">{order.id}</span>
+                            <span className="text-[9px] text-white/40">{order.date}</span>
+                          </div>
+                          <p className="text-[11px] text-white/90 leading-relaxed mb-1">
+                            Purchase successful!
+                          </p>
+                          <p className="text-[10px] text-white/60 uppercase">
+                            Status: <span className="text-white font-bold">{order.status}</span>
+                          </p>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                  <div className="p-3 border-t border-white/10 bg-[#0e0e0e] text-center">
+                    <button onClick={() => { setIsNotificationOpen(false); if(setCurrentView) setCurrentView('profile'); }} className="text-[10px] text-primary hover:text-white transition-colors uppercase tracking-widest font-bold bg-transparent border-none cursor-pointer">
+                      View Order History
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
 
             {/* Profile Button */}
             {user && user.role === 'user' && (
