@@ -166,6 +166,17 @@ export default function Navbar({ setCurrentView, user, setUser, cart = [] }) {
               </button>
             )}
 
+            {/* Profile Button */}
+            {user && user.role === 'user' && (
+              <button 
+                onClick={() => setCurrentView && setCurrentView('profile')} 
+                className="flex items-center gap-2 font-bold text-[11px] uppercase tracking-widest hover:text-primary transition cursor-pointer bg-transparent border-none"
+              >
+                <span className="material-symbols-outlined text-[22px]">account_circle</span>
+                <span className="hidden sm:inline">Profile</span>
+              </button>
+            )}
+
             <button 
               onClick={() => setCurrentView && setCurrentView('bag')} 
               className="flex items-center gap-2 font-bold text-[11px] uppercase tracking-widest hover:text-primary transition cursor-pointer bg-transparent border-none"
