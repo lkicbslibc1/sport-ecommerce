@@ -1,103 +1,30 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
-  LayoutDashboard,
-  ShoppingCart,
-  Boxes,
-  Shirt,
-  Users,
-  Settings,
-  HelpCircle,
-  Search,
-  Bell,
   TrendingUp,
   Truck,
   AlertTriangle,
   Plus,
   Package,
   Banknote,
-  CircleDot,
+  Boxes,
+  Bell,
+  Search
 } from "lucide-react";
 import GogoAthleticOrders from "./Orders.jsx";
 import GogoAthleticInventory from "./Inventory.jsx";
 import GogoAthleticProducts from "./Products.jsx";
 import GogoAthleticTeam from "./Team.jsx";
 import Sidebar from "./Sidebar.jsx";
-
-
-
+import { PRODUCTS } from "../data/products.js";
 
 const WEEK = [
-  { day: "Mon", height: "h-2/3", amount: "$32k" },
-  { day: "Tue", height: "h-1/2", amount: "$24k" },
-  { day: "Wed", height: "h-3/4", amount: "$36k" },
-  { day: "Thu", height: "h-2/5", amount: "$19k" },
-  { day: "Fri", height: "h-5/6", amount: "$39k" },
-  { day: "Sat", height: "h-4/5", amount: "$37k" },
-  { day: "Sun", height: "h-full", amount: "$42k", today: true },
-];
-
-const KPIS = [
-  {
-    label: "Daily Revenue",
-    value: "$42,890.00",
-    icon: Banknote,
-    trend: "+12.4% vs prev. day",
-    trendIcon: TrendingUp,
-    trendColor: "text-orange-300",
-  },
-  {
-    label: "Active Shipments",
-    value: "1,204",
-    icon: Truck,
-    trend: "89% On-Schedule",
-    trendIcon: Truck,
-    trendColor: "text-indigo-300",
-  },
-  {
-    label: "Stock Efficiency",
-    value: "94.2%",
-    icon: Package,
-    trend: "12 SKUs critical",
-    trendIcon: AlertTriangle,
-    trendColor: "text-red-400",
-  },
-];
-
-const ALERTS = [
-  { name: "Ignite 3.0 Leggings", sku: "IGN-LG-BLK-01", status: "2 LEFT" },
-  { name: "Vertex Compression Top", sku: "VTX-TP-OR-05", status: "OUT" },
-  { name: "Kinetic Headband", sku: "KNT-HB-GRY", status: "8 LEFT" },
-];
-
-const BEST_SELLERS = [
-  {
-    rank: 1,
-    name: "Kinetic Compression Shorts",
-    series: "Core Tech Series",
-    revenue: "$84.5k",
-    rankBg: "bg-orange-300 text-neutral-950",
-  },
-  {
-    rank: 2,
-    name: "Aero-V Hoodie 2.0",
-    series: "Thermo-Control",
-    revenue: "$62.1k",
-    rankBg: "bg-neutral-300 text-neutral-950",
-  },
-  {
-    rank: 3,
-    name: "Volt Endurance Vest",
-    series: "Reflective / Night Run",
-    revenue: "$51.9k",
-    rankBg: "bg-neutral-500 text-neutral-950",
-  },
-  {
-    rank: 4,
-    name: "Strike Performance Shoe",
-    series: "Footwear / Sprint",
-    revenue: "$38.4k",
-    rankBg: "bg-neutral-700 text-neutral-100",
-  },
+  { day: "Mon", height: "h-2/3", amount: "32k ฿" },
+  { day: "Tue", height: "h-1/2", amount: "24k ฿" },
+  { day: "Wed", height: "h-3/4", amount: "36k ฿" },
+  { day: "Thu", height: "h-2/5", amount: "19k ฿" },
+  { day: "Fri", height: "h-5/6", amount: "39k ฿" },
+  { day: "Sat", height: "h-4/5", amount: "37k ฿" },
+  { day: "Sun", height: "h-full", amount: "42k ฿", today: true },
 ];
 
 function GlassPanel({ className = "", children }) {
@@ -115,6 +42,76 @@ function GlassPanel({ className = "", children }) {
 export default function GogoAthleticDashboard({ onViewChange, user }) {
   const [range, setRange] = useState("daily");
   const [currentPage, setCurrentPage] = useState("dashboard");
+
+  // Load products list and orders from localStorage dynamically
+  const productsList = useMemo(() => {
+    try {
+      const stored = localStorage.getItem('gogo_products');
+      if (stored) return JSON.parse(stored);
+    } catch (e) {}
+    return PRODUCTS;
+  }, [currentPage]); // re-evaluate when page switches to keep sync
+
+  const ordersList = useMemo(() => {
+    try {
+      const stored = localStorage.getItem('gogo_orders');
+      if (stored) return JSON.parse(stored);
+    } catch (e) {}
+    return [];
+  }, [currentPage]); // re-evaluate when page switches to keep sync
+
+  // Dynamic Metrics
+  const totalRevenue = useMemo(() => {
+    return ordersList
+      .filter(o => o.status !== 'Cancelled')
+      .reduce((sum, o) => {
+        const val = parseFloat(o.total.replace(/,/g, '').replace(/[^\d.]/g, '')) || 0;
+        return sum + val;
+      }, 0);
+  }, [ordersList]);
+
+  const activeShipments = useMemo(() => {
+    return ordersList.filter(o => o.status === 'Preparing' || o.status === 'Shipped').length;
+  }, [ordersList]);
+
+  const criticalProducts = useMemo(() => {
+    return productsList.filter(p => p.amount <= 10);
+  }, [productsList]);
+
+  const stockEfficiency = useMemo(() => {
+    if (productsList.length === 0) return "100%";
+    const optimalCount = productsList.filter(p => p.amount > 10).length;
+    return ((optimalCount / productsList.length) * 100).toFixed(1) + "%";
+  }, [productsList]);
+
+  const dynamicAlerts = useMemo(() => {
+    return criticalProducts.map(p => ({
+      name: p.name,
+      sku: p.sku || `GA-PROD-${p.id}`,
+      status: p.amount === 0 ? "OUT OF STOCK" : `${p.amount} LEFT`
+    })).slice(0, 5);
+  }, [criticalProducts]);
+
+  const bestSellers = useMemo(() => {
+    return productsList
+      .slice()
+      .sort((a, b) => (b.review || 0) - (a.review || 0))
+      .slice(0, 4)
+      .map((p, idx) => ({
+        rank: idx + 1,
+        name: p.name,
+        series: p.series || p.description || "Core Technical Gear",
+        revenue: (p.price * (15 - idx * 2)).toLocaleString("th-TH") + " ฿",
+        image: p.image,
+        rankBg: idx === 0 
+          ? "bg-orange-300 text-neutral-950" 
+          : idx === 1 
+          ? "bg-neutral-300 text-neutral-950" 
+          : idx === 2 
+          ? "bg-neutral-500 text-neutral-950" 
+          : "bg-neutral-700 text-neutral-100"
+      }));
+  }, [productsList]);
 
   if (currentPage === "orders") {
     return <GogoAthleticOrders onNavigate={setCurrentPage} onViewChange={onViewChange} user={user} />;
@@ -136,7 +133,10 @@ export default function GogoAthleticDashboard({ onViewChange, user }) {
         onNavigate={setCurrentPage}
         onViewChange={onViewChange}
         actionButton={
-          <button className="w-full bg-orange-600 text-white py-3 text-xs font-bold uppercase tracking-widest hover:scale-105 transition-transform flex items-center justify-center gap-2">
+          <button 
+            onClick={() => setCurrentPage("products")}
+            className="w-full bg-orange-600 text-white py-3 text-xs font-bold uppercase tracking-widest hover:scale-105 transition-transform flex items-center justify-center gap-2"
+          >
             <Plus size={16} />
             New Product
           </button>
@@ -205,7 +205,32 @@ export default function GogoAthleticDashboard({ onViewChange, user }) {
           {/* BENTO GRID LAYOUT */}
           <div className="grid grid-cols-12 gap-6">
             {/* KPI CARDS */}
-            {KPIS.map(
+            {[
+              {
+                label: "Store Revenue",
+                value: totalRevenue.toLocaleString("th-TH") + " ฿",
+                icon: Banknote,
+                trend: `From ${ordersList.length} total orders`,
+                trendIcon: TrendingUp,
+                trendColor: "text-orange-300",
+              },
+              {
+                label: "Active Shipments",
+                value: activeShipments.toString(),
+                icon: Truck,
+                trend: "Fulfillment In Progress",
+                trendIcon: Truck,
+                trendColor: "text-indigo-300",
+              },
+              {
+                label: "Stock Efficiency",
+                value: stockEfficiency,
+                icon: Package,
+                trend: `${criticalProducts.length} items critical`,
+                trendIcon: AlertTriangle,
+                trendColor: criticalProducts.length > 0 ? "text-red-400" : "text-green-400",
+              }
+            ].map(
               ({ label, value, icon: Icon, trend, trendIcon: TrendIcon, trendColor }) => (
                 <div
                   key={label}
@@ -314,27 +339,34 @@ export default function GogoAthleticDashboard({ onViewChange, user }) {
                     Critical Alerts
                   </h5>
                   <span className="text-[10px] bg-red-400 text-red-950 px-2 py-0.5 font-bold">
-                    12 SKUs
+                    {criticalProducts.length} SKUs
                   </span>
                 </div>
                 <div className="space-y-4">
-                  {ALERTS.map(({ name, sku, status }) => (
-                    <div
-                      key={sku}
-                      className="flex items-center justify-between py-3 border-b border-white/5 last:border-b-0 last:pb-0"
-                    >
-                      <div>
-                        <p className="font-bold text-sm uppercase">{name}</p>
-                        <p className="text-[10px] text-neutral-500">SKU: {sku}</p>
+                  {dynamicAlerts.length > 0 ? (
+                    dynamicAlerts.map(({ name, sku, status }) => (
+                      <div
+                        key={sku}
+                        className="flex items-center justify-between py-3 border-b border-white/5 last:border-b-0 last:pb-0"
+                      >
+                        <div>
+                          <p className="font-bold text-sm uppercase">{name}</p>
+                          <p className="text-[10px] text-neutral-500">SKU: {sku}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-red-400 font-black">{status}</p>
+                          <button 
+                            onClick={() => setCurrentPage("inventory")}
+                            className="text-orange-300 text-[10px] font-bold underline uppercase tracking-widest"
+                          >
+                            Restock
+                          </button>
+                        </div>
                       </div>
-                      <div className="text-right">
-                        <p className="text-red-400 font-black">{status}</p>
-                        <button className="text-orange-300 text-[10px] font-bold underline uppercase tracking-widest">
-                          Reorder
-                        </button>
-                      </div>
-                    </div>
-                  ))}
+                    ))
+                  ) : (
+                    <p className="text-neutral-500 text-xs italic">All stock levels normal.</p>
+                  )}
                 </div>
               </GlassPanel>
             </div>
@@ -349,20 +381,27 @@ export default function GogoAthleticDashboard({ onViewChange, user }) {
                       Leaderboard
                     </span>
                   </h5>
-                  <button className="text-neutral-400 hover:text-orange-300 text-xs font-bold uppercase tracking-widest border-b border-neutral-500">
+                  <button 
+                    onClick={() => setCurrentPage("products")}
+                    className="text-neutral-400 hover:text-orange-300 text-xs font-bold uppercase tracking-widest border-b border-neutral-500"
+                  >
                     View Full Catalog
                   </button>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                  {BEST_SELLERS.map(({ rank, name, series, revenue, rankBg }) => (
+                  {bestSellers.map(({ rank, name, series, revenue, image, rankBg }) => (
                     <div key={rank} className="group">
                       <div className="relative aspect-square bg-neutral-900 overflow-hidden mb-4 border border-white/5 transition-all duration-500 group-hover:border-orange-300/50 flex items-center justify-center">
-                        <Shirt
-                          size={72}
-                          strokeWidth={1}
-                          className="text-neutral-700 group-hover:text-orange-300/60 transition-colors duration-500 group-hover:scale-110 duration-700"
-                        />
+                        {image ? (
+                          <img src={image} className="w-full h-full object-cover group-hover:scale-110 duration-700 transition-transform" alt={name} />
+                        ) : (
+                          <Boxes
+                            size={72}
+                            strokeWidth={1}
+                            className="text-neutral-700 group-hover:text-orange-300/60 transition-colors duration-500 group-hover:scale-110 duration-700"
+                          />
+                        )}
                         <div
                           className={
                             "absolute top-0 right-0 font-black p-3 text-lg italic " +
@@ -377,7 +416,7 @@ export default function GogoAthleticDashboard({ onViewChange, user }) {
                           <h6 className="font-bold text-sm uppercase tracking-tight">
                             {name}
                           </h6>
-                          <p className="text-[10px] text-neutral-500 uppercase tracking-widest mt-1">
+                          <p className="text-[10px] text-neutral-500 uppercase tracking-widest mt-1 max-w-[150px] overflow-hidden text-ellipsis whitespace-nowrap">
                             {series}
                           </p>
                         </div>
@@ -398,7 +437,10 @@ export default function GogoAthleticDashboard({ onViewChange, user }) {
       </div>
 
       {/* FLOATING ACTION BUTTON */}
-      <button className="fixed bottom-10 right-10 w-16 h-16 bg-orange-300 text-neutral-950 shadow-2xl flex items-center justify-center hover:scale-110 transition-transform z-50">
+      <button 
+        onClick={() => setCurrentPage("products")}
+        className="fixed bottom-10 right-10 w-16 h-16 bg-orange-300 text-neutral-950 shadow-2xl flex items-center justify-center hover:scale-110 transition-transform z-50"
+      >
         <Plus size={28} />
       </button>
     </div>

@@ -3,6 +3,7 @@ import Navbar from './navbar.jsx';
 
 export default function Login({ onViewChange, user, setUser }) {
   const [formData, setFormData] = useState({
+    username: '',
     firstName: '',
     lastName: '',
     email: '',
@@ -25,7 +26,36 @@ export default function Login({ onViewChange, user, setUser }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    alert(`Account created successfully for ${formData.firstName}!`);
+    const newUser = {
+      id: Date.now(),
+      name: `${formData.firstName} ${formData.lastName}`.trim() || formData.username,
+      username: formData.username,
+      email: formData.email,
+      password: formData.password,
+      role: 'Customer',
+      status: 'Active',
+      joined: new Date().toLocaleDateString("en-US", {
+        month: "short",
+        day: "2-digit",
+        year: "numeric"
+      }).toUpperCase()
+    };
+
+    // Save to gogo_users in localStorage
+    const existingUsers = JSON.parse(localStorage.getItem("gogo_users") || "[]");
+    if (!existingUsers.some(u => u.email.toLowerCase() === formData.email.toLowerCase())) {
+      existingUsers.push(newUser);
+      localStorage.setItem("gogo_users", JSON.stringify(existingUsers));
+    }
+
+    if (setUser) {
+      setUser({
+        name: formData.username,
+        email: formData.email,
+        role: 'user'
+      });
+    }
+    alert(`Account created successfully for ${formData.username}!`);
     if (onViewChange) {
       onViewChange('home');
     }
@@ -62,13 +92,24 @@ export default function Login({ onViewChange, user, setUser }) {
           </div>
 
           {/* Right Side: Registration Form */}
-          <div className="lg:col-span-6 flex justify-center lg:justify-end">
+          <div className="lg:col-span-6 flex items-center justify-center lg:justify-end">
             <div className="glass-panel w-full max-w-xl p-8 md:p-12">
               <div className="mb-10">
                 <h2 className="font-headline-md text-headline-md italic uppercase text-[#ffb59e]">CREATE ACCOUNT</h2>
                 <p className="font-title-sm text-title-sm text-[#a1a1a1] mt-2">ACCESS THE INNER CIRCLE</p>
               </div>
               <form className="space-y-8" onSubmit={handleSubmit}>
+                <div className="relative focus-within:scale-[1.01] transition-transform duration-200">
+                  <input 
+                    className="w-full bg-transparent border-0 border-b-2 border-[#353534] font-label-xs text-label-xs text-[#e5e2e1] uppercase py-3 input-border-anim placeholder:text-[#bdbdba]" 
+                    placeholder="USERNAME" 
+                    type="text" 
+                    name="username"
+                    value={formData.username}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div className="relative focus-within:scale-[1.01] transition-transform duration-200">
                     <input 

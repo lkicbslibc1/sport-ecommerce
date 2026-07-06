@@ -1,13 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import Sidebar from "./Sidebar.jsx";
 import {
-  LayoutDashboard,
-  ShoppingCart,
-  Package,
-  Boxes,
-  Users,
-  Settings,
-  HelpCircle,
   Search,
   Bell,
   UserCircle,
@@ -16,15 +9,15 @@ import {
   ChevronLeft,
   ChevronRight,
   X,
+  Package,
 } from "lucide-react";
-
-
 
 const STATUS_STYLES = {
   Pending: "bg-neutral-700 text-neutral-200",
   Preparing: "bg-indigo-300 text-indigo-950",
   Shipped: "bg-orange-600 text-orange-50",
   Delivered: "bg-orange-300 text-orange-950",
+  Cancelled: "bg-red-500/10 text-red-400 border border-red-500/20"
 };
 
 const TIER_STYLES = {
@@ -32,60 +25,6 @@ const TIER_STYLES = {
   PRO: "text-indigo-300 border border-indigo-300",
   MEMBER: "text-neutral-400 border border-neutral-600",
 };
-
-const ORDERS = [
-  {
-    id: "#GGO-92831",
-    customer: "Dominic Toretto",
-    tier: "ELITE",
-    date: "OCT 24, 2023",
-    total: "$1,240.00",
-    status: "Pending",
-    actions: ["Update Status", "Mark Shipped", "Mark Preparing", "Cancel Order"],
-  },
-  {
-    id: "#GGO-92830",
-    customer: "Sarah Connor",
-    tier: "PRO",
-    date: "OCT 23, 2023",
-    total: "$450.50",
-    status: "Preparing",
-    actions: ["Update Status", "Mark Shipped", "Mark Delivered"],
-  },
-  {
-    id: "#GGO-92829",
-    customer: "Letty Ortiz",
-    tier: "MEMBER",
-    date: "OCT 23, 2023",
-    total: "$89.00",
-    status: "Shipped",
-    actions: ["Update Status", "Mark Delivered", "Track Shipment"],
-  },
-  {
-    id: "#GGO-92828",
-    customer: "Ellen Ripley",
-    tier: "ELITE",
-    date: "OCT 22, 2023",
-    total: "$3,200.00",
-    status: "Delivered",
-    actions: ["Update Status", "Re-open Order", "Archive"],
-  },
-];
-
-const CART_ITEMS = [
-  {
-    name: "Apex Compression V2 - Stealth",
-    sku: "GGO-APX-001 / Size: XL",
-    qty: 2,
-    price: "$180.00",
-  },
-  {
-    name: "Velocity Carbon Runner",
-    sku: "GGO-SH-922 / Size: 11",
-    qty: 1,
-    price: "$1,060.00",
-  },
-];
 
 function GlassPanel({ className = "", children }) {
   return (
@@ -100,8 +39,93 @@ function GlassPanel({ className = "", children }) {
 }
 
 export default function GogoAthleticOrders({ onNavigate, onViewChange }) {
+  const [ordersList, setOrdersList] = useState(() => {
+    try {
+      const stored = localStorage.getItem('gogo_orders');
+      if (stored) return JSON.parse(stored);
+    } catch (e) {
+      console.error(e);
+    }
+    const initialMock = [
+      {
+        id: "#GGO-92831",
+        customer: "Dominic Toretto",
+        tier: "ELITE",
+        date: "OCT 24, 2026",
+        total: "1,240.00 ฿",
+        status: "Pending",
+        items: [
+          { name: "Gogo Aero-Run V1", sku: "GA-FW-2024-001", qty: 2, price: "4,500.00 ฿" }
+        ],
+        actions: ["Update Status", "Mark Shipped", "Mark Preparing", "Cancel Order"],
+      },
+      {
+        id: "#GGO-92830",
+        customer: "Sarah Connor",
+        tier: "PRO",
+        date: "OCT 23, 2026",
+        total: "450.00 ฿",
+        status: "Preparing",
+        items: [
+          { name: "Pro Performance Tee", sku: "GA-CP-2024-089", qty: 1, price: "1,250.00 ฿" }
+        ],
+        actions: ["Update Status", "Mark Shipped", "Mark Delivered"],
+      },
+      {
+        id: "#GGO-92829",
+        customer: "Letty Ortiz",
+        tier: "MEMBER",
+        date: "OCT 23, 2026",
+        total: "89.00 ฿",
+        status: "Shipped",
+        items: [
+          { name: "Endurance Flight Shorts", sku: "GA-RN-2024-003", qty: 1, price: "1,800.00 ฿" }
+        ],
+        actions: ["Update Status", "Mark Delivered", "Track Shipment"],
+      }
+    ];
+    localStorage.setItem('gogo_orders', JSON.stringify(initialMock));
+    return initialMock;
+  });
+
   const [selectedOrder, setSelectedOrder] = useState(null);
   const isOpen = selectedOrder !== null;
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState("All Statuses");
+
+  const handleUpdateStatus = (orderId, newStatus) => {
+    const updated = ordersList.map(o => {
+      if (o.id === orderId) {
+        return { ...o, status: newStatus };
+      }
+      return o;
+    });
+    setOrdersList(updated);
+    try {
+      localStorage.setItem('gogo_orders', JSON.stringify(updated));
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const filteredOrders = useMemo(() => {
+    return ordersList.filter(o => {
+      const matchSearch =
+        o.customer.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        o.id.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchStatus = selectedStatus === "All Statuses" || o.status === selectedStatus;
+      return matchSearch && matchStatus;
+    });
+  }, [ordersList, searchQuery, selectedStatus]);
+
+  // Dynamic statistics
+  const todayOrdersCount = filteredOrders.length;
+  const revenueTotal = filteredOrders
+    .filter(o => o.status !== "Cancelled")
+    .reduce((sum, o) => {
+      const val = parseFloat(o.total.replace(/,/g, '')) || 0;
+      return sum + val;
+    }, 0);
 
   return (
     <div className="min-h-screen w-full bg-neutral-950 text-neutral-100 flex">
@@ -112,7 +136,7 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange }) {
         actionButton={
           <button className="w-full bg-orange-600 text-white text-[10px] font-black py-4 px-2 uppercase tracking-widest hover:scale-105 transition-transform flex items-center justify-center gap-2">
             <Plus size={16} />
-            New Entry
+            Orders Action
           </button>
         }
       />
@@ -127,8 +151,10 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange }) {
             />
             <input
               type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search orders, ID, customers..."
-              className="bg-neutral-900 border-none focus:ring-1 focus:ring-orange-300 text-neutral-100 text-sm pl-10 pr-4 py-2 w-56 sm:w-80 placeholder:text-neutral-600"
+              className="bg-neutral-900 border-none focus:ring-1 focus:ring-orange-300 text-neutral-100 text-sm pl-10 pr-4 py-2 w-56 sm:w-80 placeholder:text-neutral-600 outline-none"
             />
           </div>
 
@@ -164,15 +190,15 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange }) {
             <div className="flex gap-4">
               <GlassPanel className="px-6 py-4 flex flex-col items-center justify-center min-w-[140px]">
                 <span className="text-[10px] text-neutral-400 uppercase tracking-widest">
-                  Today
+                  Filtered Orders
                 </span>
-                <span className="text-2xl font-black text-orange-300">124</span>
+                <span className="text-2xl font-black text-orange-300">{todayOrdersCount}</span>
               </GlassPanel>
-              <GlassPanel className="px-6 py-4 flex flex-col items-center justify-center min-w-[140px]">
+              <GlassPanel className="px-6 py-4 flex flex-col items-center justify-center min-w-[160px]">
                 <span className="text-[10px] text-neutral-400 uppercase tracking-widest">
-                  Revenue
+                  Total Revenue
                 </span>
-                <span className="text-2xl font-black">$12.8k</span>
+                <span className="text-2xl font-black text-orange-300">{revenueTotal.toLocaleString("th-TH")} ฿</span>
               </GlassPanel>
             </div>
           </div>
@@ -183,37 +209,18 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange }) {
               <span className="text-[10px] uppercase tracking-widest text-neutral-400">
                 Filter Status:
               </span>
-              <select className="bg-neutral-900 border border-white/10 text-neutral-100 text-xs py-2 px-4 focus:ring-orange-300 focus:border-orange-300">
-                <option>All Statuses</option>
-                <option>Pending</option>
-                <option>Preparing</option>
-                <option>Shipped</option>
-                <option>Delivered</option>
+              <select 
+                value={selectedStatus}
+                onChange={(e) => setSelectedStatus(e.target.value)}
+                className="bg-neutral-900 border border-white/10 text-neutral-100 text-xs py-2 px-4 focus:ring-orange-300 focus:border-orange-300"
+              >
+                <option value="All Statuses" className="bg-neutral-950 text-neutral-100">All Statuses</option>
+                <option value="Pending" className="bg-neutral-950 text-neutral-100">Pending</option>
+                <option value="Preparing" className="bg-neutral-950 text-neutral-100">Preparing</option>
+                <option value="Shipped" className="bg-neutral-950 text-neutral-100">Shipped</option>
+                <option value="Delivered" className="bg-neutral-950 text-neutral-100">Delivered</option>
+                <option value="Cancelled" className="bg-neutral-950 text-neutral-100">Cancelled</option>
               </select>
-            </div>
-            <div className="flex items-center gap-3">
-              <span className="text-[10px] uppercase tracking-widest text-neutral-400">
-                Date Range:
-              </span>
-              <div className="flex items-center bg-neutral-900 border border-white/10">
-                <input
-                  type="date"
-                  className="bg-transparent border-none text-neutral-100 text-xs py-2 px-4 focus:ring-0"
-                />
-                <span className="text-neutral-500">/</span>
-                <input
-                  type="date"
-                  className="bg-transparent border-none text-neutral-100 text-xs py-2 px-4 focus:ring-0"
-                />
-              </div>
-            </div>
-            <div className="sm:ml-auto flex gap-4 w-full sm:w-auto">
-              <button className="bg-neutral-100 text-neutral-950 text-[10px] font-black px-6 py-3 uppercase tracking-widest hover:scale-105 transition-transform">
-                Export CSV
-              </button>
-              <button className="bg-orange-600 text-white text-[10px] font-black px-6 py-3 uppercase tracking-widest hover:scale-105 transition-transform">
-                Run Bulk Action
-              </button>
             </div>
           </GlassPanel>
 
@@ -239,7 +246,7 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange }) {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/5">
-                  {ORDERS.map((order) => (
+                  {filteredOrders.map((order) => (
                     <tr
                       key={order.id}
                       className="hover:bg-orange-600/5 hover:border-l-2 hover:border-orange-400 transition-colors"
@@ -255,10 +262,10 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange }) {
                           <span
                             className={
                               "px-2 py-0.5 text-[8px] font-black uppercase tracking-tighter " +
-                              TIER_STYLES[order.tier]
+                              TIER_STYLES[order.tier || "MEMBER"]
                             }
                           >
-                            {order.tier}
+                            {order.tier || "MEMBER"}
                           </span>
                         </div>
                       </td>
@@ -277,17 +284,24 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange }) {
                         </span>
                       </td>
                       <td className="p-6">
-                        <div className="flex justify-end gap-3">
+                        <div className="flex justify-end items-center gap-3">
                           <button
                             onClick={() => setSelectedOrder(order)}
                             className="p-2 border border-white/10 hover:bg-neutral-100 hover:text-neutral-950 transition-colors"
+                            title="View Details"
                           >
                             <Eye size={16} />
                           </button>
-                          <select className="bg-neutral-900 border-none text-[10px] uppercase font-black focus:ring-1 focus:ring-orange-300 cursor-pointer px-4">
-                            {order.actions.map((a) => (
-                              <option key={a}>{a}</option>
-                            ))}
+                          <select 
+                            value={order.status}
+                            onChange={(e) => handleUpdateStatus(order.id, e.target.value)}
+                            className="bg-neutral-900 border border-white/10 text-[10px] uppercase font-black focus:ring-1 focus:ring-orange-300 cursor-pointer px-4 py-1.5 text-neutral-100"
+                          >
+                            <option value="Pending" className="bg-neutral-950 text-neutral-100">Pending</option>
+                            <option value="Preparing" className="bg-neutral-950 text-neutral-100">Preparing</option>
+                            <option value="Shipped" className="bg-neutral-950 text-neutral-100">Shipped</option>
+                            <option value="Delivered" className="bg-neutral-950 text-neutral-100">Delivered</option>
+                            <option value="Cancelled" className="bg-neutral-950 text-neutral-100">Cancelled</option>
                           </select>
                         </div>
                       </td>
@@ -300,7 +314,7 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange }) {
             {/* Pagination */}
             <div className="p-6 border-t border-white/10 bg-neutral-900/60 flex justify-between items-center">
               <p className="text-[10px] font-black text-neutral-400 uppercase tracking-widest">
-                Showing 1 - 25 of 1,249 orders
+                Showing {filteredOrders.length} of {ordersList.length} orders
               </p>
               <div className="flex gap-2">
                 <button className="p-2 border border-white/10 hover:bg-orange-600 hover:text-white transition-all">
@@ -341,46 +355,15 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange }) {
             </div>
 
             <div className="flex-1 overflow-y-auto p-8 space-y-8">
-              {/* Status Timeline */}
-              <section>
-                <h4 className="text-[10px] uppercase tracking-[0.2em] mb-4">
-                  Lifecycle Timeline
-                </h4>
-                <div className="space-y-4 relative before:absolute before:left-2 before:top-2 before:bottom-2 before:w-px before:bg-white/10">
-                  <div className="pl-8 relative flex items-start gap-4">
-                    <div className="absolute left-0 top-1 w-4 h-4 bg-orange-300 border-4 border-neutral-900 rounded-full" />
-                    <div>
-                      <p className="font-bold text-xs uppercase">
-                        Payment Confirmed
-                      </p>
-                      <p className="text-[10px] text-neutral-400">
-                        OCT 24, 09:45 AM
-                      </p>
-                    </div>
-                  </div>
-                  <div className="pl-8 relative flex items-start gap-4 opacity-40">
-                    <div className="absolute left-0 top-1 w-4 h-4 bg-neutral-600 border-4 border-neutral-900 rounded-full" />
-                    <div>
-                      <p className="font-bold text-xs uppercase">
-                        Warehouse Picking
-                      </p>
-                      <p className="text-[10px] text-neutral-400">
-                        Pending Allocation
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </section>
-
               {/* Items */}
               <section>
                 <h4 className="text-[10px] uppercase tracking-[0.2em] mb-4">
-                  Cart Inventory ({CART_ITEMS.length})
+                  Cart Items ({selectedOrder.items ? selectedOrder.items.length : 0})
                 </h4>
                 <div className="space-y-4">
-                  {CART_ITEMS.map((item) => (
+                  {selectedOrder.items && selectedOrder.items.map((item, idx) => (
                     <div
-                      key={item.name}
+                      key={idx}
                       className="flex gap-4 p-4 bg-neutral-950 border border-white/10"
                     >
                       <div className="w-16 h-16 bg-neutral-800 shrink-0 flex items-center justify-center">
@@ -388,7 +371,7 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange }) {
                       </div>
                       <div className="flex-1">
                         <p className="font-bold text-xs uppercase">{item.name}</p>
-                        <p className="text-[10px] text-neutral-400">{item.sku}</p>
+                        <p className="text-[10px] text-neutral-400">SKU: {item.sku}</p>
                         <div className="flex justify-between items-end mt-2">
                           <span className="text-[10px] text-neutral-400">
                             Qty: {item.qty}
@@ -410,12 +393,8 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange }) {
                   <span>{selectedOrder.total}</span>
                 </div>
                 <div className="flex justify-between text-xs text-neutral-400">
-                  <span>Shipping (Priority Express)</span>
-                  <span className="text-orange-300">FREE (ELITE)</span>
-                </div>
-                <div className="flex justify-between text-xs text-neutral-400">
-                  <span>Taxes (Estimated)</span>
-                  <span>$0.00</span>
+                  <span>Shipping</span>
+                  <span className="text-orange-300">FREE</span>
                 </div>
                 <div className="h-px bg-white/10 my-4" />
                 <div className="flex justify-between text-xl font-black">
@@ -430,10 +409,7 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange }) {
                 onClick={() => setSelectedOrder(null)}
                 className="border border-neutral-100 text-neutral-100 text-[10px] font-black py-4 uppercase tracking-widest hover:bg-neutral-100 hover:text-neutral-950 transition-colors"
               >
-                Print Invoice
-              </button>
-              <button className="bg-orange-600 text-white text-[10px] font-black py-4 uppercase tracking-widest hover:scale-105 transition-transform">
-                Push to Carrier
+                Close details
               </button>
             </div>
           </div>

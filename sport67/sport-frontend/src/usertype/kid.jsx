@@ -11,14 +11,7 @@ const COLORS = [
   { name: "Orange", hex: "#fb8c00" },
 ];
 
-const PRODUCTS = [
-  { id: 1, name: "Gogo Aero-Run V1", series: "Racing Series / Hyper-Responsive", price: 4500, brand: "Nike", sizes: ["M","L","XL"], colorNames: ["Orange","Black"], badge: "Best Seller", badgeType: "primary", colors: ["bg-primary","bg-surface-container-highest","bg-white"], image: "https://lh3.googleusercontent.com/aida-public/AB6AXuDTnM-8DY9lYLdkxbB1u6YF0F_XEernIKhjHIViEc8ldLCsZhf-fNZmZhXqL5JWQGpt0zshAUhkv0D9NeJfVGLBOlwtsSvml3hEi7mqzGQSRr5xIW_iY_vX_qLvle52Pze3b-LwdLe5VVWQ_xIkIZSwPNePlUyFkWjQeyAA-vONzbLl7aPxcMXWZtrNvagtkoXWTHC_8KRWaAoUkdmZf9j5ikWe0_4orj6UGhV8afvKO-w-n9D0fjDgED3LeWUmsgWa_5QCUBtizvY" },
-  { id: 2, name: "Pro Performance Tee", series: "Compression Fit / Moisture-Wicking", price: 1250, brand: "Adidas", sizes: ["S","M","L"], colorNames: ["Black","Blue"], colors: ["bg-surface-container-highest","bg-secondary"], image: "https://lh3.googleusercontent.com/aida-public/AB6AXuBn76oCMWziwU-o3V95aYlmHIkqh4LQQ0EP71hXDYfYnTuJ93tofPdZGB5Ad2-C1ZI5CmJKCkhjt_Bgw-HneHBXKWNwJxvTolx9WDIuqcJT2ujt0rkrsilBz0nVV4deckTmoDBoBLjKiGmK-sVJ3MMgQSbcTl7zyEaQnvTi2E_dnK4bYOD9XDYD7Dx0neZNm50TGWa2JeBZ46JqOdC4jXZmcJ5Ft6Gvz6c97j06Izxi9Cc24I-hQeXucQctNrHTPmK19UNZ-zR6xWk" },
-  { id: 3, name: "Endurance Flight Shorts", series: "Ultra-Lightweight / 5-Inch Inseam", price: 1800, brand: "Puma", sizes: ["S","M","XL"], colorNames: ["Orange","Red"], badge: "New Arrival", badgeType: "tertiary", colors: ["bg-primary","bg-tertiary"], image: "https://lh3.googleusercontent.com/aida-public/AB6AXuDVVa5LGRxDJqIDf1aNvUdUZjJwrcK4Z-0HcTkSlHJQzAnvxA1L9cWMwLl5tlYkMoh9NKFAlzlH2WpKKBVSQAnlTWIHIuOpZrMT7TqNZ-IkrKH7AynPTL7pFRpj8ffiJbJAbj2IvUwJuC2nF4zZmmZQhLGapIiLAOEowvajHojGzPDWuuIuxs1yY6Zm_KSnPW8-SyUnAk9c3IgBJITD4hghRR3yiH4UJRZAoJQTfJkFvESJfpQ-hGextcuV4aZFDFnOaDLsIQ0_CPU" },
-  { id: 4, name: "Cloud Strike V3", series: "Recovery Series / Max Cushioning", price: 3900, brand: "Nike", sizes: ["M","L"], colorNames: ["White","Blue"], colors: ["bg-white","bg-secondary"], image: "https://lh3.googleusercontent.com/aida-public/AB6AXuBlVYH6ikzf5bxQCYE53SYSRoS5l8txvds81jk9f5Qv3aUhwrb1RQHCwU4nk2NGfVkV0otOrpumXSpPUy_pdwkpSnm6OqCtQexqOFr7RY0-9WxL04JWi9ToIFSRF2BEycoIHT5YQqFgB6Cqzii4O2865S_SHbh-UNtRExTKpxnCcqxGylVP_4NDIKJBVvndJ8PPNA15TQsyqdAZCSq0mRX6_uWICHigPmCIg1rEL1iSn1bMZVwhpZQO5fet7dxOTSmz4Aas8l6VIxY" },
-  { id: 5, name: "Elite Grip Socks", series: "Anatomical Fit / Zero Blister Tech", price: 650, brand: "Puma", sizes: ["S","M","L","XL"], colorNames: ["Orange","Blue"], colors: ["bg-primary","bg-secondary"], image: "https://lh3.googleusercontent.com/aida-public/AB6AXuCgpTuORnCViF6OIjKpyhLSpFHkEKShjyk2wlpf-5oUQVvQp7EGpllRNoisMKYUo3pl8te_QoyEUQcJQCZITFhtwitZCQ8l5EJz-qQcINXOoDxrMPehLlk7uRB3fkbzjFNkSPiKX7a0gRvi5vGDiiKva8EhVh9yXnLhCBIoEnfeQhQQ3Dlvdi0lr8x5TzsTxXhiliBryHrLpwuhvUPcEruaKAo-i8wp1apxkQAGzYt43FfCV38pbTyrwXzaUt5ic3gW_XsnOr6qcu4" },
-  { id: 6, name: "Gogo Pulse Tracker", series: "GPS Multisport / Heart Rate Monitoring", price: 4500, brand: "Puma", sizes: ["M"], colorNames: ["Black"], colors: ["bg-surface-container-highest"], image: "https://lh3.googleusercontent.com/aida-public/AB6AXuAZX6vjb4OdKismLrui_Wv8pVC6izuolQeLiBvkpev0Y7Q1ZQoR2RKRrdG47sh_E-27fPhk92_4FvCiuqr7pJOfm88cF1pWRdJXZX5h2VTjsv9WxdTrwQU9HpdBH3Wus0bBMVcs2_yX_6xTWyRPzHhhCRo0z6OXMSImaceXRMhOjqfsc3D0f_4QDQjoUjbNv6K1J2qG_2dwMknpqUw6B9PKqFeezLgWMwrDyrFpqiH5AwoL7oYG-kIUuwPCuogbbHJOLazQAkFhMs4" },
-];
+import { PRODUCTS } from '../data/products.js';
 
 function formatPrice(n) {
   return n.toLocaleString("th-TH", { minimumFractionDigits: 2 }) + " ฿";
@@ -72,15 +65,20 @@ export default function Football({ onViewChange, user, setUser, cart, addToCart 
     setSelectedColors([]);
   };
 
+  // Filter products by Kid targetGroup
+  const categoryProducts = useMemo(() => {
+    return PRODUCTS.filter(p => p.targetGroup === 'kid');
+  }, []);
+
   const filteredProducts = useMemo(() => {
-    return PRODUCTS.filter((p) => {
+    return categoryProducts.filter((p) => {
       const matchPrice = p.price <= priceRange;
       const matchCollection = selectedCollections.length === 0 || selectedCollections.includes(p.brand);
       const matchSize = selectedSizes.length === 0 || p.sizes.some((s) => selectedSizes.includes(s));
       const matchColor = selectedColors.length === 0 || p.colorNames.some((c) => selectedColors.includes(c));
       return matchPrice && matchCollection && matchSize && matchColor;
     });
-  }, [priceRange, selectedCollections, selectedSizes, selectedColors]);
+  }, [categoryProducts, priceRange, selectedCollections, selectedSizes, selectedColors]);
 
   const activeFilterCount =
     (priceRange < 5000 ? 1 : 0) + selectedCollections.length + selectedSizes.length + selectedColors.length;

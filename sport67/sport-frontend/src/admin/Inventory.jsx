@@ -1,13 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import Sidebar from "./Sidebar.jsx";
 import {
-  LayoutDashboard,
-  ShoppingCart,
-  Package,
   Boxes,
-  Users,
-  Settings,
-  HelpCircle,
   Search,
   Bell,
   UserCircle,
@@ -16,9 +10,9 @@ import {
   ChevronRight,
   X,
   PackageCheck,
+  Package,
 } from "lucide-react";
-
-
+import { PRODUCTS, updateProduct } from "../data/products.js";
 
 const STOCK_STYLES = {
   "In Stock": {
@@ -38,40 +32,15 @@ const STOCK_STYLES = {
   },
 };
 
-const INVENTORY = [
-  {
-    name: "Apex Carbon Runner v2",
-    sku: "GA-FW-2024-001",
-    category: "Footwear",
-    status: "In Stock",
-    qty: 450,
-    price: "$285.00",
-  },
-  {
-    name: "Titan Compression Base",
-    sku: "GA-CP-2024-089",
-    category: "Compression",
-    status: "Low Stock",
-    qty: 12,
-    price: "$75.00",
-  },
-  {
-    name: "Onyx Biometric Tracker",
-    sku: "GA-WR-2024-012",
-    category: "Wearables",
-    status: "Out of Stock",
-    qty: 0,
-    price: "$499.00",
-  },
-  {
-    name: "Precision Dumbbell Set",
-    sku: "GA-EQ-2024-115",
-    category: "Equipment",
-    status: "In Stock",
-    qty: 84,
-    price: "$1,150.00",
-  },
-];
+function formatPrice(n) {
+  return n.toLocaleString("th-TH", { minimumFractionDigits: 2 }) + " ฿";
+}
+
+const getStockStatus = (amount) => {
+  if (amount <= 0) return "Out of Stock";
+  if (amount <= 10) return "Low Stock";
+  return "In Stock";
+};
 
 function GlassPanel({ className = "", children }) {
   return (
@@ -86,9 +55,61 @@ function GlassPanel({ className = "", children }) {
 }
 
 export default function GogoAthleticInventory({ onNavigate, onViewChange }) {
-  const [modalOpen, setModalOpen] = useState(false);
+  const [productsList, setProductsList] = useState([...PRODUCTS]);
   const [searchFocused, setSearchFocused] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All Gear");
+  const [selectedStatus, setSelectedStatus] = useState("All Statuses");
+
+  // Modal and quick adjust state
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
   const [newQty, setNewQty] = useState("");
+  const [adjustmentReason, setAdjustmentReason] = useState("Restock Received");
+
+  const handleOpenAdjust = (item) => {
+    setSelectedItem(item);
+    setNewQty(item.amount.toString());
+    setModalOpen(true);
+  };
+
+  const handleFormSubmit = (e) => {
+    e.preventDefault();
+    if (!selectedItem) return;
+    const qtyNum = parseInt(newQty);
+    if (isNaN(qtyNum) || qtyNum < 0) {
+      alert("Please enter a valid stock quantity.");
+      return;
+    }
+
+    updateProduct({
+      id: selectedItem.id,
+      amount: qtyNum
+    });
+
+    setProductsList([...PRODUCTS]);
+    setModalOpen(false);
+  };
+
+  const filteredInventory = useMemo(() => {
+    return productsList.filter((item) => {
+      const matchSearch =
+        item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.sku.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      const matchCategory =
+        selectedCategory === "All Gear" ||
+        item.sportType === selectedCategory ||
+        item.brand === selectedCategory;
+
+      const itemStatus = getStockStatus(item.amount);
+      const matchStatus =
+        selectedStatus === "All Statuses" ||
+        itemStatus === selectedStatus;
+
+      return matchSearch && matchCategory && matchStatus;
+    });
+  }, [productsList, searchQuery, selectedCategory, selectedStatus]);
 
   return (
     <div className="min-h-screen w-full bg-neutral-950 text-neutral-100 flex">
@@ -97,8 +118,11 @@ export default function GogoAthleticInventory({ onNavigate, onViewChange }) {
         onNavigate={onNavigate}
         onViewChange={onViewChange}
         actionButton={
-          <button className="w-full bg-orange-600 text-white py-3 text-sm uppercase italic font-black hover:scale-105 transition-transform">
-            New Entry
+          <button 
+            onClick={() => handleOpenAdjust(productsList[0])}
+            className="w-full bg-orange-600 text-white py-3 text-sm uppercase italic font-black hover:scale-105 transition-transform"
+          >
+            Adjust Stock
           </button>
         }
       />
@@ -107,20 +131,14 @@ export default function GogoAthleticInventory({ onNavigate, onViewChange }) {
         {/* TOP NAVIGATION */}
         <header className="sticky top-0 z-40 flex justify-between items-center h-16 px-6 md:px-12 bg-neutral-950/80 backdrop-blur-md border-b border-white/5">
           <div className="w-full max-w-md">
-            <div
-              className={
-                "relative transition-all duration-200 " +
-                (searchFocused ? "scale-105" : "")
-              }
-            >
-              <Search
-                size={16}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500"
-              />
+            <div className={"relative transition-all duration-200 " + (searchFocused ? "scale-105" : "")}>
+              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500" />
               <input
                 type="text"
                 onFocus={() => setSearchFocused(true)}
                 onBlur={() => setSearchFocused(false)}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="SEARCH SKUs OR PRODUCTS..."
                 className={
                   "bg-transparent border-0 border-b w-full pl-10 py-2 focus:ring-0 text-sm uppercase tracking-tight placeholder:text-neutral-600 transition-colors " +
@@ -165,13 +183,13 @@ export default function GogoAthleticInventory({ onNavigate, onViewChange }) {
                 <p className="text-[10px] uppercase font-bold tracking-widest text-neutral-400">
                   Active SKUs
                 </p>
-                <p className="text-3xl italic font-black">1,284</p>
+                <p className="text-3xl italic font-black">{productsList.length}</p>
               </GlassPanel>
               <GlassPanel className="px-6 py-4 flex flex-col items-end border-r-4 border-red-400">
                 <p className="text-[10px] uppercase font-bold tracking-widest text-neutral-400">
                   Low Stock
                 </p>
-                <p className="text-3xl italic font-black text-red-400">12</p>
+                <p className="text-3xl italic font-black text-red-400">{productsList.filter(p => p.amount <= 10).length}</p>
               </GlassPanel>
             </div>
           </div>
@@ -183,33 +201,35 @@ export default function GogoAthleticInventory({ onNavigate, onViewChange }) {
                 <span className="text-[10px] text-neutral-400 uppercase tracking-widest">
                   Filter by Category
                 </span>
-                <select className="bg-transparent border-0 border-b border-orange-300/30 text-xs uppercase py-1 focus:ring-0 focus:border-orange-300 pr-8 tracking-widest font-bold">
-                  <option>All Gear</option>
-                  <option>Footwear</option>
-                  <option>Compression</option>
-                  <option>Equipment</option>
-                  <option>Wearables</option>
+                <select 
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  className="bg-transparent border-0 border-b border-orange-300/30 text-xs uppercase py-1 focus:ring-0 focus:border-orange-300 pr-8 tracking-widest font-bold bg-neutral-900 text-neutral-100"
+                >
+                  <option value="All Gear" className="bg-neutral-950 text-neutral-100">All Gear</option>
+                  <option value="Running" className="bg-neutral-950 text-neutral-100">Running</option>
+                  <option value="Football" className="bg-neutral-950 text-neutral-100">Football</option>
+                  <option value="Swimming" className="bg-neutral-950 text-neutral-100">Swimming</option>
+                  <option value="Nike" className="bg-neutral-950 text-neutral-100">Nike</option>
+                  <option value="Adidas" className="bg-neutral-950 text-neutral-100">Adidas</option>
+                  <option value="Puma" className="bg-neutral-950 text-neutral-100">Puma</option>
                 </select>
               </div>
               <div className="flex flex-col gap-1">
                 <span className="text-[10px] text-neutral-400 uppercase tracking-widest">
                   Stock Status
                 </span>
-                <select className="bg-transparent border-0 border-b border-orange-300/30 text-xs uppercase py-1 focus:ring-0 focus:border-orange-300 pr-8 tracking-widest font-bold">
-                  <option>All Statuses</option>
-                  <option>In Stock</option>
-                  <option>Low Stock</option>
-                  <option>Out of Stock</option>
+                <select 
+                  value={selectedStatus}
+                  onChange={(e) => setSelectedStatus(e.target.value)}
+                  className="bg-transparent border-0 border-b border-orange-300/30 text-xs uppercase py-1 focus:ring-0 focus:border-orange-300 pr-8 tracking-widest font-bold bg-neutral-900 text-neutral-100"
+                >
+                  <option value="All Statuses" className="bg-neutral-950 text-neutral-100">All Statuses</option>
+                  <option value="In Stock" className="bg-neutral-950 text-neutral-100">In Stock</option>
+                  <option value="Low Stock" className="bg-neutral-950 text-neutral-100">Low Stock</option>
+                  <option value="Out of Stock" className="bg-neutral-950 text-neutral-100">Out of Stock</option>
                 </select>
               </div>
-            </div>
-            <div className="flex items-center gap-4">
-              <button className="border border-white/10 px-6 py-2 uppercase text-xs font-bold tracking-widest hover:bg-neutral-100 hover:text-neutral-950 transition-colors">
-                Export CSV
-              </button>
-              <button className="bg-orange-300 text-neutral-950 px-6 py-2 uppercase text-xs font-black italic tracking-widest hover:scale-105 transition-transform">
-                Bulk Update
-              </button>
             </div>
           </GlassPanel>
 
@@ -222,7 +242,7 @@ export default function GogoAthleticInventory({ onNavigate, onViewChange }) {
                     {[
                       "Product Name",
                       "SKU",
-                      "Category",
+                      "Sport / Category",
                       "Stock Level",
                       "Price",
                     ].map((h) => (
@@ -234,19 +254,24 @@ export default function GogoAthleticInventory({ onNavigate, onViewChange }) {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/5">
-                  {INVENTORY.map((item) => {
-                    const s = STOCK_STYLES[item.status];
+                  {filteredInventory.map((item) => {
+                    const statusText = getStockStatus(item.amount);
+                    const s = STOCK_STYLES[statusText];
                     return (
                       <tr
-                        key={item.sku}
+                        key={item.id}
                         className="group hover:bg-white/[0.02] hover:border-l-4 hover:border-orange-500 transition-colors"
                       >
                         <td className="px-6 py-6 flex items-center gap-4">
-                          <div className="w-12 h-12 bg-neutral-900 border border-white/10 shrink-0 flex items-center justify-center">
-                            <Package
-                              size={20}
-                              className="text-neutral-600 group-hover:text-orange-300 transition-colors"
-                            />
+                          <div className="w-12 h-12 bg-neutral-900 border border-white/10 shrink-0 flex items-center justify-center overflow-hidden">
+                            {item.image ? (
+                              <img src={item.image} className="w-full h-full object-cover" alt={item.name} />
+                            ) : (
+                              <Package
+                                size={20}
+                                className="text-neutral-600 group-hover:text-orange-300 transition-colors"
+                              />
+                            )}
                           </div>
                           <span className="italic font-black uppercase group-hover:text-orange-300 transition-colors">
                             {item.name}
@@ -256,32 +281,24 @@ export default function GogoAthleticInventory({ onNavigate, onViewChange }) {
                           {item.sku}
                         </td>
                         <td className="px-6 py-6 uppercase text-xs font-bold">
-                          {item.category}
+                          {item.sportType}
                         </td>
                         <td className="px-6 py-6">
                           <div className="flex items-center gap-3">
-                            <span
-                              className={
-                                "w-2 h-2 rounded-full " + s.dot + " " + s.pulse
-                              }
-                            />
-                            <span
-                              className={
-                                "px-3 py-1 text-[10px] font-black uppercase tracking-widest " +
-                                s.badge
-                              }
-                            >
-                              {item.status} ({item.qty})
+                            <span className={"w-2 h-2 rounded-full " + s.dot + " " + s.pulse} />
+                            <span className={"px-3 py-1 text-[10px] font-black uppercase tracking-widest " + s.badge}>
+                              {statusText} ({item.amount})
                             </span>
                           </div>
                         </td>
                         <td className="px-6 py-6 italic font-bold">
-                          {item.price}
+                          {formatPrice(item.price)}
                         </td>
                         <td className="px-6 py-6 text-right">
                           <button
-                            onClick={() => setModalOpen(true)}
+                            onClick={() => handleOpenAdjust(item)}
                             className="bg-white/5 border border-white/10 hover:border-orange-300 p-2 transition-all hover:bg-orange-300 hover:text-neutral-950"
+                            title="Adjust Stock"
                           >
                             <Pencil size={16} />
                           </button>
@@ -296,7 +313,7 @@ export default function GogoAthleticInventory({ onNavigate, onViewChange }) {
             {/* Pagination */}
             <div className="p-6 bg-white/5 flex flex-col md:flex-row justify-between items-center gap-4 border-t border-white/5">
               <p className="text-neutral-400 text-[10px] uppercase tracking-widest">
-                Showing 1-10 of 1,284 Assets
+                Showing {filteredInventory.length} of {productsList.length} Assets
               </p>
               <div className="flex items-center gap-2">
                 <button className="p-2 border border-white/10 hover:bg-white/10 transition-colors">
@@ -304,16 +321,6 @@ export default function GogoAthleticInventory({ onNavigate, onViewChange }) {
                 </button>
                 <button className="px-4 py-2 bg-orange-300 text-neutral-950 font-black italic text-xs">
                   1
-                </button>
-                <button className="px-4 py-2 border border-white/10 hover:bg-white/10 transition-colors text-xs font-bold">
-                  2
-                </button>
-                <button className="px-4 py-2 border border-white/10 hover:bg-white/10 transition-colors text-xs font-bold">
-                  3
-                </button>
-                <span className="px-2 text-neutral-500">...</span>
-                <button className="px-4 py-2 border border-white/10 hover:bg-white/10 transition-colors text-xs font-bold">
-                  129
                 </button>
                 <button className="p-2 border border-white/10 hover:bg-white/10 transition-colors">
                   <ChevronRight size={16} />
@@ -324,21 +331,8 @@ export default function GogoAthleticInventory({ onNavigate, onViewChange }) {
         </main>
       </div>
 
-      {/* FLOATING QUICK ACTION */}
-      <div className="fixed bottom-10 right-10 z-50">
-        <button
-          onClick={() => setModalOpen(true)}
-          className="bg-orange-600 p-5 text-white shadow-2xl hover:scale-110 active:scale-95 transition-all relative"
-        >
-          <PackageCheck size={28} />
-          <span className="absolute -top-1 -right-1 bg-white text-neutral-950 text-[10px] font-black px-1">
-            NEW
-          </span>
-        </button>
-      </div>
-
       {/* QUICK STOCK UPDATE MODAL */}
-      {modalOpen && (
+      {modalOpen && selectedItem && (
         <div className="fixed inset-0 bg-neutral-950/95 backdrop-blur-2xl z-[100] flex items-center justify-center p-6">
           <div className="w-full max-w-2xl bg-neutral-900 border border-orange-300/20 relative">
             <button
@@ -351,21 +345,16 @@ export default function GogoAthleticInventory({ onNavigate, onViewChange }) {
               <h3 className="text-2xl sm:text-3xl uppercase italic font-black mb-8 border-b-4 border-orange-300 inline-block pb-2">
                 Quick Stock Update
               </h3>
-              <form
-                className="space-y-8"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  setModalOpen(false);
-                }}
-              >
+              <form className="space-y-8" onSubmit={handleFormSubmit}>
                 <div className="flex flex-col gap-2">
                   <label className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold">
-                    Select Gear Asset
+                    Gear Asset Name
                   </label>
                   <input
                     type="text"
-                    placeholder="ENTER SKU OR PRODUCT NAME"
-                    className="bg-white/5 border border-white/10 focus:border-orange-300 focus:ring-0 py-4 px-6 uppercase text-sm placeholder:text-neutral-600"
+                    disabled
+                    value={selectedItem.name.toUpperCase()}
+                    className="bg-white/5 border border-white/10 py-4 px-6 text-sm uppercase opacity-55 w-full outline-none"
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-8">
@@ -376,9 +365,9 @@ export default function GogoAthleticInventory({ onNavigate, onViewChange }) {
                     <input
                       disabled
                       type="number"
-                      value={450}
+                      value={selectedItem.amount}
                       readOnly
-                      className="bg-white/5 border border-white/10 py-4 px-6 italic font-black opacity-50"
+                      className="bg-white/5 border border-white/10 py-4 px-6 italic font-black opacity-55 w-full outline-none"
                     />
                   </div>
                   <div className="flex flex-col gap-2">
@@ -390,7 +379,8 @@ export default function GogoAthleticInventory({ onNavigate, onViewChange }) {
                       placeholder="000"
                       value={newQty}
                       onChange={(e) => setNewQty(e.target.value)}
-                      className="bg-neutral-800 border border-orange-300/50 focus:border-orange-300 focus:ring-0 py-4 px-6 italic font-black text-orange-300"
+                      required
+                      className="bg-neutral-800 border border-orange-300/50 focus:border-orange-300 focus:ring-0 py-4 px-6 italic font-black text-orange-300 w-full outline-none"
                     />
                   </div>
                 </div>
@@ -398,11 +388,15 @@ export default function GogoAthleticInventory({ onNavigate, onViewChange }) {
                   <label className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold">
                     Reason for Adjustment
                   </label>
-                  <select className="bg-white/5 border border-white/10 focus:border-orange-300 focus:ring-0 py-4 px-6 uppercase text-sm">
-                    <option>Restock Received</option>
-                    <option>Return Processing</option>
-                    <option>Damaged/Write-off</option>
-                    <option>Cycle Count Adjustment</option>
+                  <select 
+                    value={adjustmentReason}
+                    onChange={(e) => setAdjustmentReason(e.target.value)}
+                    className="bg-white/5 border border-white/10 focus:border-orange-300 focus:ring-0 py-4 px-6 uppercase text-sm w-full bg-neutral-900 text-neutral-100"
+                  >
+                    <option value="Restock Received" className="bg-neutral-950 text-neutral-100">Restock Received</option>
+                    <option value="Return Processing" className="bg-neutral-950 text-neutral-100">Return Processing</option>
+                    <option value="Damaged/Write-off" className="bg-neutral-950 text-neutral-100">Damaged/Write-off</option>
+                    <option value="Cycle Count Adjustment" className="bg-neutral-950 text-neutral-100">Cycle Count Adjustment</option>
                   </select>
                 </div>
                 <div className="pt-4 flex gap-4">

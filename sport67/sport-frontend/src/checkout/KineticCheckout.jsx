@@ -112,6 +112,30 @@ export default function KineticCheckout({ onViewChange, cart = [], setCart, user
 
         setTimeout(() => {
             const randomId = "GOGO-" + Math.floor(100000 + Math.random() * 900000);
+            
+            // Construct and save order
+            try {
+                const existingOrders = JSON.parse(localStorage.getItem('gogo_orders') || '[]');
+                const newOrder = {
+                    id: "#" + randomId,
+                    customer: `${formData.firstName} ${formData.lastName}`,
+                    tier: user && user.name !== 'Guest User' ? 'MEMBER' : 'PRO',
+                    date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).toUpperCase(),
+                    total: total.toLocaleString("th-TH") + " ฿",
+                    status: "Pending",
+                    items: cart.map(i => ({
+                        name: i.name,
+                        sku: i.sku || `GA-${i.brand.slice(0, 2).toUpperCase()}-${i.id}`,
+                        qty: i.quantity,
+                        price: i.price.toLocaleString("th-TH") + " ฿"
+                    })),
+                    actions: ["Update Status", "Mark Shipped", "Mark Preparing", "Cancel Order"]
+                };
+                localStorage.setItem('gogo_orders', JSON.stringify([newOrder, ...existingOrders]));
+            } catch (err) {
+                console.error("Failed to save order to localStorage", err);
+            }
+
             setOrderId(randomId);
             setIsSubmitting(false);
             setIsSubmitted(true);

@@ -32,6 +32,7 @@ const ROLE_STYLES = {
   Manager: "text-indigo-300 border border-indigo-300/30 bg-indigo-300/5",
   Logistics: "text-blue-400 border border-blue-400/30 bg-blue-400/5",
   Support: "text-emerald-400 border border-emerald-400/30 bg-emerald-400/5",
+  Customer: "text-pink-400 border border-pink-400/30 bg-pink-400/5",
 };
 
 const INITIAL_TEAM = [
@@ -90,14 +91,47 @@ function GlassPanel({ className = "", children }) {
 }
 
 export default function GogoAthleticTeam({ onNavigate, onViewChange, user }) {
-  const [team, setTeam] = useState(INITIAL_TEAM);
+  const [team, setTeam] = useState(() => {
+    const saved = localStorage.getItem("gogo_staff");
+    if (saved) return JSON.parse(saved);
+    localStorage.setItem("gogo_staff", JSON.stringify(INITIAL_TEAM));
+    return INITIAL_TEAM;
+  });
+
+  const [customers, setCustomers] = useState(() => {
+    return JSON.parse(localStorage.getItem("gogo_users") || "[]");
+  });
+
+  const [activeTab, setActiveTab] = useState("staff"); // "staff" or "customers"
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("All");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newMember, setNewMember] = useState({ name: "", email: "", role: "Support", status: "Active" });
 
+  // Sync customers dynamically when the component mounts or when localstorage changes
+  React.useEffect(() => {
+    const handleStorageChange = () => {
+      setCustomers(JSON.parse(localStorage.getItem("gogo_users") || "[]"));
+    };
+    window.addEventListener("storage", handleStorageChange);
+    // Poll to keep it instantly synchronized
+    const interval = setInterval(handleStorageChange, 1000);
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      clearInterval(interval);
+    };
+  }, []);
+
   const handleDelete = (id) => {
-    setTeam(team.filter((member) => member.id !== id));
+    const updated = team.filter((member) => member.id !== id);
+    setTeam(updated);
+    localStorage.setItem("gogo_staff", JSON.stringify(updated));
+  };
+
+  const handleDeleteCustomer = (email) => {
+    const updated = customers.filter((c) => c.email !== email);
+    setCustomers(updated);
+    localStorage.setItem("gogo_users", JSON.stringify(updated));
   };
 
   const handleAddMember = (e) => {
@@ -110,7 +144,7 @@ export default function GogoAthleticTeam({ onNavigate, onViewChange, user }) {
       year: "numeric",
     }).toUpperCase();
 
-    setTeam([
+    const updated = [
       ...team,
       {
         id: Date.now(),
@@ -120,7 +154,9 @@ export default function GogoAthleticTeam({ onNavigate, onViewChange, user }) {
         status: newMember.status,
         joined: date,
       },
-    ]);
+    ];
+    setTeam(updated);
+    localStorage.setItem("gogo_staff", JSON.stringify(updated));
     setNewMember({ name: "", email: "", role: "Support", status: "Active" });
     setIsModalOpen(false);
   };
@@ -131,6 +167,13 @@ export default function GogoAthleticTeam({ onNavigate, onViewChange, user }) {
       member.email.toLowerCase().includes(search.toLowerCase());
     const matchesRole = roleFilter === "All" || member.role === roleFilter;
     return matchesSearch && matchesRole;
+  });
+
+  const filteredCustomers = customers.filter((customer) => {
+    const matchesSearch =
+      customer.name.toLowerCase().includes(search.toLowerCase()) ||
+      customer.email.toLowerCase().includes(search.toLowerCase());
+    return matchesSearch;
   });
 
   return (
@@ -201,18 +244,42 @@ export default function GogoAthleticTeam({ onNavigate, onViewChange, user }) {
                 Roster & Operations
               </h3>
             </div>
-            <div className="flex gap-4">
-              <select
-                value={roleFilter}
-                onChange={(e) => setRoleFilter(e.target.value)}
-                className="bg-neutral-900 border border-white/10 text-neutral-300 text-xs px-4 py-2 focus:ring-1 focus:ring-orange-300"
-              >
-                <option value="All">All Roles</option>
-                <option value="Administrator">Administrator</option>
-                <option value="Manager">Manager</option>
-                <option value="Logistics">Logistics</option>
-                <option value="Support">Support</option>
-              </select>
+            <div className="flex gap-4 items-center">
+              <div className="flex border border-white/10 p-1 bg-neutral-900/50">
+                <button
+                  onClick={() => setActiveTab("staff")}
+                  className={`px-4 py-1.5 text-xs uppercase tracking-widest font-black transition-all ${
+                    activeTab === "staff"
+                      ? "bg-orange-300 text-neutral-950"
+                      : "text-neutral-400 hover:text-white"
+                  }`}
+                >
+                  Staff
+                </button>
+                <button
+                  onClick={() => setActiveTab("customers")}
+                  className={`px-4 py-1.5 text-xs uppercase tracking-widest font-black transition-all ${
+                    activeTab === "customers"
+                      ? "bg-orange-300 text-neutral-950"
+                      : "text-neutral-400 hover:text-white"
+                  }`}
+                >
+                  Customers ({customers.length})
+                </button>
+              </div>
+              {activeTab === "staff" && (
+                <select
+                  value={roleFilter}
+                  onChange={(e) => setRoleFilter(e.target.value)}
+                  className="bg-neutral-900 border border-white/10 text-neutral-300 text-xs px-4 py-2 focus:ring-1 focus:ring-orange-300 text-neutral-100"
+                >
+                  <option value="All" className="bg-neutral-950 text-neutral-100">All Roles</option>
+                  <option value="Administrator" className="bg-neutral-950 text-neutral-100">Administrator</option>
+                  <option value="Manager" className="bg-neutral-950 text-neutral-100">Manager</option>
+                  <option value="Logistics" className="bg-neutral-950 text-neutral-100">Logistics</option>
+                  <option value="Support" className="bg-neutral-950 text-neutral-100">Support</option>
+                </select>
+              )}
             </div>
           </div>
 
@@ -227,9 +294,9 @@ export default function GogoAthleticTeam({ onNavigate, onViewChange, user }) {
             </GlassPanel>
             <GlassPanel className="p-6 flex items-center justify-between">
               <div>
-                <p className="text-[10px] text-neutral-400 uppercase tracking-widest">Active Now</p>
+                <p className="text-[10px] text-neutral-400 uppercase tracking-widest">Active Customers</p>
                 <h4 className="text-3xl font-black italic text-green-400 mt-1">
-                  {team.filter((t) => t.status === "Active").length}
+                  {customers.length}
                 </h4>
               </div>
               <Shield size={32} className="text-neutral-600" />
@@ -256,72 +323,117 @@ export default function GogoAthleticTeam({ onNavigate, onViewChange, user }) {
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
-                {filteredTeam.map((member) => (
-                  <tr key={member.id} className="hover:bg-white/[0.01] transition-colors group">
-                    <td className="py-5 px-6">
-                      <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 bg-neutral-900 border border-white/10 rounded-none flex items-center justify-center">
-                          <UserCircle size={20} className="text-neutral-400" />
+                {activeTab === "staff" ? (
+                  filteredTeam.map((member) => (
+                    <tr key={member.id} className="hover:bg-white/[0.01] transition-colors group">
+                      <td className="py-5 px-6">
+                        <div className="flex items-center gap-3">
+                          <div className="h-10 w-10 bg-neutral-900 border border-white/10 rounded-none flex items-center justify-center">
+                            <UserCircle size={20} className="text-neutral-400" />
+                          </div>
+                          <div>
+                            <p className="font-bold text-sm uppercase tracking-wide">{member.name}</p>
+                            <p className="text-xs text-neutral-500 flex items-center gap-1">
+                              <Mail size={12} />
+                              {member.email}
+                            </p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="font-bold text-sm uppercase tracking-wide">{member.name}</p>
-                          <p className="text-xs text-neutral-500 flex items-center gap-1">
-                            <Mail size={12} />
-                            {member.email}
-                          </p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="py-5 px-6">
-                      {user && user.role === "manager" ? (
-                        <select
-                          value={member.role}
-                          onChange={(e) => {
-                            const updatedRole = e.target.value;
-                            setTeam(
-                              team.map((t) =>
-                                t.id === member.id ? { ...t, role: updatedRole } : t
-                              )
-                            );
-                          }}
-                          className={`text-[10px] px-2 py-1 font-bold uppercase tracking-wider bg-neutral-900 border border-white/10 rounded focus:ring-1 focus:ring-orange-300 ${ROLE_STYLES[member.role] || "text-neutral-300"}`}
-                        >
-                          <option value="Administrator">Administrator</option>
-                          <option value="Manager">Manager</option>
-                          <option value="Logistics">Logistics</option>
-                          <option value="Support">Support</option>
-                        </select>
-                      ) : (
-                        <span className={`text-[10px] px-3 py-1 font-bold uppercase tracking-wider ${ROLE_STYLES[member.role]}`}>
-                          {member.role}
+                      </td>
+                      <td className="py-5 px-6">
+                        {user && user.role === "manager" ? (
+                          <select
+                            value={member.role}
+                            onChange={(e) => {
+                              const updatedRole = e.target.value;
+                              setTeam(
+                                team.map((t) =>
+                                  t.id === member.id ? { ...t, role: updatedRole } : t
+                                )
+                              );
+                            }}
+                            className={`text-[10px] px-2 py-1 font-bold uppercase tracking-wider bg-neutral-900 border border-white/10 rounded focus:ring-1 focus:ring-orange-300 ${ROLE_STYLES[member.role] || "text-neutral-300"}`}
+                          >
+                            <option value="Administrator" className="bg-neutral-950 text-neutral-100">Administrator</option>
+                            <option value="Manager" className="bg-neutral-950 text-neutral-100">Manager</option>
+                            <option value="Logistics" className="bg-neutral-950 text-neutral-100">Logistics</option>
+                            <option value="Support" className="bg-neutral-950 text-neutral-100">Support</option>
+                          </select>
+                        ) : (
+                          <span className={`text-[10px] px-3 py-1 font-bold uppercase tracking-wider ${ROLE_STYLES[member.role]}`}>
+                            {member.role}
+                          </span>
+                        )}
+                      </td>
+                      <td className="py-5 px-6">
+                        <span className={`text-[10px] px-2.5 py-0.5 font-bold uppercase tracking-wider ${STATUS_STYLES[member.status]}`}>
+                          {member.status}
                         </span>
-                      )}
-                    </td>
-                    <td className="py-5 px-6">
-                      <span className={`text-[10px] px-2.5 py-0.5 font-bold uppercase tracking-wider ${STATUS_STYLES[member.status]}`}>
-                        {member.status}
-                      </span>
-                    </td>
-                    <td className="py-5 px-6 text-xs text-neutral-400 font-mono">
-                      {member.joined}
-                    </td>
-                    <td className="py-5 px-6 text-right">
-                      {user && user.role === "manager" && (
-                        <button
-                          onClick={() => handleDelete(member.id)}
-                          className="text-neutral-500 hover:text-red-400 transition-colors p-1"
-                          title="Remove Member"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-                {filteredTeam.length === 0 && (
+                      </td>
+                      <td className="py-5 px-6 text-xs text-neutral-400 font-mono">
+                        {member.joined}
+                      </td>
+                      <td className="py-5 px-6 text-right">
+                        {user && user.role === "manager" && (
+                          <button
+                            onClick={() => handleDelete(member.id)}
+                            className="text-neutral-500 hover:text-red-400 transition-colors p-1"
+                            title="Remove Member"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  filteredCustomers.map((customer) => (
+                    <tr key={customer.id || customer.email} className="hover:bg-white/[0.01] transition-colors group">
+                      <td className="py-5 px-6">
+                        <div className="flex items-center gap-3">
+                          <div className="h-10 w-10 bg-neutral-900 border border-white/10 rounded-none flex items-center justify-center">
+                            <UserCircle size={20} className="text-neutral-400" />
+                          </div>
+                          <div>
+                            <p className="font-bold text-sm uppercase tracking-wide">{customer.name}</p>
+                            <p className="text-xs text-neutral-500 flex items-center gap-1">
+                              <Mail size={12} />
+                              {customer.email}
+                            </p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="py-5 px-6">
+                        <span className={`text-[10px] px-3 py-1 font-bold uppercase tracking-wider ${ROLE_STYLES.Customer}`}>
+                          Customer
+                        </span>
+                      </td>
+                      <td className="py-5 px-6">
+                        <span className={`text-[10px] px-2.5 py-0.5 font-bold uppercase tracking-wider ${STATUS_STYLES.Active}`}>
+                          Active
+                        </span>
+                      </td>
+                      <td className="py-5 px-6 text-xs text-neutral-400 font-mono">
+                        {customer.joined || "N/A"}
+                      </td>
+                      <td className="py-5 px-6 text-right">
+                        {user && user.role === "manager" && (
+                          <button
+                            onClick={() => handleDeleteCustomer(customer.email)}
+                            className="text-neutral-500 hover:text-red-400 transition-colors p-1"
+                            title="Remove Customer"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))
+                )}
+                {((activeTab === "staff" && filteredTeam.length === 0) || (activeTab === "customers" && filteredCustomers.length === 0)) && (
                   <tr>
                     <td colSpan="5" className="text-center py-10 text-neutral-500 text-sm">
-                      No team members found matching search query.
+                      No matching records found.
                     </td>
                   </tr>
                 )}
