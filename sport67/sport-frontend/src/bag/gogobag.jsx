@@ -198,11 +198,11 @@ export default function GoGoBag({ onViewChange, cart = [], setCart, user, setUse
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                         <div className="lg:col-span-8 space-y-8">
                             {cart.map((item) => (
-                                <BagItem 
-                                    key={item.id} 
-                                    item={item} 
-                                    updateQuantity={updateQuantity} 
-                                    removeItem={removeItem} 
+                                <BagItem
+                                    key={item.id}
+                                    item={item}
+                                    updateQuantity={updateQuantity}
+                                    removeItem={removeItem}
                                 />
                             ))}
 

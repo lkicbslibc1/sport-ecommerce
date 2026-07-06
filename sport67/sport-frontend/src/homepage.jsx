@@ -17,6 +17,7 @@ import Adidas from './brand/adidas.jsx';
 import GoGoBag from './bag/gogobag.jsx';
 import KineticCheckout from './checkout/KineticCheckout.jsx';
 import Profile from './profile/profile.jsx';
+import OrderStatus from './profile/OrderStatus.jsx';
 
 export default function MainPage() {
   const [activeCategory, setActiveCategory] = useState('men');
@@ -101,6 +102,9 @@ export default function MainPage() {
   }
   if (currentView === 'profile') {
     return <Profile onViewChange={setCurrentView} user={user} setUser={setUser} cart={cart} addToCart={addToCart} />;
+  }
+  if (currentView === 'order_status') {
+    return <OrderStatus onViewChange={setCurrentView} user={user} setUser={setUser} cart={cart} />;
   }
 
   return (

@@ -1,0 +1,108 @@
+import React, { useEffect } from 'react';
+import Navbar from '../navbar.jsx';
+import { ArrowLeft, CheckCircle2, Package, Truck, Receipt } from 'lucide-react';
+
+export default function OrderStatus({ onViewChange, user, setUser, cart }) {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  return (
+    <div className="selection:bg-primary selection:text-white min-h-screen bg-background text-on-background font-sans">
+      <Navbar setCurrentView={onViewChange} user={user} setUser={setUser} cart={cart} />
+      
+      <main className="pt-32 pb-32 px-6 md:px-12 max-w-[1000px] mx-auto">
+        <button 
+          onClick={() => onViewChange('profile')}
+          className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-on-surface-variant hover:text-primary transition-colors mb-12"
+        >
+          <ArrowLeft size={16} /> กลับสู่หน้าโปรไฟล์ (Back to Profile)
+        </button>
+
+        <header className="mb-16">
+          <h1 className="uppercase italic tracking-tighter leading-none mb-4 font-black text-5xl md:text-7xl text-on-surface">
+            ORDER <span className="text-primary">STATUS</span>
+          </h1>
+          <p className="text-[11px] tracking-widest uppercase font-bold text-on-surface-variant">
+            สถานะการจัดส่งสินค้าของคุณ
+          </p>
+        </header>
+
+        <div className="glass p-8 md:p-12 border border-white/10 relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-primary"></div>
+          
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12 border-b border-white/10 pb-8">
+            <div>
+              <p className="text-[10px] uppercase font-bold tracking-widest text-on-surface-variant mb-1">หมายเลขคำสั่งซื้อ (Order ID)</p>
+              <h3 className="font-anybody font-black text-2xl uppercase">ORD-2026-001</h3>
+            </div>
+            <div className="md:text-right">
+              <p className="text-[10px] uppercase font-bold tracking-widest text-on-surface-variant mb-1">วันที่สั่งซื้อ (Order Date)</p>
+              <p className="font-bold">2026-07-01</p>
+            </div>
+          </div>
+
+          <div className="py-8 relative">
+            {/* Progress Line */}
+            <div className="absolute top-1/2 left-[10%] right-[10%] h-1 bg-white/10 -translate-y-1/2 hidden md:block"></div>
+            <div className="absolute top-1/2 left-[10%] w-[40%] h-1 bg-primary -translate-y-1/2 hidden md:block"></div>
+
+            <div className="flex flex-col md:flex-row justify-between relative gap-12 md:gap-0 z-10">
+              {/* Step 1: Paid */}
+              <div className="flex flex-col items-center gap-4">
+                <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-white border-4 border-background shadow-[0_0_20px_rgba(255,87,25,0.3)]">
+                  <Receipt size={28} />
+                </div>
+                <div className="text-center">
+                  <h4 className="font-black italic uppercase text-lg">ชำระเงินแล้ว</h4>
+                  <p className="text-[10px] text-on-surface-variant uppercase tracking-widest">Paid</p>
+                  <p className="text-xs mt-2 font-medium text-white/50">01 Jul, 10:30 AM</p>
+                </div>
+              </div>
+
+              {/* Step 2: Shipping */}
+              <div className="flex flex-col items-center gap-4 relative">
+                <div className="absolute -left-1/2 right-1/2 top-8 h-1 bg-primary -translate-y-1/2 md:hidden"></div>
+                <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-white border-4 border-background shadow-[0_0_20px_rgba(255,87,25,0.3)]">
+                  <Truck size={28} />
+                </div>
+                <div className="text-center">
+                  <h4 className="font-black italic uppercase text-lg text-primary">กำลังจัดส่ง</h4>
+                  <p className="text-[10px] text-on-surface-variant uppercase tracking-widest">Shipping</p>
+                  <p className="text-xs mt-2 font-medium text-white/50">02 Jul, 14:15 PM</p>
+                </div>
+              </div>
+
+              {/* Step 3: Delivered */}
+              <div className="flex flex-col items-center gap-4 relative">
+                <div className="absolute -left-1/2 right-1/2 top-8 h-1 bg-white/10 -translate-y-1/2 md:hidden"></div>
+                <div className="w-16 h-16 rounded-full bg-surface-container-high flex items-center justify-center text-white/40 border-4 border-background">
+                  <Package size={28} />
+                </div>
+                <div className="text-center opacity-40">
+                  <h4 className="font-black italic uppercase text-lg">จัดส่งแล้ว</h4>
+                  <p className="text-[10px] text-on-surface-variant uppercase tracking-widest">Delivered</p>
+                  <p className="text-xs mt-2 font-medium">Pending</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-16 bg-white/5 p-6 border border-white/10">
+            <h4 className="font-black uppercase tracking-widest text-sm mb-6 border-b border-white/10 pb-4">รายการสินค้า (Items)</h4>
+            <div className="flex items-center gap-6">
+              <div className="w-24 h-24 bg-surface-container flex items-center justify-center p-2">
+                <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDUvCVnJTx-gEfawY8-FNPOPr00pKOBMvmflTb-xYd8__gKctCW26c1LaYIcCaq16LWFoTHmQpesUOqaqwlpBvKGxnXS2r3WPxFr_SNDjGnYvMXsP7cTh7ubn8ov9wu8eZQM_Cx4TobM4_TmamPyteS3DI3t4NT82KjajcGOYAlOHvaZRixRLMRGNFcI1yr6nghM7n3yF-4XVNs4NZeFiXNPVCZtgbksZCXySqnAF2FS_FNABYcR1gkp_F57g8IsnunmENM-V82bhg" alt="XT-6 GORE-TEX" className="w-full h-full object-contain" />
+              </div>
+              <div>
+                <h5 className="font-black text-lg italic uppercase">XT-6 GORE-TEX</h5>
+                <p className="text-xs text-on-surface-variant uppercase tracking-widest mt-1">QTY: 1</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </main>
+    </div>
+  );
+}
