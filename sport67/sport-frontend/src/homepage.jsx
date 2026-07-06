@@ -16,6 +16,7 @@ import Puma from './brand/puma.jsx';
 import Adidas from './brand/adidas.jsx';
 import GoGoBag from './bag/gogobag.jsx';
 import KineticCheckout from './checkout/KineticCheckout.jsx';
+import Profile from './profile/profile.jsx';
 
 export default function MainPage() {
   const [activeCategory, setActiveCategory] = useState('men');
@@ -97,6 +98,9 @@ export default function MainPage() {
   }
   if (currentView === 'checkout') {
     return <KineticCheckout onViewChange={setCurrentView} cart={cart} setCart={setCart} user={user} setUser={setUser} />;
+  }
+  if (currentView === 'profile') {
+    return <Profile onViewChange={setCurrentView} user={user} setUser={setUser} cart={cart} addToCart={addToCart} />;
   }
 
   return (
