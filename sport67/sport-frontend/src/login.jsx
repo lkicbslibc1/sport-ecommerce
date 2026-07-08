@@ -26,38 +26,35 @@ export default function Login({ onViewChange, user, setUser }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
     const newUser = {
       id: Date.now(),
-      name: `${formData.firstName} ${formData.lastName}`.trim() || formData.username,
       username: formData.username,
-      email: formData.email,
       password: formData.password,
-      role: 'Customer',
-      status: 'Active',
-      joined: new Date().toLocaleDateString("en-US", {
-        month: "short",
-        day: "2-digit",
-        year: "numeric"
-      }).toUpperCase()
+      role: 'customer',
+      isActive: true
     };
 
     // Save to gogo_users in localStorage
     const existingUsers = JSON.parse(localStorage.getItem("gogo_users") || "[]");
-    if (!existingUsers.some(u => u.email.toLowerCase() === formData.email.toLowerCase())) {
+
+    // Check if username already exists
+    if (!existingUsers.some(u => u.username.toLowerCase() === formData.username.toLowerCase())) {
       existingUsers.push(newUser);
       localStorage.setItem("gogo_users", JSON.stringify(existingUsers));
-    }
 
-    if (setUser) {
-      setUser({
-        name: formData.username,
-        email: formData.email,
-        role: 'user'
-      });
-    }
-    alert(`Account created successfully for ${formData.username}!`);
-    if (onViewChange) {
-      onViewChange('home');
+      if (setUser) {
+        setUser({
+          username: formData.username,
+          role: 'customer'
+        });
+      }
+      alert(`Account created successfully for ${formData.username}!`);
+      if (onViewChange) {
+        onViewChange('home');
+      }
+    } else {
+      alert("Username already exists!");
     }
   };
 
@@ -69,10 +66,10 @@ export default function Login({ onViewChange, user, setUser }) {
       <main className="min-h-screen pt-24 pb-32 flex items-center justify-center relative overflow-hidden">
         {/* Background Asset */}
         <div className="absolute inset-0 z-0 opacity-40">
-          <img 
+          <img
             src="https://lh3.googleusercontent.com/aida/AP1WRLuirDahRI53WH2PY_geVyGFdvgvLJyt4hxRJWnSxxHlJX3jyxKgZ74ROyCAURFJwW8EHw5hztk_VfMkY5RHDuSggHNS0VyLu6AUKmOEIQjfYMCe5LaYgukEQBz38VGAIl37xvG4Of1OOUCyMgJ68QFqbLI5dlS6hTE7vK8ggOU0iTp2F4Z6jVz9srcyCrhlV_1Bpjh-FHcZg2FFXNAO2dLeBCQ1SkyplgV7KOkrQDY35B8Og3mz-x4Lfcw"
             referrerPolicy="no-referrer"
-            className="w-full h-full object-cover grayscale contrast-125" 
+            className="w-full h-full object-cover grayscale contrast-125"
             alt="Background Runner"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-[#131313] via-transparent to-[#131313]"></div>
@@ -100,10 +97,10 @@ export default function Login({ onViewChange, user, setUser }) {
               </div>
               <form className="space-y-8" onSubmit={handleSubmit}>
                 <div className="relative focus-within:scale-[1.01] transition-transform duration-200">
-                  <input 
-                    className="w-full bg-transparent border-0 border-b-2 border-[#353534] font-label-xs text-label-xs text-[#e5e2e1] uppercase py-3 input-border-anim placeholder:text-[#bdbdba]" 
-                    placeholder="USERNAME" 
-                    type="text" 
+                  <input
+                    className="w-full bg-transparent border-0 border-b-2 border-[#353534] font-label-xs text-label-xs text-[#e5e2e1] uppercase py-3 input-border-anim placeholder:text-[#bdbdba]"
+                    placeholder="USERNAME"
+                    type="text"
                     name="username"
                     value={formData.username}
                     onChange={handleChange}
@@ -112,10 +109,10 @@ export default function Login({ onViewChange, user, setUser }) {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div className="relative focus-within:scale-[1.01] transition-transform duration-200">
-                    <input 
-                      className="w-full bg-transparent border-0 border-b-2 border-[#353534] font-label-xs text-label-xs text-[#e5e2e1] uppercase py-3 input-border-anim  placeholder:text-[#bdbdba]" 
-                      placeholder="FIRST NAME" 
-                      type="text" 
+                    <input
+                      className="w-full bg-transparent border-0 border-b-2 border-[#353534] font-label-xs text-label-xs text-[#e5e2e1] uppercase py-3 input-border-anim  placeholder:text-[#bdbdba]"
+                      placeholder="FIRST NAME"
+                      type="text"
                       name="firstName"
                       value={formData.firstName}
                       onChange={handleChange}
@@ -123,10 +120,10 @@ export default function Login({ onViewChange, user, setUser }) {
                     />
                   </div>
                   <div className="relative focus-within:scale-[1.01] transition-transform duration-200">
-                    <input 
-                      className="w-full bg-transparent border-0 border-b-2 border-[#353534] font-label-xs text-label-xs text-[#e5e2e1] uppercase py-3 input-border-anim placeholder:text-[#bdbdba]" 
-                      placeholder="LAST NAME" 
-                      type="text" 
+                    <input
+                      className="w-full bg-transparent border-0 border-b-2 border-[#353534] font-label-xs text-label-xs text-[#e5e2e1] uppercase py-3 input-border-anim placeholder:text-[#bdbdba]"
+                      placeholder="LAST NAME"
+                      type="text"
                       name="lastName"
                       value={formData.lastName}
                       onChange={handleChange}
@@ -135,10 +132,10 @@ export default function Login({ onViewChange, user, setUser }) {
                   </div>
                 </div>
                 <div className="relative focus-within:scale-[1.01] transition-transform duration-200">
-                  <input 
-                    className="w-full bg-transparent border-0 border-b-2 border-[#353534] font-label-xs text-label-xs text-[#e5e2e1] uppercase py-3 input-border-anim placeholder:text-[#bdbdba]" 
-                    placeholder="EMAIL ADDRESS" 
-                    type="email" 
+                  <input
+                    className="w-full bg-transparent border-0 border-b-2 border-[#353534] font-label-xs text-label-xs text-[#e5e2e1] uppercase py-3 input-border-anim placeholder:text-[#bdbdba]"
+                    placeholder="EMAIL ADDRESS"
+                    type="email"
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
@@ -147,10 +144,10 @@ export default function Login({ onViewChange, user, setUser }) {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div className="relative focus-within:scale-[1.01] transition-transform duration-200">
-                    <input 
-                      className="w-full bg-transparent border-0 border-b-2 border-[#353534] font-label-xs text-label-xs text-[#e5e2e1] uppercase py-3 input-border-anim  placeholder:text-[#bdbdba]" 
-                      placeholder="PASSWORD" 
-                      type="password" 
+                    <input
+                      className="w-full bg-transparent border-0 border-b-2 border-[#353534] font-label-xs text-label-xs text-[#e5e2e1] uppercase py-3 input-border-anim  placeholder:text-[#bdbdba]"
+                      placeholder="PASSWORD"
+                      type="password"
                       name="password"
                       value={formData.password}
                       onChange={handleChange}
@@ -158,10 +155,10 @@ export default function Login({ onViewChange, user, setUser }) {
                     />
                   </div>
                   <div className="relative focus-within:scale-[1.01] transition-transform duration-200">
-                    <input 
-                      className="w-full bg-transparent border-0 border-b-2 border-[#353534] font-label-xs text-label-xs text-[#e5e2e1] uppercase py-3 input-border-anim  placeholder:text-[#bdbdba]" 
-                      placeholder="CONFIRM PASSWORD" 
-                      type="password" 
+                    <input
+                      className="w-full bg-transparent border-0 border-b-2 border-[#353534] font-label-xs text-label-xs text-[#e5e2e1] uppercase py-3 input-border-anim  placeholder:text-[#bdbdba]"
+                      placeholder="CONFIRM PASSWORD"
+                      type="password"
                       name="confirmPassword"
                       value={formData.confirmPassword}
                       onChange={handleChange}
@@ -172,9 +169,9 @@ export default function Login({ onViewChange, user, setUser }) {
                 <div className="flex items-center gap-4">
                   <label className="flex items-center cursor-pointer group">
                     <div className="relative flex items-center">
-                      <input 
-                        className="peer hidden" 
-                        type="checkbox" 
+                      <input
+                        className="peer hidden"
+                        type="checkbox"
                         name="newsletter"
                         checked={formData.newsletter}
                         onChange={handleChange}
@@ -188,7 +185,7 @@ export default function Login({ onViewChange, user, setUser }) {
                   </label>
                 </div>
                 <div className="pt-4">
-                  <button 
+                  <button
                     type="submit"
                     className="w-full bg-[#ff4e00] text-[#5e1700] font-headline-md text-headline-md italic py-6 uppercase tracking-tighter hover:scale-[1.02] active:scale-95 transition-transform duration-200 shadow-[0_0_40px_-10px_rgba(255,78,0,0.5)] cursor-pointer"
                   >
@@ -196,7 +193,7 @@ export default function Login({ onViewChange, user, setUser }) {
                   </button>
                 </div>
                 <div className="text-center pt-4">
-                  <button 
+                  <button
                     type="button"
                     onClick={() => onViewChange && onViewChange('home')}
                     className="font-title-sm text-title-sm text-[#a1a1a1] hover:text-[#ffb59e] transition-colors uppercase cursor-pointer bg-transparent border-none"

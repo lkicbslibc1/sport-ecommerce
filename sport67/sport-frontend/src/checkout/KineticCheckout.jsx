@@ -119,7 +119,7 @@ export default function KineticCheckout({ onViewChange, cart = [], setCart, user
                 const newOrder = {
                     id: "#" + randomId,
                     customer: `${formData.firstName} ${formData.lastName}`,
-                    tier: user && user.name !== 'Guest User' ? 'MEMBER' : 'PRO',
+                    tier: user ? 'MEMBER' : 'PRO',
                     date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).toUpperCase(),
                     total: total.toLocaleString("th-TH") + " ฿",
                     status: "Pending",
@@ -192,7 +192,18 @@ export default function KineticCheckout({ onViewChange, cart = [], setCart, user
                     </p>
                 </div>
 
-                {cart.length === 0 ? (
+                {!user ? (
+                    <div className="flex flex-col items-center justify-center py-24 border" style={{ borderColor: "rgba(255,255,255,0.05)", backgroundColor: "rgba(255,255,255,0.02)" }}>
+                        <p className="text-sm uppercase tracking-widest mb-8 opacity-60">PLEASE LOGIN TO CONTINUE CHECKOUT.</p>
+                        <button
+                            onClick={() => onViewChange('login')}
+                            className="border font-black uppercase px-8 py-4 text-[11px] italic transition-all duration-300 cursor-pointer bg-transparent"
+                            style={{ borderColor: C.primary, color: C.primary }}
+                        >
+                            Login / Register
+                        </button>
+                    </div>
+                ) : cart.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-24 border" style={{ borderColor: "rgba(255,255,255,0.05)", backgroundColor: "rgba(255,255,255,0.02)" }}>
                         <p className="text-sm uppercase tracking-widest mb-8 opacity-60">Checkout is empty.</p>
                         <button

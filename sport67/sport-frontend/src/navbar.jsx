@@ -12,16 +12,30 @@ export default function Navbar({ setCurrentView, user, setUser, cart = [] }) {
   const [isLoginVisible, setIsLoginVisible] = useState(false);
   const [isLoginActive, setIsLoginActive] = useState(false);
 
+  // Profile dropdown state
+  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutsideDropdown = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setIsProfileDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutsideDropdown);
+    return () => document.removeEventListener('mousedown', handleClickOutsideDropdown);
+  }, []);
+
   const openLogin = () => {
     setIsLoginVisible(true);
     if (selectedRole === 'manager') {
-      setLoginIdentifier('marcus@gogoathletic.com');
-      setLoginPassword('marcus123');
+      setLoginIdentifier('manager');
+      setLoginPassword('manager123');
     } else if (selectedRole === 'employee') {
-      setLoginIdentifier('dom@gogoathletic.com');
-      setLoginPassword('dom123');
+      setLoginIdentifier('employee');
+      setLoginPassword('employee123');
     } else {
-      setLoginIdentifier('guest@gogo.com');
+      setLoginIdentifier('guest');
       setLoginPassword('guest123');
     }
     setTimeout(() => {
@@ -58,6 +72,26 @@ export default function Navbar({ setCurrentView, user, setUser, cart = [] }) {
       }
     }
   };
+
+  useEffect(() => {
+    // Seed base users for roles if not exist
+    const existingUsers = JSON.parse(localStorage.getItem("gogo_users") || "[]");
+    const baseUsers = [
+      { id: 1, username: 'manager', password: 'manager123', role: 'manager', isActive: true },
+      { id: 2, username: 'employee', password: 'employee123', role: 'employee', isActive: true },
+      { id: 3, username: 'guest', password: 'guest123', role: 'customer', isActive: true }
+    ];
+    let updated = false;
+    baseUsers.forEach(baseUser => {
+      if (!existingUsers.some(u => u.username === baseUser.username)) {
+        existingUsers.push(baseUser);
+        updated = true;
+      }
+    });
+    if (updated) {
+      localStorage.setItem("gogo_users", JSON.stringify(existingUsers));
+    }
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -109,7 +143,7 @@ export default function Navbar({ setCurrentView, user, setUser, cart = [] }) {
           </nav>
 
           {/* Dashboard Button */}
-          {user && user.role !== 'user' && (
+          {user && user.role !== 'customer' && user.role !== 'user' && (
             <button
               onClick={() => setCurrentView && setCurrentView('dashboard')}
               className="hidden md:flex items-center gap-2 font-bold text-[11px] uppercase tracking-widest bg-primary/10 border border-primary/40 hover:bg-primary hover:text-white px-4 py-2 transition-all duration-300 text-primary"
@@ -153,56 +187,57 @@ export default function Navbar({ setCurrentView, user, setUser, cart = [] }) {
               </button>
             </div>
 
-            {user && user.role !== 'user' ? (
-              <div className="flex items-center gap-3">
-                <span className="text-[10px] bg-primary/20 text-primary border border-primary/30 px-2.5 py-1 font-bold uppercase tracking-wider">
-                  {user.role}
-                </span>
-                <span className="hidden sm:inline text-[11px] font-bold uppercase tracking-widest text-white">
-                  {user.name}
-                </span>
+            {user ? (
+              <div className="relative" ref={dropdownRef}>
                 <button
-                  onClick={() => setUser({ name: 'Guest User', email: 'guest@gogo.com', role: 'user' })}
-                  className="text-white hover:text-primary text-[10px] font-bold uppercase tracking-widest border border-white/20 hover:border-primary px-3 py-1 transition-all"
+                  onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
+                  className="flex items-center gap-2 font-bold text-[11px] uppercase tracking-widest hover:text-primary transition cursor-pointer text-primary bg-transparent border-none"
                 >
-                  Logout
+                  <span className="material-symbols-outlined text-[22px]">person</span>
+                  <span className="hidden sm:inline">{user.username || user.name}</span>
+                  {user.role !== 'customer' && user.role !== 'user' && (
+                    <span className="ml-2 px-1.5 py-0.5 text-[8px] bg-primary/20 text-primary border border-primary/30 rounded">{user.role}</span>
+                  )}
                 </button>
+
+                {isProfileDropdownOpen && (
+                  <div className="absolute right-0 mt-6 w-48 py-2 bg-[#131313] border border-white/10 shadow-xl z-50 flex flex-col">
+                    {(user.role === 'customer' || user.role === 'user') && (
+                      <button
+                        onClick={() => {
+                          setIsProfileDropdownOpen(false);
+                          if (setCurrentView) setCurrentView('profile');
+                        }}
+                        className="text-left px-4 py-3 text-[11px] font-bold uppercase tracking-widest text-white hover:bg-white/10 hover:text-primary transition-colors bg-transparent border-none w-full cursor-pointer"
+                      >
+                        Profile
+                      </button>
+                    )}
+                    <button
+                      onClick={() => {
+                        setIsProfileDropdownOpen(false);
+                        setUser(null);
+                        if (setCurrentView && (user.role === 'customer' || user.role === 'user')) setCurrentView('home');
+                      }}
+                      className="text-left px-4 py-3 text-[11px] font-bold uppercase tracking-widest text-white hover:bg-white/10 hover:text-primary transition-colors bg-transparent border-none w-full border-t border-white/5 cursor-pointer"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                )}
               </div>
-            ) : user && user.name !== 'Guest User' ? (
-              <button
-                onClick={() => {
-                  if (window.confirm("Do you want to logout?")) {
-                    setUser({ name: 'Guest User', email: 'guest@gogo.com', role: 'user' });
-                  }
-                }}
-                className="flex items-center gap-2 font-bold text-[11px] uppercase tracking-widest hover:text-primary transition cursor-pointer text-primary"
-              >
-                <span className="material-symbols-outlined text-[22px]">person</span>
-                <span className="hidden sm:inline">{user.name}</span>
-              </button>
             ) : (
               <button
                 onClick={openLogin}
-                className="flex items-center gap-2 font-bold text-[11px] uppercase tracking-widest hover:text-primary transition cursor-pointer"
+                className="flex items-center gap-2 font-bold text-[11px] uppercase tracking-widest hover:text-primary transition cursor-pointer bg-transparent border-none text-white"
               >
                 <span className="material-symbols-outlined text-[22px]">person</span>
-                <span className="hidden sm:inline">Login</span>
+                <span className="hidden sm:inline">Login / Register</span>
               </button>
             )}
 
-            {/* Profile Button */}
-            {user && user.role === 'user' && (
-              <button 
-                onClick={() => setCurrentView && setCurrentView('profile')} 
-                className="flex items-center gap-2 font-bold text-[11px] uppercase tracking-widest hover:text-primary transition cursor-pointer bg-transparent border-none"
-              >
-                <span className="material-symbols-outlined text-[22px]">account_circle</span>
-                <span className="hidden sm:inline">Profile</span>
-              </button>
-            )}
-
-            <button 
-              onClick={() => setCurrentView && setCurrentView('bag')} 
+            <button
+              onClick={() => setCurrentView && setCurrentView('bag')}
               className="flex items-center gap-2 font-bold text-[11px] uppercase tracking-widest hover:text-primary transition cursor-pointer bg-transparent border-none"
             >
               <span className="material-symbols-outlined text-[22px]">shopping_bag</span>
@@ -245,7 +280,7 @@ export default function Navbar({ setCurrentView, user, setUser, cart = [] }) {
             <h2 className="text-5xl font-anybody font-black italic uppercase tracking-tighter mb-12">Member Login</h2>
             <form
               className="space-y-6"
-               onSubmit={(e) => {
+              onSubmit={(e) => {
                 e.preventDefault();
                 let name = "Guest User";
                 let email = "guest@gogo.com";
@@ -253,85 +288,33 @@ export default function Navbar({ setCurrentView, user, setUser, cart = [] }) {
 
                 const existingUsers = JSON.parse(localStorage.getItem("gogo_users") || "[]");
 
-                // Check for simulated manager
-                if (selectedRole === 'manager') {
-                  const isIdentifierMatch = loginIdentifier.toLowerCase() === 'marcus@gogoathletic.com' || loginIdentifier.toLowerCase() === 'marcus';
-                  const isPasswordMatch = loginPassword === 'marcus123';
-                  if (isIdentifierMatch && isPasswordMatch) {
-                    name = "Marcus Thorne";
-                    email = "marcus@gogoathletic.com";
-                  } else {
-                    alert("Invalid Administrator credentials! Try: marcus / marcus123");
-                    return;
-                  }
-                } 
-                // Check for simulated employee
-                else if (selectedRole === 'employee') {
-                  const isIdentifierMatch = loginIdentifier.toLowerCase() === 'dom@gogoathletic.com' || loginIdentifier.toLowerCase() === 'dom';
-                  const isPasswordMatch = loginPassword === 'dom123';
-                  if (isIdentifierMatch && isPasswordMatch) {
-                    name = "Dominic Toretto";
-                    email = "dom@gogoathletic.com";
-                  } else {
-                    alert("Invalid Employee credentials! Try: dom / dom123");
-                    return;
-                  }
-                } 
-                // Check for Customer login
-                else {
-                  const matchedUser = existingUsers.find(
-                    u => u.email.toLowerCase() === loginIdentifier.toLowerCase() ||
-                         (u.username && u.username.toLowerCase() === loginIdentifier.toLowerCase())
-                  );
+                const matchedUser = existingUsers.find(
+                  u => u.username && u.username.toLowerCase() === loginIdentifier.toLowerCase()
+                );
 
-                  if (!matchedUser) {
-                    // Check if it's the default guest demo values, then we can allow it as a quick demo bypass
-                    if (loginIdentifier.toLowerCase() === 'guest@gogo.com' && loginPassword === 'guest123') {
-                      name = "Guest User";
-                      email = "guest@gogo.com";
-                    } else {
-                      alert("User account not found! Please create an account first.");
-                      return;
-                    }
-                  } else {
-                    if (matchedUser.password && matchedUser.password !== loginPassword) {
-                      alert("Incorrect password! Please try again.");
-                      return;
-                    }
-                    name = matchedUser.name;
-                    email = matchedUser.email;
-                  }
+                if (!matchedUser) {
+                  alert("User account not found! Please create an account first.");
+                  return;
+                } else if (!matchedUser.isActive) {
+                  alert("Account is deactivated.");
+                  return;
+                } else if (matchedUser.password !== loginPassword) {
+                  alert("Incorrect password! Please try again.");
+                  return;
                 }
 
+                name = matchedUser.username;
+                email = matchedUser.username; // keep it simple as username is the primary identifier
+                role = matchedUser.role;
+
                 setUser({ name, email, role });
+                if (role === 'employee' || role === 'manager') {
+                  if (setCurrentView) setCurrentView('dashboard');
+                }
                 closeLoginDrawer();
               }}
             >
-              <div className="space-y-2">
-                <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Simulate Role Select</label>
-                <select
-                  value={selectedRole}
-                  onChange={(e) => {
-                    const r = e.target.value;
-                    setSelectedRole(r);
-                    if (r === 'manager') {
-                      setLoginIdentifier('marcus@gogoathletic.com');
-                      setLoginPassword('marcus123');
-                    } else if (r === 'employee') {
-                      setLoginIdentifier('dom@gogoathletic.com');
-                      setLoginPassword('dom123');
-                    } else {
-                      setLoginIdentifier('guest@gogo.com');
-                      setLoginPassword('guest123');
-                    }
-                  }}
-                  className="w-full bg-white/5 border border-white/10 px-6 py-4 text-sm text-white focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all uppercase tracking-widest"
-                >
-                  <option value="user" className="bg-neutral-950 text-neutral-100">User (Customer)</option>
-                  <option value="employee" className="bg-neutral-950 text-neutral-100">Employee</option>
-                  <option value="manager" className="bg-neutral-950 text-neutral-100">Manager</option>
-                </select>
-              </div>
+
               <div className="space-y-2">
                 <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Email or Username</label>
                 <input

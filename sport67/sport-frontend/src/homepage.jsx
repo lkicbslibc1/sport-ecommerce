@@ -22,11 +22,21 @@ import OrderStatus from './profile/OrderStatus.jsx';
 export default function MainPage() {
   const [activeCategory, setActiveCategory] = useState('men');
   const [currentView, setCurrentView] = useState('home');
-  const [user, setUser] = useState({
-    name: "Guest User",
-    email: "guest@gogo.com",
-    role: "user" // 'user', 'employee', 'manager'
+  const [user, setUser] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('gogo_current_user')) || null;
+    } catch {
+      return null;
+    }
   });
+
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem('gogo_current_user', JSON.stringify(user));
+    } else {
+      localStorage.removeItem('gogo_current_user');
+    }
+  }, [user]);
 
   const [cart, setCart] = useState(() => {
     try {
@@ -76,7 +86,7 @@ export default function MainPage() {
     return <Kid onViewChange={setCurrentView} user={user} setUser={setUser} cart={cart} addToCart={addToCart} />;
   }
   if (currentView === 'dashboard') {
-    if (user.role === 'user') {
+    if (!user || user.role === 'customer' || user.role === 'user') {
       setCurrentView('home');
       return null;
     }
@@ -101,6 +111,10 @@ export default function MainPage() {
     return <KineticCheckout onViewChange={setCurrentView} cart={cart} setCart={setCart} user={user} setUser={setUser} />;
   }
   if (currentView === 'profile') {
+    if (!user) {
+      setCurrentView('home');
+      return null;
+    }
     return <Profile onViewChange={setCurrentView} user={user} setUser={setUser} cart={cart} addToCart={addToCart} />;
   }
   if (currentView === 'order_status') {
