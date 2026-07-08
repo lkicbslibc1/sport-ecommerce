@@ -137,3 +137,17 @@ input:-webkit-autofill:active {
   -webkit-text-fill-color: #e5e2e1 !important;
 }
 
+/* Drawer slide-in animation */
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.animate-slideIn {
+  animation: slideIn 0.3s ease-out;
+}
+

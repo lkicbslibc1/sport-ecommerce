@@ -18,8 +18,17 @@ import GoGoBag from './bag/gogobag.jsx';
 import KineticCheckout from './checkout/KineticCheckout.jsx';
 import Profile from './profile/profile.jsx';
 import OrderStatus from './profile/OrderStatus.jsx';
+import { ProductProvider } from './data/products.jsx';
 
 export default function MainPage() {
+  return (
+    <ProductProvider>
+      <MainPageContent />
+    </ProductProvider>
+  );
+}
+
+function MainPageContent() {
   const [activeCategory, setActiveCategory] = useState('men');
   const [currentView, setCurrentView] = useState('home');
   const [user, setUser] = useState(() => {

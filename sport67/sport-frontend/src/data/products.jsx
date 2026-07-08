@@ -1,3 +1,5 @@
+import { createContext, useContext, useState, useEffect } from "react";
+
 const INITIAL_PRODUCTS = [
   {
     id: 1,
@@ -188,50 +190,194 @@ const INITIAL_PRODUCTS = [
   }
 ];
 
-let storedProducts = [];
-try {
-  const local = localStorage.getItem('gogo_products');
-  if (local) {
-    storedProducts = JSON.parse(local);
-  } else {
-    storedProducts = INITIAL_PRODUCTS;
-    localStorage.setItem('gogo_products', JSON.stringify(INITIAL_PRODUCTS));
+// Initial mock orders data
+const INITIAL_ORDERS = [
+  {
+    id: "#GGO-92831",
+    customer: "Dominic Toretto",
+    tier: "ELITE",
+    date: "OCT 24, 2026",
+    total: "1,240.00 ฿",
+    status: "Pending",
+    items: [
+      { name: "Gogo Aero-Run V1", sku: "GA-FW-2024-001", qty: 2, price: "4,500.00 ฿" }
+    ],
+    actions: ["Update Status", "Mark Shipped", "Mark Preparing", "Cancel Order"],
+  },
+  {
+    id: "#GGO-92830",
+    customer: "Sarah Connor",
+    tier: "PRO",
+    date: "OCT 23, 2026",
+    total: "450.00 ฿",
+    status: "Preparing",
+    items: [
+      { name: "Pro Performance Tee", sku: "GA-CP-2024-089", qty: 1, price: "1,250.00 ฿" }
+    ],
+    actions: ["Update Status", "Mark Shipped", "Mark Delivered"],
+  },
+  {
+    id: "#GGO-92829",
+    customer: "Letty Ortiz",
+    tier: "MEMBER",
+    date: "OCT 23, 2026",
+    total: "89.00 ฿",
+    status: "Shipped",
+    items: [
+      { name: "Endurance Flight Shorts", sku: "GA-RN-2024-003", qty: 1, price: "1,800.00 ฿" }
+    ],
+    actions: ["Update Status", "Mark Delivered", "Track Shipment"],
   }
-} catch (e) {
-  storedProducts = INITIAL_PRODUCTS;
+];
+
+// Get products from localStorage or use initial data
+function getStoredProducts() {
+  try {
+    const stored = localStorage.getItem('gogo_products');
+    if (stored) {
+      return JSON.parse(stored);
+    }
+  } catch (e) {
+    console.error("Failed to parse products from localStorage", e);
+  }
+  return INITIAL_PRODUCTS;
 }
 
-export const PRODUCTS = storedProducts;
-
-export function addProduct(product) {
-  PRODUCTS.push(product);
+// Save products to localStorage
+function saveProducts(products) {
   try {
-    localStorage.setItem('gogo_products', JSON.stringify(PRODUCTS));
+    localStorage.setItem('gogo_products', JSON.stringify(products));
   } catch (e) {
     console.error("Failed to save products to localStorage", e);
   }
 }
 
-export function updateProduct(updatedProduct) {
-  const index = PRODUCTS.findIndex(p => p.id === updatedProduct.id);
-  if (index !== -1) {
-    PRODUCTS[index] = { ...PRODUCTS[index], ...updatedProduct };
-    try {
-      localStorage.setItem('gogo_products', JSON.stringify(PRODUCTS));
-    } catch (e) {
-      console.error("Failed to save products to localStorage", e);
+// Get orders from localStorage or use initial data
+function getStoredOrders() {
+  try {
+    const stored = localStorage.getItem('gogo_orders');
+    if (stored) {
+      return JSON.parse(stored);
     }
+  } catch (e) {
+    console.error("Failed to parse orders from localStorage", e);
+  }
+  // Initialize orders in localStorage if not present
+  try {
+    localStorage.setItem('gogo_orders', JSON.stringify(INITIAL_ORDERS));
+  } catch (e) {
+    console.error("Failed to initialize orders in localStorage", e);
+  }
+  return INITIAL_ORDERS;
+}
+
+// Save orders to localStorage
+function saveOrders(orders) {
+  try {
+    localStorage.setItem('gogo_orders', JSON.stringify(orders));
+  } catch (e) {
+    console.error("Failed to save orders to localStorage", e);
   }
 }
 
-export function deleteProduct(id) {
-  const index = PRODUCTS.findIndex(p => p.id === id);
-  if (index !== -1) {
-    PRODUCTS.splice(index, 1);
-    try {
-      localStorage.setItem('gogo_products', JSON.stringify(PRODUCTS));
-    } catch (e) {
-      console.error("Failed to delete product from localStorage", e);
+// Initialize localStorage on app start (only if not already set)
+function initializeStorage() {
+  try {
+    if (!localStorage.getItem('gogo_products')) {
+      localStorage.setItem('gogo_products', JSON.stringify(INITIAL_PRODUCTS));
     }
+    if (!localStorage.getItem('gogo_orders')) {
+      localStorage.setItem('gogo_orders', JSON.stringify(INITIAL_ORDERS));
+    }
+  } catch (e) {
+    console.error("Failed to initialize storage", e);
   }
 }
+
+// Product Context
+const ProductContext = createContext(null);
+
+// Export the context for direct use with useContext
+export { ProductContext };
+
+// Custom hook to use product context
+export function useProducts() {
+  const context = useContext(ProductContext);
+  if (!context) {
+    throw new Error('useProducts must be used within a ProductProvider');
+  }
+  return context;
+}
+
+// Product Provider Component
+export function ProductProvider({ children }) {
+  const [products, setProducts] = useState(getStoredProducts);
+
+  // Initialize localStorage on first load
+  useEffect(() => {
+    initializeStorage();
+  }, []);
+
+  // Listen for storage changes from other tabs/windows
+  useEffect(() => {
+    const handleStorageChange = (e) => {
+      if (e.key === 'gogo_products') {
+        try {
+          const updated = JSON.parse(e.newValue);
+          if (updated) {
+            setProducts(updated);
+          }
+        } catch (err) {
+          console.error("Failed to parse storage event", err);
+        }
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
+  const addProduct = (product) => {
+    const newProducts = [...products, product];
+    setProducts(newProducts);
+    saveProducts(newProducts);
+  };
+
+  const updateProduct = (updatedProduct) => {
+    const index = products.findIndex(p => p.id === updatedProduct.id);
+    if (index !== -1) {
+      const newProducts = [...products];
+      newProducts[index] = { ...products[index], ...updatedProduct };
+      setProducts(newProducts);
+      saveProducts(newProducts);
+    }
+  };
+
+  const deleteProduct = (id) => {
+    const newProducts = products.filter(p => p.id !== id);
+    setProducts(newProducts);
+    saveProducts(newProducts);
+  };
+
+  const refreshProducts = () => {
+    setProducts(getStoredProducts());
+  };
+
+  return (
+    <ProductContext.Provider value={{
+      products,
+      addProduct,
+      updateProduct,
+      deleteProduct,
+      refreshProducts
+    }}>
+      {children}
+    </ProductContext.Provider>
+  );
+}
+
+// Export initial products for reference (fallback only)
+export { INITIAL_PRODUCTS };
+
+// Export orders functions for use in other components
+export { getStoredOrders, saveOrders, INITIAL_ORDERS };

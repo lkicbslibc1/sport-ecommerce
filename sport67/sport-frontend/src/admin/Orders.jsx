@@ -11,6 +11,7 @@ import {
   X,
   Package,
 } from "lucide-react";
+import { getStoredOrders, saveOrders } from "../data/products.jsx";
 
 const STATUS_STYLES = {
   Pending: "bg-neutral-700 text-neutral-200",
@@ -40,53 +41,10 @@ function GlassPanel({ className = "", children }) {
 
 export default function GogoAthleticOrders({ onNavigate, onViewChange }) {
   const [ordersList, setOrdersList] = useState(() => {
-    try {
-      const stored = localStorage.getItem('gogo_orders');
-      if (stored) return JSON.parse(stored);
-    } catch (e) {
-      console.error(e);
-    }
-    const initialMock = [
-      {
-        id: "#GGO-92831",
-        customer: "Dominic Toretto",
-        tier: "ELITE",
-        date: "OCT 24, 2026",
-        total: "1,240.00 ฿",
-        status: "Pending",
-        items: [
-          { name: "Gogo Aero-Run V1", sku: "GA-FW-2024-001", qty: 2, price: "4,500.00 ฿" }
-        ],
-        actions: ["Update Status", "Mark Shipped", "Mark Preparing", "Cancel Order"],
-      },
-      {
-        id: "#GGO-92830",
-        customer: "Sarah Connor",
-        tier: "PRO",
-        date: "OCT 23, 2026",
-        total: "450.00 ฿",
-        status: "Preparing",
-        items: [
-          { name: "Pro Performance Tee", sku: "GA-CP-2024-089", qty: 1, price: "1,250.00 ฿" }
-        ],
-        actions: ["Update Status", "Mark Shipped", "Mark Delivered"],
-      },
-      {
-        id: "#GGO-92829",
-        customer: "Letty Ortiz",
-        tier: "MEMBER",
-        date: "OCT 23, 2026",
-        total: "89.00 ฿",
-        status: "Shipped",
-        items: [
-          { name: "Endurance Flight Shorts", sku: "GA-RN-2024-003", qty: 1, price: "1,800.00 ฿" }
-        ],
-        actions: ["Update Status", "Mark Delivered", "Track Shipment"],
-      }
-    ];
-    localStorage.setItem('gogo_orders', JSON.stringify(initialMock));
-    return initialMock;
+    return getStoredOrders();
   });
+  
+  const [showActionModal, setShowActionModal] = useState(false);
 
   const [selectedOrder, setSelectedOrder] = useState(null);
   const isOpen = selectedOrder !== null;
@@ -101,11 +59,7 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange }) {
       return o;
     });
     setOrdersList(updated);
-    try {
-      localStorage.setItem('gogo_orders', JSON.stringify(updated));
-    } catch (e) {
-      console.error(e);
-    }
+    saveOrders(updated);
   };
 
   const filteredOrders = useMemo(() => {
@@ -129,12 +83,15 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange }) {
 
   return (
     <div className="min-h-screen w-full bg-neutral-950 text-neutral-100 flex">
-      <Sidebar
+<Sidebar
         activeItem="orders"
         onNavigate={onNavigate}
         onViewChange={onViewChange}
         actionButton={
-          <button className="w-full bg-orange-600 text-white text-[10px] font-black py-4 px-2 uppercase tracking-widest hover:scale-105 transition-transform flex items-center justify-center gap-2">
+          <button 
+            onClick={() => setShowActionModal(true)}
+            className="w-full bg-orange-600 text-white text-[10px] font-black py-4 px-2 uppercase tracking-widest hover:scale-105 transition-transform flex items-center justify-center gap-2"
+          >
             <Plus size={16} />
             Orders Action
           </button>
@@ -336,7 +293,7 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange }) {
             className="absolute inset-0 bg-neutral-950/95 backdrop-blur-2xl"
             onClick={() => setSelectedOrder(null)}
           />
-          <div className="absolute right-0 top-0 bottom-0 w-full max-w-[500px] bg-neutral-900 border-l border-white/10 shadow-2xl flex flex-col animate-[slideIn_0.3s_ease-out]">
+<div className="absolute right-0 top-0 bottom-0 w-full max-w-[500px] bg-neutral-900 border-l border-white/10 shadow-2xl flex flex-col animate-slideIn">
             <div className="p-8 border-b border-white/10 flex justify-between items-center">
               <div>
                 <h3 className="text-2xl italic uppercase font-black text-orange-300">
@@ -410,6 +367,80 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange }) {
                 className="border border-neutral-100 text-neutral-100 text-[10px] font-black py-4 uppercase tracking-widest hover:bg-neutral-100 hover:text-neutral-950 transition-colors"
               >
                 Close details
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ORDERS ACTION MODAL */}
+      {showActionModal && (
+        <div className="fixed inset-0 z-[100]">
+          <div
+            className="absolute inset-0 bg-neutral-950/95 backdrop-blur-2xl"
+            onClick={() => setShowActionModal(false)}
+          />
+<div className="absolute right-0 top-0 bottom-0 w-full max-w-[400px] bg-neutral-900 border-l border-white/10 shadow-2xl flex flex-col animate-slideIn">
+            <div className="p-6 border-b border-white/10 flex justify-between items-center">
+              <h3 className="text-xl italic uppercase font-black text-orange-300">
+                Orders Actions
+              </h3>
+              <button
+                onClick={() => setShowActionModal(false)}
+                className="hover:rotate-90 transition-transform duration-300"
+              >
+                <X size={24} />
+              </button>
+            </div>
+            <div className="flex-1 p-6 space-y-4">
+              <button
+                onClick={() => {
+                  const pendingOrders = ordersList.filter(o => o.status === "Pending");
+                  if (pendingOrders.length > 0) {
+                    const updated = ordersList.map(o => 
+                      o.status === "Pending" ? { ...o, status: "Preparing" } : o
+                    );
+                    setOrdersList(updated);
+                    saveOrders(updated);
+                  }
+                  setShowActionModal(false);
+                }}
+                className="w-full bg-orange-600 text-white py-3 text-xs font-bold uppercase tracking-widest hover:bg-orange-500 transition-colors"
+              >
+                Process All Pending Orders
+              </button>
+              <button
+                onClick={() => {
+                  const preparingOrders = ordersList.filter(o => o.status === "Preparing");
+                  if (preparingOrders.length > 0) {
+                    const updated = ordersList.map(o => 
+                      o.status === "Preparing" ? { ...o, status: "Shipped" } : o
+                    );
+                    setOrdersList(updated);
+                    saveOrders(updated);
+                  }
+                  setShowActionModal(false);
+                }}
+                className="w-full bg-indigo-600 text-white py-3 text-xs font-bold uppercase tracking-widest hover:bg-indigo-500 transition-colors"
+              >
+                Ship All Preparing Orders
+              </button>
+              <button
+                onClick={() => {
+                  if (window.confirm("Are you sure you want to export all orders?")) {
+                    const dataStr = JSON.stringify(ordersList, null, 2);
+                    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+                    const exportFileDefaultName = 'gogo-orders-export.json';
+                    let linkElement = document.createElement('a');
+                    linkElement.setAttribute('href', dataUri);
+                    linkElement.setAttribute('download', exportFileDefaultName);
+                    linkElement.click();
+                  }
+                  setShowActionModal(false);
+                }}
+                className="w-full bg-neutral-700 text-white py-3 text-xs font-bold uppercase tracking-widest hover:bg-neutral-600 transition-colors"
+              >
+                Export Orders Data
               </button>
             </div>
           </div>

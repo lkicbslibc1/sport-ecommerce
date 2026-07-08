@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useContext } from "react";
 import Sidebar from "./Sidebar.jsx";
 import {
     Boxes,
@@ -12,7 +12,7 @@ import {
     Plus,
     Trash2
 } from "lucide-react";
-import { PRODUCTS, addProduct, updateProduct, deleteProduct } from "../data/products.js";
+import { ProductContext } from "../data/products.jsx";
 
 const STATUS_STYLES = {
     Published: "bg-green-500/10 text-green-400 border border-green-500/20",
@@ -56,12 +56,14 @@ const COLOR_NAMES = [
     "green", "orange", "pink", "beige", "brown", "grey", "mixed"
 ];
 
-export default function GogoAthleticProducts({ onNavigate, onViewChange }) {
-    const [productsList, setProductsList] = useState([...PRODUCTS]);
+export default function GogoAthleticProducts({ onNavigate, onViewChange, user }) {
+    const { products, addProduct, updateProduct, deleteProduct } = useContext(ProductContext);
     const [searchFocused, setSearchFocused] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("All Categories");
     const [selectedStatus, setSelectedStatus] = useState("All Statuses");
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 5; // Number of products per page
 
     // Modal state
     const [modalOpen, setModalOpen] = useState(false);
@@ -174,7 +176,7 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange }) {
                 else if (formFields.sportType === "Swimming") catCode = "SW";
             }
             const currentYear = new Date().getFullYear();
-            const seqStr = String(productsList.length + 1).padStart(3, '0');
+            const seqStr = String(products.length + 1).padStart(3, '0');
             generatedSku = `GA-${catCode}-${currentYear}-${seqStr}`;
         }
 
@@ -202,26 +204,24 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange }) {
             updateProduct({ ...currentProduct, ...productData });
         } else {
             addProduct({
-                id: PRODUCTS.length > 0 ? Math.max(...PRODUCTS.map(p => p.id)) + 1 : 1,
+                id: products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1,
                 ...productData
             });
         }
 
-        setProductsList([...PRODUCTS]);
         setModalOpen(false);
     };
 
     const handleDelete = (id) => {
         if (window.confirm("Are you sure you want to delete this product?")) {
             deleteProduct(id);
-            setProductsList([...PRODUCTS]);
             setModalOpen(false);
         }
     };
 
     // Filter logic
     const filteredProducts = useMemo(() => {
-        return productsList.filter((item) => {
+        return products.filter((item) => {
             const matchSearch =
                 item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 item.sku.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -238,7 +238,20 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange }) {
 
             return matchSearch && matchCategory && matchStatus;
         });
-    }, [productsList, searchQuery, selectedCategory, selectedStatus]);
+    }, [products, searchQuery, selectedCategory, selectedStatus]);
+
+    // Pagination logic
+    const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+    const paginatedProducts = useMemo(() => {
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        return filteredProducts.slice(startIndex, startIndex + itemsPerPage);
+    }, [filteredProducts, currentPage, itemsPerPage]);
+
+    // Reset to page 1 when filters change
+    React.useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setCurrentPage(1);
+    }, [searchQuery, selectedCategory, selectedStatus]);
 
     return (
         <div className="min-h-screen w-full bg-neutral-950 text-neutral-100 flex">
@@ -247,13 +260,19 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange }) {
                 onNavigate={onNavigate}
                 onViewChange={onViewChange}
                 actionButton={
-                    <button
-                        onClick={handleOpenAdd}
-                        className="w-full bg-orange-600 text-white py-3 text-sm uppercase italic font-black hover:scale-105 transition-transform flex items-center justify-center gap-2"
-                    >
-                        <Plus size={16} />
-                        New Product
-                    </button>
+                    user && user.role === "manager" ? (
+                        <button
+                            onClick={handleOpenAdd}
+                            className="w-full bg-orange-600 text-white py-3 text-sm uppercase italic font-black hover:scale-105 transition-transform flex items-center justify-center gap-2"
+                        >
+                            <Plus size={16} />
+                            New Product
+                        </button>
+                    ) : (
+                        <div className="text-[10px] text-center text-neutral-500 uppercase tracking-widest border border-white/5 py-4 px-2">
+                            Viewing Mode Only
+                        </div>
+                    )
                 }
             />
 
@@ -311,11 +330,11 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange }) {
                         <div className="flex gap-4">
                             <GlassPanel className="px-6 py-4 flex flex-col items-end border-r-4 border-orange-300">
                                 <p className="text-[10px] uppercase font-bold tracking-widest text-neutral-400">Total Products</p>
-                                <p className="text-3xl italic font-black">{productsList.length}</p>
+                                <p className="text-3xl italic font-black">{products.length}</p>
                             </GlassPanel>
                             <GlassPanel className="px-6 py-4 flex flex-col items-end border-r-4 border-green-400">
                                 <p className="text-[10px] uppercase font-bold tracking-widest text-neutral-400">Published</p>
-                                <p className="text-3xl italic font-black text-green-400">{productsList.filter(p => p.status === 'Published').length}</p>
+                                <p className="text-3xl italic font-black text-green-400">{products.filter(p => p.status === 'Published').length}</p>
                             </GlassPanel>
                         </div>
                     </div>
@@ -353,13 +372,19 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange }) {
                             </div>
                         </div>
                         <div className="flex items-center gap-4">
-                            <button
-                                onClick={handleOpenAdd}
-                                className="bg-orange-600 text-white px-6 py-2 uppercase text-xs font-black italic tracking-widest hover:scale-105 transition-transform flex items-center gap-2"
-                            >
-                                <Plus size={14} />
-                                Add Product
-                            </button>
+                            {user && user.role === "manager" ? (
+                                <button
+                                    onClick={handleOpenAdd}
+                                    className="bg-orange-600 text-white px-6 py-2 uppercase text-xs font-black italic tracking-widest hover:scale-105 transition-transform flex items-center gap-2"
+                                >
+                                    <Plus size={14} />
+                                    Add Product
+                                </button>
+                            ) : (
+                                <div className="text-[10px] text-neutral-500 uppercase tracking-widest">
+                                    Viewing Mode Only
+                                </div>
+                            )}
                         </div>
                     </GlassPanel>
 
@@ -376,27 +401,27 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange }) {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-white/5">
-                                    {filteredProducts.map((item) => (
+                                    {paginatedProducts.map((item) => (
                                         <tr
                                             key={item.id}
                                             className="group hover:bg-white/[0.02] hover:border-l-4 hover:border-orange-500 transition-colors"
                                         >
                                             <td className="px-6 py-6 flex items-center gap-4">
                                                 <div className="w-12 h-12 bg-neutral-900 border border-white/10 shrink-0 flex items-center justify-center overflow-hidden">
-                                                    {item.image ? (
-                                                        <img src={item.image} className="w-full h-full object-cover" alt={item.name} />
-                                                    ) : (
-                                                        <Boxes size={20} className="text-neutral-600 group-hover:text-orange-300 transition-colors" />
-                                                    )}
-                                                </div>
-                                                <div className="flex flex-col">
-                                                    <span className="italic font-black uppercase group-hover:text-orange-300 transition-colors">
-                                                        {item.name}
-                                                    </span>
-                                                    <span className="text-[9px] text-neutral-500 tracking-wider">
-                                                        {item.targetGroup} / {item.productType}
-                                                    </span>
-                                                </div>
+                                                        {item.image ? (
+                                                            <img src={item.image} className="w-full h-full object-cover" alt={item.name} />
+                                                        ) : (
+                                                            <Boxes size={20} className="text-neutral-600 group-hover:text-orange-300 transition-colors" />
+                                                        )}
+                                                    </div>
+                                                    <div className="flex flex-col">
+                                                        <span className="italic font-black uppercase group-hover:text-orange-300 transition-colors">
+                                                            {item.name}
+                                                        </span>
+                                                        <span className="text-[9px] text-neutral-500 tracking-wider">
+                                                            {item.targetGroup} / {item.productType}
+                                                        </span>
+                                                    </div>
                                             </td>
                                             <td className="px-6 py-6 text-neutral-400 font-mono text-sm">{item.sku}</td>
                                             <td className="px-6 py-6 uppercase text-xs font-bold">{item.sportType}</td>
@@ -417,13 +442,15 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange }) {
                                                     >
                                                         <Pencil size={16} />
                                                     </button>
-                                                    <button
-                                                        onClick={() => handleDelete(item.id)}
-                                                        className="bg-white/5 border border-white/10 hover:border-red-500 p-2 transition-all hover:bg-red-500 hover:text-neutral-950 text-red-400"
-                                                        title="Delete Product"
-                                                    >
-                                                        <Trash2 size={16} />
-                                                    </button>
+                                                    {user && user.role === "manager" && (
+                                                        <button
+                                                            onClick={() => handleDelete(item.id)}
+                                                            className="bg-white/5 border border-white/10 hover:border-red-500 p-2 transition-all hover:bg-red-500 hover:text-neutral-950 text-red-400"
+                                                            title="Delete Product"
+                                                        >
+                                                            <Trash2 size={16} />
+                                                        </button>
+                                                    )}
                                                 </div>
                                             </td>
                                         </tr>
@@ -434,18 +461,39 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange }) {
 
                         {/* Pagination */}
                         <div className="p-6 bg-white/5 flex flex-col md:flex-row justify-between items-center gap-4 border-t border-white/5">
-                            <p className="text-neutral-400 text-[10px] uppercase tracking-widest">
-                                Showing {filteredProducts.length} of {productsList.length} Products
-                            </p>
-                            <div className="flex items-center gap-2">
-                                <button className="p-2 border border-white/10 hover:bg-white/10 transition-colors">
-                                    <ChevronLeft size={16} />
+                        <p className="text-neutral-400 text-[10px] uppercase tracking-widest">
+                            Showing {(currentPage - 1) * itemsPerPage + 1}-
+                            {Math.min(currentPage * itemsPerPage, filteredProducts.length)} of {products.length} Products
+                        </p>
+                        <div className="flex items-center gap-2">
+                            <button 
+                                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                disabled={currentPage === 1}
+                                className="p-2 border border-white/10 hover:bg-white/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                <ChevronLeft size={16} />
+                            </button>
+                            {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                                <button 
+                                    key={page}
+                                    onClick={() => setCurrentPage(page)}
+                                    className={`px-4 py-2 font-black italic text-xs ${
+                                        currentPage === page 
+                                            ? "bg-orange-300 text-neutral-950" 
+                                            : "border border-white/10 hover:bg-white/10 text-neutral-300"
+                                    }`}
+                                >
+                                    {page}
                                 </button>
-                                <button className="px-4 py-2 bg-orange-300 text-neutral-950 font-black italic text-xs">1</button>
-                                <button className="p-2 border border-white/10 hover:bg-white/10 transition-colors">
-                                    <ChevronRight size={16} />
-                                </button>
-                            </div>
+                            ))}
+                            <button 
+                                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                                disabled={currentPage === totalPages || totalPages === 0}
+                                className="p-2 border border-white/10 hover:bg-white/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                <ChevronRight size={16} />
+                            </button>
+                        </div>
                         </div>
                     </GlassPanel>
                 </main>

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useContext } from "react";
 import {
   TrendingUp,
   Truck,
@@ -8,14 +8,15 @@ import {
   Banknote,
   Boxes,
   Bell,
-  Search
+  Search,
+  ShoppingCart
 } from "lucide-react";
 import GogoAthleticOrders from "./Orders.jsx";
 import GogoAthleticInventory from "./Inventory.jsx";
 import GogoAthleticProducts from "./Products.jsx";
 import GogoAthleticTeam from "./Team.jsx";
 import Sidebar from "./Sidebar.jsx";
-import { PRODUCTS } from "../data/products.js";
+import { ProductContext, getStoredOrders, INITIAL_ORDERS } from "../data/products.jsx";
 
 const WEEK = [
   { day: "Mon", height: "h-2/3", amount: "32k ฿" },
@@ -42,25 +43,15 @@ function GlassPanel({ className = "", children }) {
 export default function GogoAthleticDashboard({ onViewChange, user }) {
   const [range, setRange] = useState("daily");
   const [currentPage, setCurrentPage] = useState("dashboard");
-
-  // Load products list and orders from localStorage dynamically
-  const productsList = useMemo(() => {
-    try {
-      const stored = localStorage.getItem('gogo_products');
-      if (stored) return JSON.parse(stored);
-    } catch (e) {}
-    return PRODUCTS;
-  }, [currentPage]); // re-evaluate when page switches to keep sync
-
+  
+  // Get products and orders from context and localStorage
+  const { products } = useContext(ProductContext);
+  
   const ordersList = useMemo(() => {
-    try {
-      const stored = localStorage.getItem('gogo_orders');
-      if (stored) return JSON.parse(stored);
-    } catch (e) {}
-    return [];
+    return getStoredOrders();
   }, [currentPage]); // re-evaluate when page switches to keep sync
 
-  // Dynamic Metrics
+  // Dynamic Metrics - now using products from context
   const totalRevenue = useMemo(() => {
     return ordersList
       .filter(o => o.status !== 'Cancelled')
@@ -75,14 +66,14 @@ export default function GogoAthleticDashboard({ onViewChange, user }) {
   }, [ordersList]);
 
   const criticalProducts = useMemo(() => {
-    return productsList.filter(p => p.amount <= 10);
-  }, [productsList]);
+    return products.filter(p => p.amount <= 10);
+  }, [products]);
 
   const stockEfficiency = useMemo(() => {
-    if (productsList.length === 0) return "100%";
-    const optimalCount = productsList.filter(p => p.amount > 10).length;
-    return ((optimalCount / productsList.length) * 100).toFixed(1) + "%";
-  }, [productsList]);
+    if (products.length === 0) return "100%";
+    const optimalCount = products.filter(p => p.amount > 10).length;
+    return ((optimalCount / products.length) * 100).toFixed(1) + "%";
+  }, [products]);
 
   const dynamicAlerts = useMemo(() => {
     return criticalProducts.map(p => ({
@@ -92,8 +83,9 @@ export default function GogoAthleticDashboard({ onViewChange, user }) {
     })).slice(0, 5);
   }, [criticalProducts]);
 
+  // Best Sellers - now using products from context (real-time updates)
   const bestSellers = useMemo(() => {
-    return productsList
+    return products
       .slice()
       .sort((a, b) => (b.review || 0) - (a.review || 0))
       .slice(0, 4)
@@ -111,7 +103,7 @@ export default function GogoAthleticDashboard({ onViewChange, user }) {
           ? "bg-neutral-500 text-neutral-950" 
           : "bg-neutral-700 text-neutral-100"
       }));
-  }, [productsList]);
+  }, [products]);
 
   if (currentPage === "orders") {
     return <GogoAthleticOrders onNavigate={setCurrentPage} onViewChange={onViewChange} user={user} />;
@@ -128,18 +120,27 @@ export default function GogoAthleticDashboard({ onViewChange, user }) {
 
   return (
     <div className="min-h-screen w-full bg-neutral-950 text-neutral-100 flex">
-      <Sidebar
+<Sidebar
         activeItem="dashboard"
         onNavigate={setCurrentPage}
         onViewChange={onViewChange}
         actionButton={
-          <button 
-            onClick={() => setCurrentPage("products")}
-            className="w-full bg-orange-600 text-white py-3 text-xs font-bold uppercase tracking-widest hover:scale-105 transition-transform flex items-center justify-center gap-2"
-          >
-            <Plus size={16} />
-            New Product
-          </button>
+          <div className="flex flex-col gap-2">
+            <button 
+              onClick={() => setCurrentPage("products")}
+              className="w-full bg-orange-600 text-white py-3 text-xs font-bold uppercase tracking-widest hover:scale-105 transition-transform flex items-center justify-center gap-2"
+            >
+              <Plus size={16} />
+              New Product
+            </button>
+            <button 
+              onClick={() => setCurrentPage("orders")}
+              className="w-full bg-indigo-600 text-white py-3 text-xs font-bold uppercase tracking-widest hover:scale-105 transition-transform flex items-center justify-center gap-2"
+            >
+              <ShoppingCart size={16} />
+              View Orders
+            </button>
+          </div>
         }
       />
 

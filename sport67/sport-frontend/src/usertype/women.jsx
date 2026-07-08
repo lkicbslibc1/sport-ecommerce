@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useContext } from 'react';
 import Navbar from '../navbar.jsx';
+import { ProductContext } from '../data/products.jsx';
 
 const COLLECTIONS = ["Nike", "Puma", "Adidas"];
 const SIZES = ["S", "M", "L", "XL"];
@@ -10,8 +11,6 @@ const COLORS = [
   { name: "Blue", hex: "#1e88e5" },
   { name: "Orange", hex: "#fb8c00" },
 ];
-
-import { PRODUCTS } from '../data/products.js';
 
 function formatPrice(n) {
   return n.toLocaleString("th-TH", { minimumFractionDigits: 2 }) + " ฿";
@@ -46,6 +45,8 @@ function FilterDropdown({ name, label, openFilter, setOpenFilter, activeCount, c
 }
 
 export default function Football({ onViewChange, user, setUser, cart, addToCart }) {
+  const { products } = useContext(ProductContext);
+  
   useEffect(() => { window.scrollTo(0, 0); }, []);
 
   const [openFilter, setOpenFilter] = useState(null);
@@ -65,10 +66,10 @@ export default function Football({ onViewChange, user, setUser, cart, addToCart 
     setSelectedColors([]);
   };
 
-  // Filter products by Women targetGroup
+  // Filter products by Women targetGroup - now using products from context
   const categoryProducts = useMemo(() => {
-    return PRODUCTS.filter(p => p.targetGroup === 'women');
-  }, []);
+    return products.filter(p => p.targetGroup === 'women');
+  }, [products]);
 
   const filteredProducts = useMemo(() => {
     return categoryProducts.filter((p) => {

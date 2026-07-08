@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useContext } from "react";
 import Sidebar from "./Sidebar.jsx";
 import {
   Boxes,
@@ -12,7 +12,7 @@ import {
   PackageCheck,
   Package,
 } from "lucide-react";
-import { PRODUCTS, updateProduct } from "../data/products.js";
+import { ProductContext } from "../data/products.jsx";
 
 const STOCK_STYLES = {
   "In Stock": {
@@ -55,11 +55,19 @@ function GlassPanel({ className = "", children }) {
 }
 
 export default function GogoAthleticInventory({ onNavigate, onViewChange }) {
-  const [productsList, setProductsList] = useState([...PRODUCTS]);
+  const { products, updateProduct } = useContext(ProductContext);
+  const [productsList, setProductsList] = useState([...products]);
   const [searchFocused, setSearchFocused] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All Gear");
   const [selectedStatus, setSelectedStatus] = useState("All Statuses");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5; // Number of products per page
+
+  // Sync local state with context when products change
+  React.useEffect(() => {
+    setProductsList([...products]);
+  }, [products]);
 
   // Modal and quick adjust state
   const [modalOpen, setModalOpen] = useState(false);
@@ -87,7 +95,6 @@ export default function GogoAthleticInventory({ onNavigate, onViewChange }) {
       amount: qtyNum
     });
 
-    setProductsList([...PRODUCTS]);
     setModalOpen(false);
   };
 
@@ -110,6 +117,18 @@ export default function GogoAthleticInventory({ onNavigate, onViewChange }) {
       return matchSearch && matchCategory && matchStatus;
     });
   }, [productsList, searchQuery, selectedCategory, selectedStatus]);
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredInventory.length / itemsPerPage);
+  const paginatedInventory = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return filteredInventory.slice(startIndex, startIndex + itemsPerPage);
+  }, [filteredInventory, currentPage, itemsPerPage]);
+
+  // Reset to page 1 when filters change
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, selectedCategory, selectedStatus]);
 
   return (
     <div className="min-h-screen w-full bg-neutral-950 text-neutral-100 flex">
@@ -254,7 +273,7 @@ export default function GogoAthleticInventory({ onNavigate, onViewChange }) {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/5">
-                  {filteredInventory.map((item) => {
+                  {paginatedInventory.map((item) => {
                     const statusText = getStockStatus(item.amount);
                     const s = STOCK_STYLES[statusText];
                     return (
@@ -313,16 +332,35 @@ export default function GogoAthleticInventory({ onNavigate, onViewChange }) {
             {/* Pagination */}
             <div className="p-6 bg-white/5 flex flex-col md:flex-row justify-between items-center gap-4 border-t border-white/5">
               <p className="text-neutral-400 text-[10px] uppercase tracking-widest">
-                Showing {filteredInventory.length} of {productsList.length} Assets
+                Showing {(currentPage - 1) * itemsPerPage + 1}-
+                {Math.min(currentPage * itemsPerPage, filteredInventory.length)} of {productsList.length} Assets
               </p>
               <div className="flex items-center gap-2">
-                <button className="p-2 border border-white/10 hover:bg-white/10 transition-colors">
+                <button 
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                  className="p-2 border border-white/10 hover:bg-white/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
                   <ChevronLeft size={16} />
                 </button>
-                <button className="px-4 py-2 bg-orange-300 text-neutral-950 font-black italic text-xs">
-                  1
-                </button>
-                <button className="p-2 border border-white/10 hover:bg-white/10 transition-colors">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                  <button 
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={`px-4 py-2 font-black italic text-xs ${
+                      currentPage === page 
+                        ? "bg-orange-300 text-neutral-950" 
+                        : "border border-white/10 hover:bg-white/10 text-neutral-300"
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+                <button 
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage === totalPages || totalPages === 0}
+                  className="p-2 border border-white/10 hover:bg-white/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
                   <ChevronRight size={16} />
                 </button>
               </div>

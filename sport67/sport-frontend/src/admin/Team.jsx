@@ -163,16 +163,16 @@ export default function GogoAthleticTeam({ onNavigate, onViewChange, user }) {
 
   const filteredTeam = team.filter((member) => {
     const matchesSearch =
-      member.name.toLowerCase().includes(search.toLowerCase()) ||
-      member.email.toLowerCase().includes(search.toLowerCase());
+      (member.name || "").toLowerCase().includes(search.toLowerCase()) ||
+      (member.email || "").toLowerCase().includes(search.toLowerCase());
     const matchesRole = roleFilter === "All" || member.role === roleFilter;
     return matchesSearch && matchesRole;
   });
 
   const filteredCustomers = customers.filter((customer) => {
     const matchesSearch =
-      customer.name.toLowerCase().includes(search.toLowerCase()) ||
-      customer.email.toLowerCase().includes(search.toLowerCase());
+      (customer.name || "").toLowerCase().includes(search.toLowerCase()) ||
+      (customer.email || "").toLowerCase().includes(search.toLowerCase());
     return matchesSearch;
   });
 
