@@ -28,6 +28,7 @@ function MainPageContent() {
   const [activeCategory, setActiveCategory] = useState('men');
   const [currentView, setCurrentView] = useState('home');
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [selectedOrder, setSelectedOrder] = useState(null);
   const [user, setUser] = useState(() => {
     try {
       return JSON.parse(localStorage.getItem('gogo_current_user')) || null;
@@ -111,10 +112,10 @@ function MainPageContent() {
       setCurrentView('home');
       return null;
     }
-    return <Profile onViewChange={setCurrentView} user={user} setUser={setUser} cart={cart} addToCart={addToCart} />;
+    return <Profile onViewChange={setCurrentView} user={user} setUser={setUser} cart={cart} addToCart={addToCart} setSelectedOrder={setSelectedOrder} />;
   }
   if (currentView === 'order_status') {
-    return <OrderStatus onViewChange={setCurrentView} user={user} setUser={setUser} cart={cart} />;
+    return <OrderStatus onViewChange={setCurrentView} user={user} setUser={setUser} cart={cart} selectedOrder={selectedOrder} />;
   }
 
   return (

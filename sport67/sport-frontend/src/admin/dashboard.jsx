@@ -42,7 +42,15 @@ function GlassPanel({ className = "", children }) {
 
 export default function GogoAthleticDashboard({ onViewChange, user }) {
   const [range, setRange] = useState("daily");
-  const [currentPage, setCurrentPage] = useState("dashboard");
+  const [currentPage, setCurrentPage] = useState(user?.role === 'employee' ? "orders" : "dashboard");
+
+  // Restrict employee access
+  React.useEffect(() => {
+    if (user?.role === 'employee' && !["orders", "inventory"].includes(currentPage)) {
+      setCurrentPage("orders");
+    }
+  }, [user, currentPage]);
+
 
   // Get products and orders from context and localStorage
   const { products } = useContext(ProductContext);
@@ -121,6 +129,7 @@ export default function GogoAthleticDashboard({ onViewChange, user }) {
   return (
     <div className="min-h-screen w-full bg-neutral-950 text-neutral-100 flex">
       <Sidebar
+        user={user}
         activeItem="dashboard"
         onNavigate={setCurrentPage}
         onViewChange={onViewChange}

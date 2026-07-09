@@ -1,24 +1,28 @@
 import React from 'react';
 import Navbar from '../navbar.jsx';
 
-export default function Profile({ onViewChange, user, setUser, cart, addToCart }) {
-  // Mock order history based on the requirements
-  const orders = [
-    {
-      id: 'ORD-2026-001',
-      date: '2026-07-01',
-      total: 14980,
-      status: 'Delivered',
-      items: ['XT-6 GORE-TEX', 'SALOMON XA PRO 3D']
-    },
-    {
-      id: 'ORD-2026-002',
-      date: '2026-06-15',
-      total: 5290,
-      status: 'Processing',
-      items: ['SALOMON SOLAMPHIBIAN']
-    },
-  ];
+export default function Profile({ onViewChange, user, setUser, cart, addToCart, setSelectedOrder }) {
+  // Fetch real order history from localStorage
+  const [orders, setOrders] = React.useState([]);
+
+  React.useEffect(() => {
+    try {
+      const stored = localStorage.getItem('gogo_orders');
+      if (stored) {
+        const allOrders = JSON.parse(stored);
+        // Filter orders for the current user.
+        // Assuming the checkout process saves customer name or username.
+        const userOrders = allOrders.filter(o => 
+          (o.username && (o.username === user.username || o.username === user.name)) ||
+          o.customer.toLowerCase().includes(user.name?.toLowerCase() || '') ||
+          o.customer === user.username
+        );
+        setOrders(userOrders);
+      }
+    } catch (e) {
+      console.error("Failed to load orders", e);
+    }
+  }, [user]);
 
   // Split name into first and last name
   const nameParts = user.name ? user.name.split(' ') : ['Guest', 'User'];
@@ -80,31 +84,40 @@ export default function Profile({ onViewChange, user, setUser, cart, addToCart }
             </h3>
 
             <div className="space-y-6">
-              {orders.map(order => (
-                <div key={order.id} onClick={() => onViewChange('order_status')} className="glass p-6 border border-white/5 hover:border-primary/50 transition-colors cursor-pointer group">
+              {orders.length > 0 ? orders.map(order => (
+                <div 
+                  key={order.id} 
+                  onClick={() => {
+                    if (setSelectedOrder) setSelectedOrder(order);
+                    onViewChange('order_status');
+                  }} 
+                  className="glass p-6 border border-white/5 hover:border-primary/50 transition-colors cursor-pointer group"
+                >
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4 border-b border-white/10 pb-4">
                     <div>
                       <h4 className="font-bold text-sm uppercase tracking-widest text-primary">{order.id}</h4>
                       <p className="text-xs text-on-surface-variant mt-1">{order.date}</p>
                     </div>
                     <div className="text-right">
-                      <span className={`text-[10px] font-black px-3 py-1 uppercase tracking-widest ${order.status === 'Delivered' ? 'bg-green-500/20 text-green-400' : 'bg-orange-500/20 text-orange-400'
+                      <span className={`text-[10px] font-black px-3 py-1 uppercase tracking-widest ${order.status === 'Delivered' || order.status === 'Shipped' ? 'bg-green-500/20 text-green-400' : 'bg-orange-500/20 text-orange-400'
                         }`}>
                         {order.status}
                       </span>
-                      <p className="font-anybody font-black italic mt-2">{order.total.toLocaleString()} ฿</p>
+                      <p className="font-anybody font-black italic mt-2">{typeof order.total === 'number' ? order.total.toLocaleString() + ' ฿' : order.total}</p>
                     </div>
                   </div>
                   <div className="space-y-2">
                     <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Items</p>
                     <ul className="list-disc list-inside text-sm font-medium space-y-1">
-                      {order.items.map((item, index) => (
-                        <li key={index}>{item}</li>
+                      {order.items && order.items.map((item, index) => (
+                        <li key={index}>{item.name || item} {item.qty ? `(x${item.qty})` : ''}</li>
                       ))}
                     </ul>
                   </div>
                 </div>
-              ))}
+              )) : (
+                <p className="text-on-surface-variant italic">No order history found.</p>
+              )}
             </div>
           </div>
         </div>
