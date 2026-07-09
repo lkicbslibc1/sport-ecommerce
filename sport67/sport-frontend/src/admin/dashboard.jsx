@@ -16,7 +16,7 @@ import GogoAthleticInventory from "./Inventory.jsx";
 import GogoAthleticProducts from "./Products.jsx";
 import GogoAthleticTeam from "./Team.jsx";
 import Sidebar from "./Sidebar.jsx";
-import { ProductContext, getStoredOrders, INITIAL_ORDERS } from "../data/products.jsx";
+import { ProductContext, getStoredOrders } from "../data/products.jsx";
 
 const WEEK = [
   { day: "Mon", height: "h-2/3", amount: "32k ฿" },
@@ -43,10 +43,10 @@ function GlassPanel({ className = "", children }) {
 export default function GogoAthleticDashboard({ onViewChange, user }) {
   const [range, setRange] = useState("daily");
   const [currentPage, setCurrentPage] = useState("dashboard");
-  
+
   // Get products and orders from context and localStorage
   const { products } = useContext(ProductContext);
-  
+
   const ordersList = useMemo(() => {
     return getStoredOrders();
   }, [currentPage]); // re-evaluate when page switches to keep sync
@@ -95,13 +95,13 @@ export default function GogoAthleticDashboard({ onViewChange, user }) {
         series: p.series || p.description || "Core Technical Gear",
         revenue: (p.price * (15 - idx * 2)).toLocaleString("th-TH") + " ฿",
         image: p.image,
-        rankBg: idx === 0 
-          ? "bg-orange-300 text-neutral-950" 
-          : idx === 1 
-          ? "bg-neutral-300 text-neutral-950" 
-          : idx === 2 
-          ? "bg-neutral-500 text-neutral-950" 
-          : "bg-neutral-700 text-neutral-100"
+        rankBg: idx === 0
+          ? "bg-orange-300 text-neutral-950"
+          : idx === 1
+            ? "bg-neutral-300 text-neutral-950"
+            : idx === 2
+              ? "bg-neutral-500 text-neutral-950"
+              : "bg-neutral-700 text-neutral-100"
       }));
   }, [products]);
 
@@ -120,20 +120,20 @@ export default function GogoAthleticDashboard({ onViewChange, user }) {
 
   return (
     <div className="min-h-screen w-full bg-neutral-950 text-neutral-100 flex">
-<Sidebar
+      <Sidebar
         activeItem="dashboard"
         onNavigate={setCurrentPage}
         onViewChange={onViewChange}
         actionButton={
           <div className="flex flex-col gap-2">
-            <button 
+            <button
               onClick={() => setCurrentPage("products")}
               className="w-full bg-orange-600 text-white py-3 text-xs font-bold uppercase tracking-widest hover:scale-105 transition-transform flex items-center justify-center gap-2"
             >
               <Plus size={16} />
               New Product
             </button>
-            <button 
+            <button
               onClick={() => setCurrentPage("orders")}
               className="w-full bg-indigo-600 text-white py-3 text-xs font-bold uppercase tracking-widest hover:scale-105 transition-transform flex items-center justify-center gap-2"
             >
@@ -356,7 +356,7 @@ export default function GogoAthleticDashboard({ onViewChange, user }) {
                         </div>
                         <div className="text-right">
                           <p className="text-red-400 font-black">{status}</p>
-                          <button 
+                          <button
                             onClick={() => setCurrentPage("inventory")}
                             className="text-orange-300 text-[10px] font-bold underline uppercase tracking-widest"
                           >
@@ -382,7 +382,7 @@ export default function GogoAthleticDashboard({ onViewChange, user }) {
                       Leaderboard
                     </span>
                   </h5>
-                  <button 
+                  <button
                     onClick={() => setCurrentPage("products")}
                     className="text-neutral-400 hover:text-orange-300 text-xs font-bold uppercase tracking-widest border-b border-neutral-500"
                   >
@@ -438,7 +438,7 @@ export default function GogoAthleticDashboard({ onViewChange, user }) {
       </div>
 
       {/* FLOATING ACTION BUTTON */}
-      <button 
+      <button
         onClick={() => setCurrentPage("products")}
         className="fixed bottom-10 right-10 w-16 h-16 bg-orange-300 text-neutral-950 shadow-2xl flex items-center justify-center hover:scale-110 transition-transform z-50"
       >

@@ -2,13 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import runningBannerImg from './assets/running_banner.png';
 import ballSportsBannerImg from './assets/ball_sports_banner.png';
 import swimmingBannerImg from './assets/swimming_banner.png';
-import Running from './shopping/running.jsx';
-import Football from './shopping/football.jsx';
-import Swimming from './shopping/swimimg.jsx';
 import AllProducts from './shopping/all_products.jsx';
-import Men from './usertype/men.jsx';
-import Women from './usertype/women.jsx';
-import Kid from './usertype/kid.jsx';
 import Navbar from './navbar.jsx';
 import Dashboard from './admin/dashboard.jsx';
 import Login from './login.jsx';
@@ -77,26 +71,8 @@ function MainPageContent() {
     window.scrollTo(0, 0);
   }, [currentView]);
 
-  if (currentView === 'running') {
-    return <Running onViewChange={setCurrentView} user={user} setUser={setUser} cart={cart} addToCart={addToCart} />;
-  }
-  if (currentView === 'football') {
-    return <Football onViewChange={setCurrentView} user={user} setUser={setUser} cart={cart} addToCart={addToCart} />;
-  }
-  if (currentView === 'swimming') {
-    return <Swimming onViewChange={setCurrentView} user={user} setUser={setUser} cart={cart} addToCart={addToCart} />;
-  }
-  if (currentView === 'sport') {
-    return <AllProducts onViewChange={setCurrentView} user={user} setUser={setUser} cart={cart} addToCart={addToCart} />;
-  }
-  if (currentView === 'men') {
-    return <Men onViewChange={setCurrentView} user={user} setUser={setUser} cart={cart} addToCart={addToCart} />;
-  }
-  if (currentView === 'women') {
-    return <Women onViewChange={setCurrentView} user={user} setUser={setUser} cart={cart} addToCart={addToCart} />;
-  }
-  if (currentView === 'kid') {
-    return <Kid onViewChange={setCurrentView} user={user} setUser={setUser} cart={cart} addToCart={addToCart} />;
+  if (['running', 'football', 'swimming', 'sport', 'men', 'women', 'kid'].includes(currentView)) {
+    return <AllProducts onViewChange={setCurrentView} user={user} setUser={setUser} cart={cart} addToCart={addToCart} initialCategory={currentView} />;
   }
   if (currentView === 'dashboard') {
     if (!user || user.role === 'customer' || user.role === 'user') {

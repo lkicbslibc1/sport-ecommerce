@@ -11,7 +11,15 @@ const COLORS = [
   { name: "Orange", hex: "#fb8c00" },
 ];
 
-import { PRODUCTS } from '../data/products.js';
+const TARGET_GROUPS = [
+  { id: 'men', label: 'Men' },
+  { id: 'women', label: 'Women' },
+  { id: 'kid', label: 'Kids' }
+];
+
+const SPORTS = ["Running", "Football", "Swimming"];
+
+import { INITIAL_PRODUCTS } from '../data/product.js';
 
 function formatPrice(n) {
   return n.toLocaleString("th-TH", { minimumFractionDigits: 2 }) + " ฿";
@@ -45,14 +53,16 @@ function FilterDropdown({ name, label, openFilter, setOpenFilter, activeCount, c
   );
 }
 
-export default function AllProducts({ onViewChange, user, setUser, cart, addToCart }) {
-  useEffect(() => { window.scrollTo(0, 0); }, []);
+export default function AllProducts({ onViewChange, user, setUser, cart, addToCart, initialCategory }) {
+  useEffect(() => { window.scrollTo(0, 0); }, [initialCategory]);
 
   const [openFilter, setOpenFilter] = useState(null);
   const [priceRange, setPriceRange] = useState(5000);
   const [selectedCollections, setSelectedCollections] = useState([]);
   const [selectedSizes, setSelectedSizes] = useState([]);
   const [selectedColors, setSelectedColors] = useState([]);
+  const [selectedTargetGroups, setSelectedTargetGroups] = useState([]);
+  const [selectedSports, setSelectedSports] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -65,17 +75,35 @@ export default function AllProducts({ onViewChange, user, setUser, cart, addToCa
     setSelectedCollections([]);
     setSelectedSizes([]);
     setSelectedColors([]);
+    setSelectedTargetGroups([]);
+    setSelectedSports([]);
     setSearchQuery('');
     setCurrentPage(1);
   };
 
   useEffect(() => {
+    setSelectedTargetGroups([]);
+    setSelectedSports([]);
+    setSearchQuery('');
     setCurrentPage(1);
-  }, [priceRange, selectedCollections, selectedSizes, selectedColors, searchQuery]);
+    
+    if (initialCategory) {
+      if (['men', 'women', 'kid'].includes(initialCategory)) {
+        setSelectedTargetGroups([initialCategory]);
+      } else if (['running', 'football', 'swimming'].includes(initialCategory)) {
+        const sport = initialCategory.charAt(0).toUpperCase() + initialCategory.slice(1);
+        setSelectedSports([sport]);
+      }
+    }
+  }, [initialCategory]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [priceRange, selectedCollections, selectedSizes, selectedColors, selectedTargetGroups, selectedSports, searchQuery]);
 
   // Show all products without targetGroup filter
   const categoryProducts = useMemo(() => {
-    return PRODUCTS;
+    return INITIAL_PRODUCTS;
   }, []);
 
   const filteredProducts = useMemo(() => {
@@ -84,17 +112,30 @@ export default function AllProducts({ onViewChange, user, setUser, cart, addToCa
       const matchCollection = selectedCollections.length === 0 || selectedCollections.includes(p.brand);
       const matchSize = selectedSizes.length === 0 || p.sizes.some((s) => selectedSizes.includes(s));
       const matchColor = selectedColors.length === 0 || p.colorNames.some((c) => selectedColors.includes(c));
+      const matchTargetGroup = selectedTargetGroups.length === 0 || selectedTargetGroups.includes(p.targetGroup);
+      const matchSport = selectedSports.length === 0 || selectedSports.includes(p.sportType);
       const searchLower = searchQuery.toLowerCase();
-      const matchSearch = searchQuery === '' || 
+      const matchSearch = searchQuery === '' ||
         p.name.toLowerCase().includes(searchLower) ||
         p.series.toLowerCase().includes(searchLower) ||
         p.brand.toLowerCase().includes(searchLower);
-      return matchPrice && matchCollection && matchSize && matchColor && matchSearch;
+      return matchPrice && matchCollection && matchSize && matchColor && matchTargetGroup && matchSport && matchSearch;
     });
-  }, [categoryProducts, priceRange, selectedCollections, selectedSizes, selectedColors, searchQuery]);
+  }, [categoryProducts, priceRange, selectedCollections, selectedSizes, selectedColors, selectedTargetGroups, selectedSports, searchQuery]);
 
   const activeFilterCount =
-    (priceRange < 5000 ? 1 : 0) + selectedCollections.length + selectedSizes.length + selectedColors.length + (searchQuery ? 1 : 0);
+    (priceRange < 5000 ? 1 : 0) + selectedCollections.length + selectedSizes.length + selectedColors.length + selectedTargetGroups.length + selectedSports.length + (searchQuery ? 1 : 0);
+
+  const pageTitle = useMemo(() => {
+    if (selectedTargetGroups.length === 1 && selectedSports.length === 0) {
+      const tg = TARGET_GROUPS.find(g => g.id === selectedTargetGroups[0]);
+      return tg ? tg.label : "All Sports";
+    }
+    if (selectedSports.length === 1 && selectedTargetGroups.length === 0) {
+      return selectedSports[0];
+    }
+    return "All Sports";
+  }, [selectedTargetGroups, selectedSports]);
 
   const itemsPerPage = 20;
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
@@ -111,12 +152,12 @@ export default function AllProducts({ onViewChange, user, setUser, cart, addToCa
         <nav className="py-8 flex items-center gap-2 font-label-sm text-on-surface-variant uppercase tracking-widest">
           <a className="hover:text-primary transition-colors" href="#" onClick={(e) => { e.preventDefault(); onViewChange && onViewChange('home'); }}>Home</a>
           <span className="material-symbols-outlined text-[14px]">chevron_right</span>
-          
-          <span className="text-primary font-black">All Sports</span>
+
+          <span className="text-primary font-black">{pageTitle}</span>
         </nav>
 
         <div className="mb-10">
-          <h1 className="font-display-lg text-7xl md:text-8xl font-black italic tracking-tighter uppercase text-on-background">All Sports</h1>
+          <h1 className="font-display-lg text-7xl md:text-8xl font-black italic tracking-tighter uppercase text-on-background">{pageTitle}</h1>
           <p className="text-on-surface-variant max-w-xl mt-4 font-body-lg font-light leading-relaxed mb-10">
             Engineered for precision. Built for control. Explore our complete collection of high-performance gear.
           </p>
@@ -124,9 +165,9 @@ export default function AllProducts({ onViewChange, user, setUser, cart, addToCa
           {/* Large Search Bar */}
           <div className="relative group w-full">
             <span className="material-symbols-outlined absolute left-6 top-1/2 -translate-y-1/2 text-white/40 text-3xl group-focus-within:text-primary transition-colors">search</span>
-            <input 
-              type="text" 
-              placeholder="SEARCH PRODUCTS, SERIES, OR BRANDS..." 
+            <input
+              type="text"
+              placeholder="SEARCH PRODUCTS, SERIES, OR BRANDS..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full bg-surface-container border border-white/10 pl-20 pr-8 py-6 text-xl md:text-2xl font-anybody font-black italic uppercase tracking-tighter text-white placeholder:text-white/20 focus:border-primary focus:bg-white/5 outline-none transition-all"
@@ -143,6 +184,32 @@ export default function AllProducts({ onViewChange, user, setUser, cart, addToCa
               <div className="flex justify-between text-xs text-on-surface-variant mt-2 font-medium">
                 <span>0 ฿</span>
                 <span className="text-primary font-bold">{formatPrice(priceRange)}</span>
+              </div>
+            </FilterDropdown>
+
+            <FilterDropdown name="gender" label="Gender" openFilter={openFilter} setOpenFilter={setOpenFilter} activeCount={selectedTargetGroups.length}>
+              <p className="font-anybody font-black text-xs uppercase tracking-widest mb-4 text-on-background">Gender</p>
+              <div className="flex flex-col gap-3">
+                {TARGET_GROUPS.map((tg) => (
+                  <label key={tg.id} className="flex items-center gap-3 cursor-pointer text-sm text-on-surface-variant hover:text-on-background">
+                    <input type="checkbox" className="accent-primary w-4 h-4" checked={selectedTargetGroups.includes(tg.id)}
+                      onChange={() => toggleValue(selectedTargetGroups, setSelectedTargetGroups, tg.id)} />
+                    {tg.label}
+                  </label>
+                ))}
+              </div>
+            </FilterDropdown>
+
+            <FilterDropdown name="sport" label="Sport" openFilter={openFilter} setOpenFilter={setOpenFilter} activeCount={selectedSports.length}>
+              <p className="font-anybody font-black text-xs uppercase tracking-widest mb-4 text-on-background">Sport</p>
+              <div className="flex flex-col gap-3">
+                {SPORTS.map((s) => (
+                  <label key={s} className="flex items-center gap-3 cursor-pointer text-sm text-on-surface-variant hover:text-on-background">
+                    <input type="checkbox" className="accent-primary w-4 h-4" checked={selectedSports.includes(s)}
+                      onChange={() => toggleValue(selectedSports, setSelectedSports, s)} />
+                    {s}
+                  </label>
+                ))}
               </div>
             </FilterDropdown>
 
@@ -223,7 +290,7 @@ export default function AllProducts({ onViewChange, user, setUser, cart, addToCa
                 <p className="font-body-md text-on-surface-variant text-sm mb-4 font-light">{product.series}</p>
                 <div className="mt-auto">
                   <p className="font-anybody font-black italic text-primary text-lg mb-4">{formatPrice(product.price)}</p>
-                  <button 
+                  <button
                     onClick={() => addToCart && addToCart(product)}
                     className="buy-button w-full py-4 border border-white/20 font-anybody font-black text-sm uppercase tracking-widest transition-all duration-300 transform hover:scale-[1.02] group-hover:bg-primary group-hover:text-white group-hover:border-primary"
                   >
@@ -243,13 +310,13 @@ export default function AllProducts({ onViewChange, user, setUser, cart, addToCa
             Page {currentPage} of {totalPages || 1}
           </p>
           <div className="flex gap-4">
-            <button 
+            <button
               onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
               disabled={currentPage === 1}
               className={`flex items-center gap-4 px-8 py-4 font-anybody font-black text-sm italic tracking-widest uppercase transition-all duration-300 transform group ${currentPage === 1 ? 'bg-white/5 text-white/20 cursor-not-allowed' : 'bg-transparent border border-white/20 text-white hover:bg-white hover:text-black hover:scale-105'}`}>
               <span className="material-symbols-outlined group-hover:-translate-x-2 transition-transform">arrow_back</span> Prev
             </button>
-            <button 
+            <button
               onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages || totalPages === 0}
               className={`flex items-center gap-4 px-8 py-4 font-anybody font-black text-sm italic tracking-widest uppercase transition-all duration-300 transform group ${currentPage === totalPages || totalPages === 0 ? 'bg-white/5 text-white/20 cursor-not-allowed' : 'bg-primary text-white hover:bg-orange-600 hover:scale-105'}`}>
