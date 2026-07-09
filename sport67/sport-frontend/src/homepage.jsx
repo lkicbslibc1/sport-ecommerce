@@ -5,6 +5,7 @@ import swimmingBannerImg from './assets/swimming_banner.png';
 import Running from './shopping/running.jsx';
 import Football from './shopping/football.jsx';
 import Swimming from './shopping/swimimg.jsx';
+import AllProducts from './shopping/all_products.jsx';
 import Men from './usertype/men.jsx';
 import Women from './usertype/women.jsx';
 import Kid from './usertype/kid.jsx';
@@ -84,6 +85,9 @@ function MainPageContent() {
   }
   if (currentView === 'swimming') {
     return <Swimming onViewChange={setCurrentView} user={user} setUser={setUser} cart={cart} addToCart={addToCart} />;
+  }
+  if (currentView === 'sport') {
+    return <AllProducts onViewChange={setCurrentView} user={user} setUser={setUser} cart={cart} addToCart={addToCart} />;
   }
   if (currentView === 'men') {
     return <Men onViewChange={setCurrentView} user={user} setUser={setUser} cart={cart} addToCart={addToCart} />;

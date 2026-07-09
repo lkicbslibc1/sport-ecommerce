@@ -41,9 +41,16 @@ function GlassPanel({ className = "", children }) {
 
 export default function GogoAthleticOrders({ onNavigate, onViewChange }) {
   const [ordersList, setOrdersList] = useState(() => {
-    return getStoredOrders();
+    try {
+      const stored = localStorage.getItem('gogo_orders');
+      if (stored) return JSON.parse(stored);
+    } catch (e) {
+      console.error(e);
+    }
+    const initialMock = [];
+    return initialMock;
   });
-  
+
   const [showActionModal, setShowActionModal] = useState(false);
 
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -83,12 +90,12 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange }) {
 
   return (
     <div className="min-h-screen w-full bg-neutral-950 text-neutral-100 flex">
-<Sidebar
+      <Sidebar
         activeItem="orders"
         onNavigate={onNavigate}
         onViewChange={onViewChange}
         actionButton={
-          <button 
+          <button
             onClick={() => setShowActionModal(true)}
             className="w-full bg-orange-600 text-white text-[10px] font-black py-4 px-2 uppercase tracking-widest hover:scale-105 transition-transform flex items-center justify-center gap-2"
           >
@@ -166,7 +173,7 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange }) {
               <span className="text-[10px] uppercase tracking-widest text-neutral-400">
                 Filter Status:
               </span>
-              <select 
+              <select
                 value={selectedStatus}
                 onChange={(e) => setSelectedStatus(e.target.value)}
                 className="bg-neutral-900 border border-white/10 text-neutral-100 text-xs py-2 px-4 focus:ring-orange-300 focus:border-orange-300"
@@ -249,7 +256,7 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange }) {
                           >
                             <Eye size={16} />
                           </button>
-                          <select 
+                          <select
                             value={order.status}
                             onChange={(e) => handleUpdateStatus(order.id, e.target.value)}
                             className="bg-neutral-900 border border-white/10 text-[10px] uppercase font-black focus:ring-1 focus:ring-orange-300 cursor-pointer px-4 py-1.5 text-neutral-100"
@@ -293,7 +300,7 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange }) {
             className="absolute inset-0 bg-neutral-950/95 backdrop-blur-2xl"
             onClick={() => setSelectedOrder(null)}
           />
-<div className="absolute right-0 top-0 bottom-0 w-full max-w-[500px] bg-neutral-900 border-l border-white/10 shadow-2xl flex flex-col animate-slideIn">
+          <div className="absolute right-0 top-0 bottom-0 w-full max-w-[500px] bg-neutral-900 border-l border-white/10 shadow-2xl flex flex-col animate-slideIn">
             <div className="p-8 border-b border-white/10 flex justify-between items-center">
               <div>
                 <h3 className="text-2xl italic uppercase font-black text-orange-300">
@@ -380,7 +387,7 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange }) {
             className="absolute inset-0 bg-neutral-950/95 backdrop-blur-2xl"
             onClick={() => setShowActionModal(false)}
           />
-<div className="absolute right-0 top-0 bottom-0 w-full max-w-[400px] bg-neutral-900 border-l border-white/10 shadow-2xl flex flex-col animate-slideIn">
+          <div className="absolute right-0 top-0 bottom-0 w-full max-w-[400px] bg-neutral-900 border-l border-white/10 shadow-2xl flex flex-col animate-slideIn">
             <div className="p-6 border-b border-white/10 flex justify-between items-center">
               <h3 className="text-xl italic uppercase font-black text-orange-300">
                 Orders Actions
@@ -397,7 +404,7 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange }) {
                 onClick={() => {
                   const pendingOrders = ordersList.filter(o => o.status === "Pending");
                   if (pendingOrders.length > 0) {
-                    const updated = ordersList.map(o => 
+                    const updated = ordersList.map(o =>
                       o.status === "Pending" ? { ...o, status: "Preparing" } : o
                     );
                     setOrdersList(updated);
@@ -413,7 +420,7 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange }) {
                 onClick={() => {
                   const preparingOrders = ordersList.filter(o => o.status === "Preparing");
                   if (preparingOrders.length > 0) {
-                    const updated = ordersList.map(o => 
+                    const updated = ordersList.map(o =>
                       o.status === "Preparing" ? { ...o, status: "Shipped" } : o
                     );
                     setOrdersList(updated);
@@ -429,7 +436,7 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange }) {
                 onClick={() => {
                   if (window.confirm("Are you sure you want to export all orders?")) {
                     const dataStr = JSON.stringify(ordersList, null, 2);
-                    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+                    const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
                     const exportFileDefaultName = 'gogo-orders-export.json';
                     let linkElement = document.createElement('a');
                     linkElement.setAttribute('href', dataUri);

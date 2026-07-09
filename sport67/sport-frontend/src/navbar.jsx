@@ -16,6 +16,21 @@ export default function Navbar({ setCurrentView, user, setUser, cart = [] }) {
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
 
+  // Mega Menu state
+  const [hoveredCategory, setHoveredCategory] = useState(null);
+  const hideTimeoutRef = useRef(null);
+
+  const handleMouseEnter = (category) => {
+    if (hideTimeoutRef.current) clearTimeout(hideTimeoutRef.current);
+    setHoveredCategory(category);
+  };
+
+  const handleMouseLeave = () => {
+    hideTimeoutRef.current = setTimeout(() => {
+      setHoveredCategory(null);
+    }, 150);
+  };
+
   useEffect(() => {
     const handleClickOutsideDropdown = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -132,14 +147,29 @@ export default function Navbar({ setCurrentView, user, setUser, cart = [] }) {
 
           {/* Navigation Menu */}
           <nav
-            className="hidden md:flex items-center space-x-12 text-[11px] font-bold uppercase tracking-[0.2em] transition-opacity duration-300"
+            className="hidden md:flex items-center space-x-8 lg:space-x-12 text-[11px] font-bold uppercase tracking-[0.2em] transition-opacity duration-300"
             id="main-nav"
             style={{ opacity: isMobileNavLowOpacity ? 0.1 : 1 }}
           >
-            <a className="hover:text-primary transition" href="#" onClick={() => setCurrentView && setCurrentView('men')}>Men</a>
-            <a className="hover:text-primary transition" href="#" onClick={() => setCurrentView && setCurrentView('women')}>Women</a>
-            <a className="hover:text-primary transition" href="#" onClick={() => setCurrentView && setCurrentView('kid')}>Kids</a>
-            <a className="text-primary transition" href="#" onClick={() => setCurrentView && setCurrentView('home')}>Brands</a>
+            {['men', 'women', 'kid', 'sport'].map((cat) => (
+              <div
+                key={cat}
+                className="h-20 flex items-center"
+                onMouseEnter={() => handleMouseEnter(cat)}
+                onMouseLeave={handleMouseLeave}
+              >
+                <a
+                  className={`hover:text-primary transition ${hoveredCategory === cat ? 'text-primary' : ''}`}
+                  href="#"
+                  onClick={(e) => { e.preventDefault(); if (setCurrentView) setCurrentView(cat); }}
+                >
+                  {cat === 'kid' ? 'Kids' : cat}
+                </a>
+              </div>
+            ))}
+            <div className="h-20 flex items-center">
+              <a className="text-primary transition" href="#" onClick={(e) => { e.preventDefault(); if (setCurrentView) setCurrentView('home'); }}>Brands</a>
+            </div>
           </nav>
 
           {/* Dashboard Button */}
@@ -247,6 +277,88 @@ export default function Navbar({ setCurrentView, user, setUser, cart = [] }) {
             <button className="md:hidden flex items-center">
               <span className="material-symbols-outlined">menu</span>
             </button>
+          </div>
+        </div>
+
+        {/* Mega Menu Dropdown */}
+        <div
+          className={`absolute top-full left-0 w-full bg-neutral-950/95 backdrop-blur-xl border-b border-white/10 transition-all duration-300 overflow-hidden ${hoveredCategory ? 'max-h-[400px] opacity-100 py-12' : 'max-h-0 opacity-0 py-0'}`}
+          onMouseEnter={() => { if (hideTimeoutRef.current) clearTimeout(hideTimeoutRef.current); }}
+          onMouseLeave={handleMouseLeave}
+        >
+          <div className="max-w-[1440px] mx-auto px-6 lg:px-12 flex flex-col md:flex-row gap-16 md:gap-32 relative z-10 pb-12">
+            {/* Title / Description */}
+            <div className="w-full md:w-1/3">
+              <h2 className="text-5xl md:text-7xl font-anybody font-black italic uppercase text-white mb-6 tracking-tighter">
+                {hoveredCategory === 'men' && "MEN'S"}
+                {hoveredCategory === 'women' && "WOMEN'S"}
+                {hoveredCategory === 'kid' && "KIDS'"}
+                {hoveredCategory === 'sport' && "SPORT"}
+              </h2>
+              <p className="text-sm text-neutral-400 leading-relaxed max-w-[250px] font-light">
+                Discover the latest high-performance gear tailored for your needs.
+              </p>
+            </div>
+
+            <div className="flex flex-1 gap-16 md:gap-32">
+              {hoveredCategory === 'sport' ? (
+                <div className="flex-1 max-w-xs">
+                  <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-500 mb-8 border-b border-white/10 pb-4">Sports</h3>
+                  <ul className="space-y-6">
+                    {['running', 'football', 'swimming'].map(sport => (
+                      <li key={sport}>
+                        <a href="#" className="text-sm font-black uppercase tracking-widest text-neutral-300 hover:text-primary hover:translate-x-2 transition-all inline-block"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setHoveredCategory(null);
+                            if (setCurrentView) setCurrentView(sport);
+                          }}>
+                          {sport}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : (
+                <>
+                  {/* Clothes Categories */}
+                  <div className="flex-1 max-w-xs">
+                    <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-500 mb-8 border-b border-white/10 pb-4">Clothes</h3>
+                    <ul className="space-y-6">
+                      {['top', 'bottom', 'shoes', 'hat', 'sock'].map(type => (
+                        <li key={type}>
+                          <a href="#" className="text-sm font-black uppercase tracking-widest text-neutral-300 hover:text-primary hover:translate-x-2 transition-all inline-block"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              setHoveredCategory(null);
+                              if (setCurrentView) setCurrentView(hoveredCategory);
+                            }}>
+                            {type}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {/* Equipment Categories */}
+                  <div className="flex-1 max-w-xs">
+                    <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-500 mb-8 border-b border-white/10 pb-4">Equipment</h3>
+                    <ul className="space-y-6">
+                      <li>
+                        <a href="#" className="text-sm font-black uppercase tracking-widest text-neutral-300 hover:text-primary hover:translate-x-2 transition-all inline-block"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setHoveredCategory(null);
+                            if (setCurrentView) setCurrentView(hoveredCategory);
+                          }}>
+                          All Equipment
+                        </a>
+                      </li>
+                    </ul>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </div>
       </header>
