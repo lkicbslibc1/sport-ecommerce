@@ -53,7 +53,7 @@ function FilterDropdown({ name, label, openFilter, setOpenFilter, activeCount, c
   );
 }
 
-export default function AllProducts({ onViewChange, user, setUser, cart, addToCart, initialCategory }) {
+export default function AllProducts({ onViewChange, setSelectedProduct, user, setUser, cart, addToCart, initialCategory }) {
   useEffect(() => { window.scrollTo(0, 0); }, [initialCategory]);
 
   const [openFilter, setOpenFilter] = useState(null);
@@ -271,7 +271,7 @@ export default function AllProducts({ onViewChange, user, setUser, cart, addToCa
 
         <section className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-y-16 gap-x-6 mb-24">
           {currentProducts.map((product) => (
-            <article key={product.id} className="product-card group cursor-pointer flex flex-col">
+            <article key={product.id} onClick={() => { if (setSelectedProduct) setSelectedProduct(product); if (onViewChange) onViewChange('product_details'); }} className="product-card group cursor-pointer flex flex-col">
               <div className="relative overflow-hidden aspect-[4/5] bg-surface-container border border-white/5">
                 <img className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" src={product.image} alt={product.name} />
                 {product.badge && (
@@ -291,7 +291,7 @@ export default function AllProducts({ onViewChange, user, setUser, cart, addToCa
                 <div className="mt-auto">
                   <p className="font-anybody font-black italic text-primary text-lg mb-4">{formatPrice(product.price)}</p>
                   <button
-                    onClick={() => addToCart && addToCart(product)}
+                    onClick={(e) => { e.stopPropagation(); addToCart && addToCart(product); }}
                     className="buy-button w-full py-4 border border-white/20 font-anybody font-black text-sm uppercase tracking-widest transition-all duration-300 transform hover:scale-[1.02] group-hover:bg-primary group-hover:text-white group-hover:border-primary"
                   >
                     Add to Cart

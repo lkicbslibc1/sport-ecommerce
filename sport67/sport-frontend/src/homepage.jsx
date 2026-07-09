@@ -14,6 +14,7 @@ import KineticCheckout from './checkout/KineticCheckout.jsx';
 import Profile from './profile/profile.jsx';
 import OrderStatus from './profile/OrderStatus.jsx';
 import { ProductProvider } from './data/products.jsx';
+import ProductDetails from './shopping/product_details.jsx';
 
 export default function MainPage() {
   return (
@@ -26,6 +27,7 @@ export default function MainPage() {
 function MainPageContent() {
   const [activeCategory, setActiveCategory] = useState('men');
   const [currentView, setCurrentView] = useState('home');
+  const [selectedProduct, setSelectedProduct] = useState(null);
   const [user, setUser] = useState(() => {
     try {
       return JSON.parse(localStorage.getItem('gogo_current_user')) || null;
@@ -54,15 +56,17 @@ function MainPageContent() {
     localStorage.setItem('gogo_cart', JSON.stringify(cart));
   }, [cart]);
 
-  const addToCart = (product) => {
+  const addToCart = (product, quantity = 1) => {
     setCart(prevCart => {
-      const existingItem = prevCart.find(item => item.id === product.id);
+      // Use custom cartId if provided (to differentiate colors/sizes), otherwise fallback to product.id
+      const cartId = product.cartId || product.id;
+      const existingItem = prevCart.find(item => (item.cartId || item.id) === cartId);
       if (existingItem) {
         return prevCart.map(item =>
-          item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
+          (item.cartId || item.id) === cartId ? { ...item, quantity: item.quantity + quantity } : item
         );
       }
-      return [...prevCart, { ...product, quantity: 1 }];
+      return [...prevCart, { ...product, quantity, cartId }];
     });
     alert(`${product.name} has been added to your shopping bag!`);
   };
@@ -72,7 +76,10 @@ function MainPageContent() {
   }, [currentView]);
 
   if (['running', 'football', 'swimming', 'sport', 'men', 'women', 'kid'].includes(currentView)) {
-    return <AllProducts onViewChange={setCurrentView} user={user} setUser={setUser} cart={cart} addToCart={addToCart} initialCategory={currentView} />;
+    return <AllProducts onViewChange={setCurrentView} setSelectedProduct={setSelectedProduct} user={user} setUser={setUser} cart={cart} addToCart={addToCart} initialCategory={currentView} />;
+  }
+  if (currentView === 'product_details' && selectedProduct) {
+    return <ProductDetails onViewChange={setCurrentView} product={selectedProduct} user={user} setUser={setUser} cart={cart} addToCart={addToCart} />;
   }
   if (currentView === 'dashboard') {
     if (!user || user.role === 'customer' || user.role === 'user') {
