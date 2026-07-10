@@ -26,7 +26,10 @@ export default function MainPage() {
 
 function MainPageContent() {
   const [activeCategory, setActiveCategory] = useState('men');
-  const [currentView, setCurrentView] = useState('home');
+  const [currentView, setCurrentView] = useState(() => {
+    const hash = window.location.hash.replace('#', '');
+    return hash || 'home';
+  });
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [user, setUser] = useState(() => {
     try {
@@ -72,11 +75,25 @@ function MainPageContent() {
   };
 
   useEffect(() => {
+    if (window.location.hash !== `#${currentView}`) {
+      window.history.pushState(null, '', `#${currentView}`);
+    }
     window.scrollTo(0, 0);
   }, [currentView]);
 
-  if (['running', 'football', 'swimming', 'sport', 'men', 'women', 'kid'].includes(currentView)) {
-    return <AllProducts onViewChange={setCurrentView} setSelectedProduct={setSelectedProduct} user={user} setUser={setUser} cart={cart} addToCart={addToCart} initialCategory={currentView} />;
+  useEffect(() => {
+    const handlePopState = () => {
+      const hash = window.location.hash.replace('#', '');
+      setCurrentView(hash || 'home');
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  const baseView = currentView.split('-')[0];
+  if (['running', 'football', 'swimming', 'sport', 'men', 'women', 'kid', 'brand'].includes(baseView)) {
+    const subCategory = currentView.includes('-') ? currentView.split('-')[1] : null;
+    return <AllProducts onViewChange={setCurrentView} setSelectedProduct={setSelectedProduct} user={user} setUser={setUser} cart={cart} addToCart={addToCart} initialCategory={baseView} initialSubCategory={subCategory} />;
   }
   if (currentView === 'product_details' && selectedProduct) {
     return <ProductDetails onViewChange={setCurrentView} product={selectedProduct} user={user} setUser={setUser} cart={cart} addToCart={addToCart} />;
@@ -113,8 +130,10 @@ function MainPageContent() {
     }
     return <Profile onViewChange={setCurrentView} user={user} setUser={setUser} cart={cart} addToCart={addToCart} />;
   }
-  if (currentView === 'order_status') {
-    return <OrderStatus onViewChange={setCurrentView} user={user} setUser={setUser} cart={cart} />;
+  if (currentView.startsWith('order_status')) {
+    const orderId = currentView.replace('order_status-', '');
+    const finalOrderId = orderId === 'order_status' ? null : orderId;
+    return <OrderStatus onViewChange={setCurrentView} user={user} setUser={setUser} cart={cart} orderId={finalOrderId} />;
   }
 
   return (

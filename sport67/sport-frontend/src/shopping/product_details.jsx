@@ -13,10 +13,15 @@ export default function ProductDetails({ onViewChange, product, user, setUser, c
   const [selectedColor, setSelectedColor] = useState(product?.colorNames?.[0] || '');
   const [selectedSize, setSelectedSize] = useState(product?.sizes?.[0] || '');
   const [quantity, setQuantity] = useState(1);
+  const [showLoginPopup, setShowLoginPopup] = useState(false);
 
   if (!product) return null;
 
   const handleAddToCart = () => {
+    if (!user) {
+      setShowLoginPopup(true);
+      return;
+    }
     const productToAdd = {
       ...product,
       cartId: `${product.id}-${selectedColor}-${selectedSize}`,
@@ -43,9 +48,9 @@ export default function ProductDetails({ onViewChange, product, user, setUser, c
 
         <div className="flex flex-col lg:flex-row gap-16 mt-8">
           {/* Image Gallery */}
-          <div className="w-full lg:w-1/2 flex justify-center">
-            <div className="w-full max-w-lg aspect-square bg-surface-container border border-white/5 relative overflow-hidden flex items-center justify-center p-12 group">
-              <img src={product.image} alt={product.name} className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-700" />
+          <div className="w-full lg:w-1/2 flex justify-center items-start">
+            <div className="w-full max-w-lg relative overflow-hidden group">
+              <img src={product.image} alt={product.name} className="w-full h-auto object-contain group-hover:scale-105 transition-transform duration-700" />
               {product.badge && (
                 <div className={`absolute top-6 left-6 ${product.badgeType === 'primary' ? 'bg-primary' : 'bg-tertiary'} text-white font-anybody font-black text-xs px-4 py-2 uppercase tracking-widest`}>
                   {product.badge}
@@ -61,7 +66,12 @@ export default function ProductDetails({ onViewChange, product, user, setUser, c
                 {product.name}
               </h1>
               <p className="text-lg md:text-xl text-on-surface-variant font-light mb-6 tracking-wide">{product.series}</p>
-              <p className="text-3xl font-anybody font-black italic text-primary">{formatPrice(product.price)}</p>
+              <div className="flex items-end gap-6">
+                <p className="text-3xl font-anybody font-black italic text-primary">{formatPrice(product.price)}</p>
+                <p className="text-sm text-on-surface-variant uppercase tracking-widest font-bold mb-1">
+                  {product.amount > 0 ? `${product.amount} items in stock` : <span className="text-[#ffb4ab]">Out of Stock</span>}
+                </p>
+              </div>
             </div>
 
             <div className="w-full h-[1px] bg-white/10 mb-8"></div>
@@ -133,10 +143,11 @@ export default function ProductDetails({ onViewChange, product, user, setUser, c
             {/* Add to Cart */}
             <button
               onClick={handleAddToCart}
-              className="w-full bg-primary hover:bg-orange-600 text-white py-6 font-anybody font-black text-lg uppercase tracking-widest transition-all duration-300 transform hover:scale-[1.02] flex items-center justify-center gap-4 mb-12 shadow-[0_0_20px_rgba(255,107,0,0.3)] hover:shadow-[0_0_30px_rgba(255,107,0,0.5)]"
+              disabled={product.amount === 0}
+              className={`w-full py-6 font-anybody font-black text-lg uppercase tracking-widest transition-all duration-300 transform flex items-center justify-center gap-4 mb-12 ${product.amount > 0 ? 'bg-primary hover:bg-orange-600 text-white hover:scale-[1.02] shadow-[0_0_20px_rgba(255,107,0,0.3)] hover:shadow-[0_0_30px_rgba(255,107,0,0.5)]' : 'bg-surface-container-high text-on-surface-variant cursor-not-allowed border border-white/10'}`}
             >
-              <span className="material-symbols-outlined">shopping_bag</span>
-              Add to Bag
+              <span className="material-symbols-outlined">{!user ? 'lock' : (product.amount > 0 ? 'shopping_bag' : 'remove_shopping_cart')}</span>
+              {!user ? 'Login Required' : (product.amount > 0 ? 'Add to Bag' : 'Out of Stock')}
             </button>
 
             {/* Product Details Section */}
@@ -158,6 +169,36 @@ export default function ProductDetails({ onViewChange, product, user, setUser, c
           </div>
         </div>
       </main>
+
+      {/* Login Required Popup */}
+      {showLoginPopup && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div 
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => setShowLoginPopup(false)}
+          />
+          <div className="relative bg-surface-container border border-white/10 p-10 max-w-sm w-full shadow-2xl flex flex-col items-center text-center animate-in fade-in zoom-in duration-300">
+            <div className="w-16 h-16 rounded-full bg-primary/20 text-primary flex items-center justify-center mb-6">
+              <span className="material-symbols-outlined text-3xl">lock</span>
+            </div>
+            <h2 className="font-anybody font-black text-2xl uppercase tracking-widest text-on-background mb-4">Login Required</h2>
+            <p className="text-on-surface-variant font-light mb-8">
+              กรุณาเข้าสู่ระบบ หรือสมัครสมาชิกก่อนทำการสั่งซื้อสินค้า
+            </p>
+            <div className="w-full space-y-4">
+              <button 
+                onClick={() => {
+                  setShowLoginPopup(false);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                className="w-full py-4 bg-primary text-white font-anybody font-black uppercase tracking-widest hover:bg-orange-600 transition-colors"
+              >
+                OK
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

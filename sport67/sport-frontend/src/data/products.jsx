@@ -4,6 +4,14 @@ import { INITIAL_PRODUCTS } from "./product";
 
 
 function getStoredProducts() {
+  try {
+    const stored = localStorage.getItem('gogo_products');
+    if (stored) {
+      return JSON.parse(stored);
+    }
+  } catch (e) {
+    console.error("Failed to parse products from localStorage", e);
+  }
   return INITIAL_PRODUCTS;
 }
 // Save products to localStorage
@@ -101,13 +109,16 @@ export function ProductProvider({ children }) {
   };
 
   const updateProduct = (updatedProduct) => {
-    const index = products.findIndex(p => p.id === updatedProduct.id);
-    if (index !== -1) {
-      const newProducts = [...products];
-      newProducts[index] = { ...products[index], ...updatedProduct };
-      setProducts(newProducts);
-      saveProducts(newProducts);
-    }
+    setProducts(prev => {
+      const index = prev.findIndex(p => p.id === updatedProduct.id);
+      if (index !== -1) {
+        const newProducts = [...prev];
+        newProducts[index] = { ...prev[index], ...updatedProduct };
+        saveProducts(newProducts);
+        return newProducts;
+      }
+      return prev;
+    });
   };
 
   const deleteProduct = (id) => {

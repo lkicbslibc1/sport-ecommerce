@@ -176,8 +176,10 @@ export default function Navbar({ setCurrentView, user, setUser, cart = [] }) {
                 </a>
               </div>
             ))}
-            <div className="h-20 flex items-center">
-              <a className="text-primary transition" href="#" onClick={(e) => { e.preventDefault(); if (setCurrentView) setCurrentView('home'); }}>Brands</a>
+            <div className="h-20 flex items-center"
+                 onMouseEnter={() => handleMouseEnter('brands')}
+                 onMouseLeave={handleMouseLeave}>
+              <a className={`hover:text-primary transition ${hoveredCategory === 'brands' ? 'text-primary' : ''}`} href="#" onClick={(e) => { e.preventDefault(); if (setCurrentView) setCurrentView('home'); }}>Brands</a>
             </div>
           </nav>
 
@@ -364,6 +366,7 @@ export default function Navbar({ setCurrentView, user, setUser, cart = [] }) {
                 {hoveredCategory === 'women' && "WOMEN'S"}
                 {hoveredCategory === 'kid' && "KIDS'"}
                 {hoveredCategory === 'sport' && "SPORT"}
+                {hoveredCategory === 'brands' && "BRANDS"}
               </h2>
               <p className="text-sm text-neutral-400 leading-relaxed max-w-[250px] font-light">
                 Discover the latest high-performance gear tailored for your needs.
@@ -389,6 +392,24 @@ export default function Navbar({ setCurrentView, user, setUser, cart = [] }) {
                     ))}
                   </ul>
                 </div>
+              ) : hoveredCategory === 'brands' ? (
+                <div className="flex-1 max-w-xs">
+                  <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-500 mb-8 border-b border-white/10 pb-4">Our Brands</h3>
+                  <ul className="space-y-6">
+                    {['nike', 'puma', 'adidas'].map(brand => (
+                      <li key={brand}>
+                        <a href="#" className="text-sm font-black uppercase tracking-widest text-neutral-300 hover:text-primary hover:translate-x-2 transition-all inline-block"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setHoveredCategory(null);
+                            if (setCurrentView) setCurrentView(`brand-${brand}`);
+                          }}>
+                          {brand}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               ) : (
                 <>
                   {/* Clothes Categories */}
@@ -401,7 +422,7 @@ export default function Navbar({ setCurrentView, user, setUser, cart = [] }) {
                             onClick={(e) => {
                               e.preventDefault();
                               setHoveredCategory(null);
-                              if (setCurrentView) setCurrentView(hoveredCategory);
+                              if (setCurrentView) setCurrentView(`${hoveredCategory}-${type}`);
                             }}>
                             {type}
                           </a>
@@ -419,7 +440,7 @@ export default function Navbar({ setCurrentView, user, setUser, cart = [] }) {
                           onClick={(e) => {
                             e.preventDefault();
                             setHoveredCategory(null);
-                            if (setCurrentView) setCurrentView(hoveredCategory);
+                            if (setCurrentView) setCurrentView(`${hoveredCategory}-equipment`);
                           }}>
                           All Equipment
                         </a>

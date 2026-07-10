@@ -18,8 +18,10 @@ const TARGET_GROUPS = [
 ];
 
 const SPORTS = ["Running", "Football", "Swimming"];
+const CLOTHES_TYPES = ["top", "bottom", "shoes", "hat", "sock"];
+const PRODUCT_TYPES = ["clothes", "equipment"];
 
-import { INITIAL_PRODUCTS } from '../data/product.js';
+import { useProducts } from '../data/products.jsx';
 
 function formatPrice(n) {
   return n.toLocaleString("th-TH", { minimumFractionDigits: 2 }) + " ฿";
@@ -53,7 +55,8 @@ function FilterDropdown({ name, label, openFilter, setOpenFilter, activeCount, c
   );
 }
 
-export default function AllProducts({ onViewChange, setSelectedProduct, user, setUser, cart, addToCart, initialCategory }) {
+export default function AllProducts({ onViewChange, setSelectedProduct, user, setUser, cart, addToCart, initialCategory, initialSubCategory }) {
+  const { products } = useProducts();
   useEffect(() => { window.scrollTo(0, 0); }, [initialCategory]);
 
   const [openFilter, setOpenFilter] = useState(null);
@@ -63,6 +66,8 @@ export default function AllProducts({ onViewChange, setSelectedProduct, user, se
   const [selectedColors, setSelectedColors] = useState([]);
   const [selectedTargetGroups, setSelectedTargetGroups] = useState([]);
   const [selectedSports, setSelectedSports] = useState([]);
+  const [selectedProductTypes, setSelectedProductTypes] = useState(PRODUCT_TYPES);
+  const [selectedClothesTypes, setSelectedClothesTypes] = useState(CLOTHES_TYPES);
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -77,6 +82,8 @@ export default function AllProducts({ onViewChange, setSelectedProduct, user, se
     setSelectedColors([]);
     setSelectedTargetGroups([]);
     setSelectedSports([]);
+    setSelectedProductTypes(PRODUCT_TYPES);
+    setSelectedClothesTypes(CLOTHES_TYPES);
     setSearchQuery('');
     setCurrentPage(1);
   };
@@ -84,6 +91,8 @@ export default function AllProducts({ onViewChange, setSelectedProduct, user, se
   useEffect(() => {
     setSelectedTargetGroups([]);
     setSelectedSports([]);
+    setSelectedProductTypes(PRODUCT_TYPES);
+    setSelectedClothesTypes(CLOTHES_TYPES);
     setSearchQuery('');
     setCurrentPage(1);
     
@@ -93,18 +102,37 @@ export default function AllProducts({ onViewChange, setSelectedProduct, user, se
       } else if (['running', 'football', 'swimming'].includes(initialCategory)) {
         const sport = initialCategory.charAt(0).toUpperCase() + initialCategory.slice(1);
         setSelectedSports([sport]);
+      } else if (initialCategory === 'brand' && initialSubCategory) {
+        const brand = initialSubCategory.charAt(0).toUpperCase() + initialSubCategory.slice(1);
+        setSelectedCollections([brand]);
       }
     }
-  }, [initialCategory]);
+
+    if (initialCategory === 'brand') {
+      setSelectedProductTypes(PRODUCT_TYPES);
+      setSelectedClothesTypes(CLOTHES_TYPES);
+    } else if (initialSubCategory) {
+      if (initialSubCategory === 'equipment') {
+        setSelectedProductTypes(['equipment']);
+        setSelectedClothesTypes(CLOTHES_TYPES);
+      } else {
+        setSelectedProductTypes(['clothes']);
+        setSelectedClothesTypes([initialSubCategory]);
+      }
+    } else {
+      setSelectedProductTypes(PRODUCT_TYPES);
+      setSelectedClothesTypes(CLOTHES_TYPES);
+    }
+  }, [initialCategory, initialSubCategory]);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [priceRange, selectedCollections, selectedSizes, selectedColors, selectedTargetGroups, selectedSports, searchQuery]);
+  }, [priceRange, selectedCollections, selectedSizes, selectedColors, selectedTargetGroups, selectedSports, selectedProductTypes, selectedClothesTypes, searchQuery]);
 
   // Show all products without targetGroup filter
   const categoryProducts = useMemo(() => {
-    return INITIAL_PRODUCTS;
-  }, []);
+    return products;
+  }, [products]);
 
   const filteredProducts = useMemo(() => {
     return categoryProducts.filter((p) => {
@@ -114,26 +142,51 @@ export default function AllProducts({ onViewChange, setSelectedProduct, user, se
       const matchColor = selectedColors.length === 0 || p.colorNames.some((c) => selectedColors.includes(c));
       const matchTargetGroup = selectedTargetGroups.length === 0 || selectedTargetGroups.includes(p.targetGroup);
       const matchSport = selectedSports.length === 0 || selectedSports.includes(p.sportType);
+      const matchProductType = selectedProductTypes.includes(p.productType);
+      const matchClothesType = p.productType !== 'clothes' || selectedClothesTypes.includes(p.clothesType);
       const searchLower = searchQuery.toLowerCase();
       const matchSearch = searchQuery === '' ||
         p.name.toLowerCase().includes(searchLower) ||
         p.series.toLowerCase().includes(searchLower) ||
         p.brand.toLowerCase().includes(searchLower);
-      return matchPrice && matchCollection && matchSize && matchColor && matchTargetGroup && matchSport && matchSearch;
+      return matchPrice && matchCollection && matchSize && matchColor && matchTargetGroup && matchSport && matchProductType && matchClothesType && matchSearch;
     });
-  }, [categoryProducts, priceRange, selectedCollections, selectedSizes, selectedColors, selectedTargetGroups, selectedSports, searchQuery]);
+  }, [categoryProducts, priceRange, selectedCollections, selectedSizes, selectedColors, selectedTargetGroups, selectedSports, selectedProductTypes, selectedClothesTypes, searchQuery]);
 
   const activeFilterCount =
-    (priceRange < 5000 ? 1 : 0) + selectedCollections.length + selectedSizes.length + selectedColors.length + selectedTargetGroups.length + selectedSports.length + (searchQuery ? 1 : 0);
+    (priceRange < 5000 ? 1 : 0) + selectedCollections.length + selectedSizes.length + selectedColors.length + selectedTargetGroups.length + selectedSports.length + (selectedProductTypes.length < PRODUCT_TYPES.length ? 1 : 0) + (selectedClothesTypes.length < CLOTHES_TYPES.length ? 1 : 0) + (searchQuery ? 1 : 0);
 
   const pageTitle = useMemo(() => {
-    if (selectedTargetGroups.length === 1 && selectedSports.length === 0) {
-      const tg = TARGET_GROUPS.find(g => g.id === selectedTargetGroups[0]);
-      return tg ? tg.label : "All Sports";
+    let titleParts = [];
+
+    if (selectedTargetGroups.length > 0) {
+      const tgLabels = selectedTargetGroups.map(id => {
+        const tg = TARGET_GROUPS.find(g => g.id === id);
+        return tg ? tg.label : id;
+      });
+      titleParts.push(tgLabels.join(' & '));
     }
-    if (selectedSports.length === 1 && selectedTargetGroups.length === 0) {
-      return selectedSports[0];
+
+    if (selectedSports.length > 0) {
+      if (selectedSports.length === SPORTS.length) {
+        titleParts.push("All Sports");
+      } else {
+        titleParts.push(selectedSports.join(' & '));
+      }
     }
+
+    if (titleParts.length === 2) {
+      let genderPart = titleParts[0];
+      if (genderPart.endsWith('s')) {
+        genderPart += "'";
+      } else {
+        genderPart += "'s";
+      }
+      return `${genderPart} ${titleParts[1]}`;
+    } else if (titleParts.length === 1) {
+      return titleParts[0];
+    }
+    
     return "All Sports";
   }, [selectedTargetGroups, selectedSports]);
 
@@ -213,6 +266,34 @@ export default function AllProducts({ onViewChange, setSelectedProduct, user, se
               </div>
             </FilterDropdown>
 
+            <FilterDropdown name="type" label="Type" openFilter={openFilter} setOpenFilter={setOpenFilter} activeCount={selectedProductTypes.length + selectedClothesTypes.length}>
+              <p className="font-anybody font-black text-xs uppercase tracking-widest mb-4 text-on-background">Product Type</p>
+              <div className="flex flex-col gap-3 mb-6">
+                {PRODUCT_TYPES.map((pt) => (
+                  <label key={pt} className="flex items-center gap-3 cursor-pointer text-sm text-on-surface-variant hover:text-on-background">
+                    <input type="checkbox" className="accent-primary w-4 h-4" checked={selectedProductTypes.includes(pt)}
+                      onChange={() => toggleValue(selectedProductTypes, setSelectedProductTypes, pt)} />
+                    {pt === 'clothes' ? 'Clothes' : 'Equipment'}
+                  </label>
+                ))}
+              </div>
+              <p className="font-anybody font-black text-xs uppercase tracking-widest mb-4 text-on-background">Clothes Type</p>
+              <div className="flex flex-col gap-3">
+                {CLOTHES_TYPES.map((ct) => (
+                  <label key={ct} className="flex items-center gap-3 cursor-pointer text-sm text-on-surface-variant hover:text-on-background">
+                    <input type="checkbox" className="accent-primary w-4 h-4" checked={selectedClothesTypes.includes(ct)}
+                      onChange={() => {
+                        toggleValue(selectedClothesTypes, setSelectedClothesTypes, ct);
+                        if (!selectedClothesTypes.includes(ct)) {
+                          setSelectedProductTypes(prev => prev.includes('clothes') ? prev : [...prev, 'clothes']);
+                        }
+                      }} />
+                    {ct.charAt(0).toUpperCase() + ct.slice(1)}
+                  </label>
+                ))}
+              </div>
+            </FilterDropdown>
+
             <FilterDropdown name="collection" label="Collection" openFilter={openFilter} setOpenFilter={setOpenFilter} activeCount={selectedCollections.length}>
               <p className="font-anybody font-black text-xs uppercase tracking-widest mb-4 text-on-background">Collection</p>
               <div className="flex flex-col gap-3">
@@ -272,8 +353,8 @@ export default function AllProducts({ onViewChange, setSelectedProduct, user, se
         <section className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-y-16 gap-x-6 mb-24">
           {currentProducts.map((product) => (
             <article key={product.id} onClick={() => { if (setSelectedProduct) setSelectedProduct(product); if (onViewChange) onViewChange('product_details'); }} className="product-card group cursor-pointer flex flex-col">
-              <div className="relative overflow-hidden aspect-[4/5] bg-surface-container border border-white/5">
-                <img className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" src={product.image} alt={product.name} />
+              <div className="relative overflow-hidden aspect-square bg-surface-container border border-white/5">
+                <img className="w-full h-full object-contain p-4 group-hover:scale-110 transition-transform duration-700" src={product.image} alt={product.name} />
                 {product.badge && (
                   <div className={`absolute top-4 left-4 ${product.badgeType === 'primary' ? 'bg-primary' : 'bg-tertiary'} text-white font-anybody font-black text-[10px] px-3 py-1 uppercase tracking-widest`}>
                     {product.badge}
@@ -288,14 +369,11 @@ export default function AllProducts({ onViewChange, setSelectedProduct, user, se
                 </div>
                 <h3 className="font-bold text-xs uppercase tracking-widest text-on-background mb-1">{product.name}</h3>
                 <p className="font-body-md text-on-surface-variant text-sm mb-4 font-light">{product.series}</p>
-                <div className="mt-auto">
+                <div className="mt-auto flex justify-between items-end">
                   <p className="font-anybody font-black italic text-primary text-lg mb-4">{formatPrice(product.price)}</p>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); addToCart && addToCart(product); }}
-                    className="buy-button w-full py-4 border border-white/20 font-anybody font-black text-sm uppercase tracking-widest transition-all duration-300 transform hover:scale-[1.02] group-hover:bg-primary group-hover:text-white group-hover:border-primary"
-                  >
-                    Add to Cart
-                  </button>
+                  <p className="text-[10px] text-on-surface-variant uppercase tracking-widest font-bold mb-4">
+                    {product.amount > 0 ? `${product.amount} Left` : <span className="text-[#ffb4ab]">Out of Stock</span>}
+                  </p>
                 </div>
               </div>
             </article>

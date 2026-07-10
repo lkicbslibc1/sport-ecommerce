@@ -91,7 +91,7 @@ function BagItem({ item, updateQuantity, removeItem }) {
                             SIZE
                         </p>
                         <p className="font-black italic" style={{ color: C.onSurface }}>
-                            {item.size || "M"}
+                            {item.selectedSize || item.size || "M"}
                         </p>
                     </div>
                     <div>
@@ -99,7 +99,7 @@ function BagItem({ item, updateQuantity, removeItem }) {
                             COLOR
                         </p>
                         <p className="font-black italic" style={{ color: C.onSurface }}>
-                            {item.color || "DEFAULT"}
+                            {item.selectedColor || item.color || "DEFAULT"}
                         </p>
                     </div>
                     <div className="col-span-2 md:col-span-1">
@@ -112,7 +112,7 @@ function BagItem({ item, updateQuantity, removeItem }) {
                         >
                             <button
                                 type="button"
-                                onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                                onClick={() => updateQuantity(item.cartId || item.id, item.quantity - 1)}
                                 className="hover:opacity-70 transition-opacity bg-transparent border-none text-white cursor-pointer"
                             >
                                 <Minus size={14} />
@@ -122,7 +122,7 @@ function BagItem({ item, updateQuantity, removeItem }) {
                             </span>
                             <button
                                 type="button"
-                                onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                                onClick={() => updateQuantity(item.cartId || item.id, item.quantity + 1)}
                                 className="hover:opacity-70 transition-opacity bg-transparent border-none text-white cursor-pointer"
                             >
                                 <Plus size={14} />
@@ -133,7 +133,7 @@ function BagItem({ item, updateQuantity, removeItem }) {
                 <div className="mt-6 flex gap-6">
                     <button
                         type="button"
-                        onClick={() => removeItem(item.id)}
+                        onClick={() => removeItem(item.cartId || item.id)}
                         className="text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:opacity-80 transition-opacity bg-transparent border-none cursor-pointer"
                         style={{ color: "#ffb4ab" }}
                     >
@@ -150,20 +150,20 @@ export default function GoGoBag({ onViewChange, cart = [], setCart, user, setUse
         window.scrollTo(0, 0);
     }, []);
 
-    const updateQuantity = (itemId, newQty) => {
+    const updateQuantity = (cartId, newQty) => {
         if (newQty < 1) {
-            removeItem(itemId);
+            removeItem(cartId);
         } else {
-            setCart(prev => prev.map(i => i.id === itemId ? { ...i, quantity: newQty } : i));
+            setCart(prev => prev.map(i => (i.cartId || i.id) === cartId ? { ...i, quantity: newQty } : i));
         }
     };
 
-    const removeItem = (itemId) => {
-        setCart(prev => prev.filter(i => i.id !== itemId));
+    const removeItem = (cartId) => {
+        setCart(prev => prev.filter(i => (i.cartId || i.id) !== cartId));
     };
 
     const subtotal = cart.reduce((sum, i) => sum + i.price * i.quantity, 0);
-    const tax = subtotal * 0.08;
+    const tax = subtotal * 0.07;
     const total = subtotal + tax;
 
     return (
@@ -199,33 +199,14 @@ export default function GoGoBag({ onViewChange, cart = [], setCart, user, setUse
                         <div className="lg:col-span-8 space-y-8">
                             {cart.map((item) => (
                                 <BagItem
-                                    key={item.id}
+                                    key={item.cartId || item.id}
                                     item={item}
                                     updateQuantity={updateQuantity}
                                     removeItem={removeItem}
                                 />
                             ))}
 
-                            <div className="mt-4 p-1 pt-0 overflow-hidden" style={{ backgroundColor: C.primaryContainer }}>
-                                <div className="p-8 flex flex-col md:flex-row items-center justify-between gap-6" style={{ backgroundColor: C.surface }}>
-                                    <div>
-                                        <h4 className="text-2xl italic uppercase font-black leading-none mb-2" style={{ color: C.onSurface }}>
-                                            COMPLETE YOUR KIT
-                                        </h4>
-                                        <p className="uppercase tracking-tighter" style={{ color: C.onSurfaceVariant }}>
-                                            ELITE MEMBERS GET 15% OFF ON BUNDLES.
-                                        </p>
-                                    </div>
-                                    <button
-                                        type="button"
-                                        onClick={() => onViewChange('home')}
-                                        className="border font-black uppercase px-8 py-4 text-[11px] italic transition-all duration-300 cursor-pointer bg-transparent"
-                                        style={{ borderColor: C.primary, color: C.primary }}
-                                    >
-                                        EXPLORE GEAR
-                                    </button>
-                                </div>
-                            </div>
+
                         </div>
 
                         <aside className="lg:col-span-4">

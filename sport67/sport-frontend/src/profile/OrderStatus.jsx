@@ -2,10 +2,28 @@ import React, { useEffect } from 'react';
 import Navbar from '../navbar.jsx';
 import { ArrowLeft, CheckCircle2, Package, Truck, Receipt } from 'lucide-react';
 
-export default function OrderStatus({ onViewChange, user, setUser, cart }) {
+export default function OrderStatus({ onViewChange, user, setUser, cart, orderId }) {
+  const [order, setOrder] = React.useState(null);
+
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, []);
+    try {
+      const orders = JSON.parse(localStorage.getItem('gogo_orders')) || [];
+      const foundOrder = orderId ? orders.find(o => o.id === orderId) : orders[0];
+      setOrder(foundOrder || null);
+    } catch (e) {
+      console.error(e);
+    }
+  }, [orderId]);
+
+  if (!order) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center">
+        <p className="text-white">Loading or Order Not Found...</p>
+        <button onClick={() => onViewChange('profile')} className="text-primary mt-4 underline">Back to Profile</button>
+      </div>
+    );
+  }
 
   return (
     <div className="selection:bg-primary selection:text-white min-h-screen bg-background text-on-background font-sans">
@@ -34,11 +52,11 @@ export default function OrderStatus({ onViewChange, user, setUser, cart }) {
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12 border-b border-white/10 pb-8">
             <div>
               <p className="text-[10px] uppercase font-bold tracking-widest text-on-surface-variant mb-1">หมายเลขคำสั่งซื้อ (Order ID)</p>
-              <h3 className="font-anybody font-black text-2xl uppercase">ORD-2026-001</h3>
+              <h3 className="font-anybody font-black text-2xl uppercase">{order.id}</h3>
             </div>
             <div className="md:text-right">
               <p className="text-[10px] uppercase font-bold tracking-widest text-on-surface-variant mb-1">วันที่สั่งซื้อ (Order Date)</p>
-              <p className="font-bold">2026-07-01</p>
+              <p className="font-bold">{order.date}</p>
             </div>
           </div>
 
@@ -90,14 +108,25 @@ export default function OrderStatus({ onViewChange, user, setUser, cart }) {
 
           <div className="mt-16 bg-white/5 p-6 border border-white/10">
             <h4 className="font-black uppercase tracking-widest text-sm mb-6 border-b border-white/10 pb-4">รายการสินค้า (Items)</h4>
-            <div className="flex items-center gap-6">
-              <div className="w-24 h-24 bg-surface-container flex items-center justify-center p-2">
-                <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDUvCVnJTx-gEfawY8-FNPOPr00pKOBMvmflTb-xYd8__gKctCW26c1LaYIcCaq16LWFoTHmQpesUOqaqwlpBvKGxnXS2r3WPxFr_SNDjGnYvMXsP7cTh7ubn8ov9wu8eZQM_Cx4TobM4_TmamPyteS3DI3t4NT82KjajcGOYAlOHvaZRixRLMRGNFcI1yr6nghM7n3yF-4XVNs4NZeFiXNPVCZtgbksZCXySqnAF2FS_FNABYcR1gkp_F57g8IsnunmENM-V82bhg" alt="XT-6 GORE-TEX" className="w-full h-full object-contain" />
-              </div>
-              <div>
-                <h5 className="font-black text-lg italic uppercase">XT-6 GORE-TEX</h5>
-                <p className="text-xs text-on-surface-variant uppercase tracking-widest mt-1">QTY: 1</p>
-              </div>
+            <div className="space-y-6">
+              {order.items && order.items.map((item, idx) => (
+                <div key={idx} className="flex items-center gap-6">
+                  {item.image ? (
+                    <div className="w-24 h-24 bg-surface-container flex items-center justify-center p-2">
+                      <img src={item.image} alt={item.name} className="w-full h-full object-contain" />
+                    </div>
+                  ) : (
+                    <div className="w-24 h-24 bg-surface-container flex items-center justify-center p-2 text-[10px] text-white/30 text-center">
+                      NO IMAGE
+                    </div>
+                  )}
+                  <div>
+                    <h5 className="font-black text-lg italic uppercase">{item.name}</h5>
+                    <p className="text-xs text-on-surface-variant uppercase tracking-widest mt-1">QTY: {item.qty}</p>
+                    <p className="text-xs text-primary font-bold italic mt-1">{item.price}</p>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
 

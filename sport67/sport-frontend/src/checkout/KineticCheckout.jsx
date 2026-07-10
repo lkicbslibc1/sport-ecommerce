@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { ShoppingBag, User, CreditCard, Wallet, ShieldCheck, CheckCircle2 } from "lucide-react";
 import Navbar from "../navbar.jsx";
+import { useProducts } from "../data/products.jsx";
 
 const C = {
     bg: "#050505",
@@ -79,6 +80,8 @@ export default function KineticCheckout({ onViewChange, cart = [], setCart, user
         window.scrollTo(0, 0);
     }, []);
 
+    const { products, updateProduct } = useProducts();
+
     const [shipping, setShipping] = useState("standard");
     const [payMethod, setPayMethod] = useState("card");
     const [isSubmitted, setIsSubmitted] = useState(false);
@@ -103,7 +106,7 @@ export default function KineticCheckout({ onViewChange, cart = [], setCart, user
 
     const subtotal = cart.reduce((sum, i) => sum + i.price * i.quantity, 0);
     const shippingCost = shipping === "express" ? 250 : 0;
-    const tax = subtotal * 0.08;
+    const tax = subtotal * 0.07;
     const total = subtotal + shippingCost + tax;
 
     const handlePlaceOrder = (e) => {
@@ -112,7 +115,7 @@ export default function KineticCheckout({ onViewChange, cart = [], setCart, user
 
         setTimeout(() => {
             const randomId = "GOGO-" + Math.floor(100000 + Math.random() * 900000);
-            
+
             // Construct and save order
             try {
                 const existingOrders = JSON.parse(localStorage.getItem('gogo_orders') || '[]');
@@ -127,7 +130,8 @@ export default function KineticCheckout({ onViewChange, cart = [], setCart, user
                         name: i.name,
                         sku: i.sku || `GA-${i.brand.slice(0, 2).toUpperCase()}-${i.id}`,
                         qty: i.quantity,
-                        price: i.price.toLocaleString("th-TH") + " ฿"
+                        price: i.price.toLocaleString("th-TH") + " ฿",
+                        image: i.image
                     })),
                     actions: ["Update Status", "Mark Shipped", "Mark Preparing", "Cancel Order"]
                 };
@@ -139,6 +143,15 @@ export default function KineticCheckout({ onViewChange, cart = [], setCart, user
             setOrderId(randomId);
             setIsSubmitting(false);
             setIsSubmitted(true);
+            
+            // Decrease product amount in local storage
+            cart.forEach(item => {
+                const productInStore = products.find(p => p.id === item.id);
+                if (productInStore) {
+                    updateProduct({ id: productInStore.id, amount: Math.max(0, productInStore.amount - item.quantity) });
+                }
+            });
+
             setCart([]); // Clear cart
         }, 1500);
     };
@@ -394,7 +407,7 @@ export default function KineticCheckout({ onViewChange, cart = [], setCart, user
                                         </span>
                                     </div>
                                     <div className="flex justify-between text-[10px]" style={{ color: C.onSurfaceVariant }}>
-                                        <span>ESTIMATED TAXES (8%)</span>
+                                        <span>ESTIMATED TAXES (7%)</span>
                                         <span>{tax.toLocaleString("th-TH")} ฿</span>
                                     </div>
                                     <div className="flex justify-between items-end pt-4">
