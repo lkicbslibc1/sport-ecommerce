@@ -1,14 +1,28 @@
 import React from 'react';
 import Navbar from '../navbar.jsx';
 
-export default function Profile({ onViewChange, user, setUser, cart, addToCart }) {
-  const [orders, setOrders] = React.useState(() => {
+export default function Profile({ onViewChange, user, setUser, cart, addToCart, setSelectedOrder }) {
+  // Fetch real order history from localStorage
+  const [orders, setOrders] = React.useState([]);
+
+  React.useEffect(() => {
     try {
-      return JSON.parse(localStorage.getItem('gogo_orders')) || [];
-    } catch {
-      return [];
+      const stored = localStorage.getItem('gogo_orders');
+      if (stored) {
+        const allOrders = JSON.parse(stored);
+        // Filter orders for the current user.
+        // Assuming the checkout process saves customer name or username.
+        const userOrders = allOrders.filter(o => 
+          (o.username && (o.username === user.username || o.username === user.name)) ||
+          o.customer.toLowerCase().includes(user.name?.toLowerCase() || '') ||
+          o.customer === user.username
+        );
+        setOrders(userOrders);
+      }
+    } catch (e) {
+      console.error("Failed to load orders", e);
     }
-  });
+  }, [user]);
 
   // Split name into first and last name
   const nameParts = user.name ? user.name.split(' ') : ['Guest', 'User'];

@@ -9,7 +9,7 @@ import {
   HelpCircle,
 } from "lucide-react";
 
-const NAV_ITEMS = [
+const ADMIN_NAV_ITEMS = [
   { label: "Dashboard", value: "dashboard", icon: LayoutDashboard },
   { label: "Orders", value: "orders", icon: ShoppingCart },
   { label: "Inventory", value: "inventory", icon: Package },
@@ -17,7 +17,13 @@ const NAV_ITEMS = [
   { label: "Team", value: "team", icon: Users },
 ];
 
-export default function Sidebar({ activeItem, onNavigate, onViewChange, actionButton }) {
+const EMPLOYEE_NAV_ITEMS = [
+  { label: "Orders", value: "orders", icon: ShoppingCart },
+  { label: "Inventory", value: "inventory", icon: Package },
+];
+
+export default function Sidebar({ activeItem, onNavigate, onViewChange, actionButton, user }) {
+  const NAV_ITEMS = user?.role === 'employee' ? EMPLOYEE_NAV_ITEMS : ADMIN_NAV_ITEMS;
   return (
     <aside className="hidden md:flex md:w-64 shrink-0 h-screen sticky top-0 flex-col border-r border-white/5 bg-black py-8">
       {/* BRAND LOGO */}

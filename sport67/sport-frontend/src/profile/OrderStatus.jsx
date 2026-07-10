@@ -25,6 +25,11 @@ export default function OrderStatus({ onViewChange, user, setUser, cart, orderId
     );
   }
 
+  const order = selectedOrder || { id: 'N/A', date: 'N/A', status: 'Pending', items: [] };
+  const status = order.status;
+  const isShipping = status === 'Preparing' || status === 'Shipped' || status === 'Delivered';
+  const isDelivered = status === 'Delivered';
+
   return (
     <div className="selection:bg-primary selection:text-white min-h-screen bg-background text-on-background font-sans">
       <Navbar setCurrentView={onViewChange} user={user} setUser={setUser} cart={cart} />
@@ -61,9 +66,15 @@ export default function OrderStatus({ onViewChange, user, setUser, cart, orderId
           </div>
 
           <div className="py-8 relative">
-            {/* Progress Line */}
+            {/* Progress Line - background track */}
             <div className="absolute top-1/2 left-[10%] right-[10%] h-1 bg-white/10 -translate-y-1/2 hidden md:block"></div>
-            <div className="absolute top-1/2 left-[10%] w-[40%] h-1 bg-primary -translate-y-1/2 hidden md:block"></div>
+            {/* Progress Line - active fill: 0% = Pending, 45% = Preparing/Shipped, 90% = Delivered */}
+            <div
+              className="absolute top-1/2 left-[10%] h-1 bg-primary -translate-y-1/2 hidden md:block transition-all duration-700"
+              style={{
+                width: isDelivered ? '80%' : isShipping ? '45%' : '0%'
+              }}
+            ></div>
 
             <div className="flex flex-col md:flex-row justify-between relative gap-12 md:gap-0 z-10">
               {/* Step 1: Paid */}
@@ -72,35 +83,32 @@ export default function OrderStatus({ onViewChange, user, setUser, cart, orderId
                   <Receipt size={28} />
                 </div>
                 <div className="text-center">
-                  <h4 className="font-black italic uppercase text-lg">ชำระเงินแล้ว</h4>
+                  <h4 className="font-black italic uppercase text-lg text-primary">ชำระเงินแล้ว</h4>
                   <p className="text-[10px] text-on-surface-variant uppercase tracking-widest">Paid</p>
-                  <p className="text-xs mt-2 font-medium text-white/50">01 Jul, 10:30 AM</p>
                 </div>
               </div>
 
               {/* Step 2: Shipping */}
               <div className="flex flex-col items-center gap-4 relative">
-                <div className="absolute -left-1/2 right-1/2 top-8 h-1 bg-primary -translate-y-1/2 md:hidden"></div>
-                <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-white border-4 border-background shadow-[0_0_20px_rgba(255,87,25,0.3)]">
+                <div className={`absolute -left-1/2 right-1/2 top-8 h-1 ${isShipping ? 'bg-primary' : 'bg-white/10'} -translate-y-1/2 md:hidden`}></div>
+                <div className={`w-16 h-16 rounded-full ${isShipping ? 'bg-primary border-background shadow-[0_0_20px_rgba(255,87,25,0.3)] text-white' : 'bg-surface-container-high border-background text-white/40'} flex items-center justify-center border-4`}>
                   <Truck size={28} />
                 </div>
-                <div className="text-center">
-                  <h4 className="font-black italic uppercase text-lg text-primary">กำลังจัดส่ง</h4>
+                <div className={`text-center ${!isShipping && 'opacity-40'}`}>
+                  <h4 className={`font-black italic uppercase text-lg ${isShipping && 'text-primary'}`}>กำลังจัดส่ง</h4>
                   <p className="text-[10px] text-on-surface-variant uppercase tracking-widest">Shipping</p>
-                  <p className="text-xs mt-2 font-medium text-white/50">02 Jul, 14:15 PM</p>
                 </div>
               </div>
 
               {/* Step 3: Delivered */}
               <div className="flex flex-col items-center gap-4 relative">
-                <div className="absolute -left-1/2 right-1/2 top-8 h-1 bg-white/10 -translate-y-1/2 md:hidden"></div>
-                <div className="w-16 h-16 rounded-full bg-surface-container-high flex items-center justify-center text-white/40 border-4 border-background">
+                <div className={`absolute -left-1/2 right-1/2 top-8 h-1 ${isDelivered ? 'bg-primary' : 'bg-white/10'} -translate-y-1/2 md:hidden`}></div>
+                <div className={`w-16 h-16 rounded-full ${isDelivered ? 'bg-primary border-background shadow-[0_0_20px_rgba(255,87,25,0.3)] text-white' : 'bg-surface-container-high border-background text-white/40'} flex items-center justify-center border-4`}>
                   <Package size={28} />
                 </div>
-                <div className="text-center opacity-40">
-                  <h4 className="font-black italic uppercase text-lg">จัดส่งแล้ว</h4>
+                <div className={`text-center ${!isDelivered && 'opacity-40'}`}>
+                  <h4 className={`font-black italic uppercase text-lg ${isDelivered && 'text-primary'}`}>จัดส่งแล้ว</h4>
                   <p className="text-[10px] text-on-surface-variant uppercase tracking-widest">Delivered</p>
-                  <p className="text-xs mt-2 font-medium">Pending</p>
                 </div>
               </div>
             </div>

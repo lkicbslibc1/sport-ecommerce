@@ -39,7 +39,7 @@ function GlassPanel({ className = "", children }) {
   );
 }
 
-export default function GogoAthleticOrders({ onNavigate, onViewChange }) {
+export default function GogoAthleticOrders({ onNavigate, onViewChange, user }) {
   const [ordersList, setOrdersList] = useState(() => {
     try {
       const stored = localStorage.getItem('gogo_orders');
@@ -91,6 +91,7 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange }) {
   return (
     <div className="min-h-screen w-full bg-neutral-950 text-neutral-100 flex">
       <Sidebar
+        user={user}
         activeItem="orders"
         onNavigate={onNavigate}
         onViewChange={onViewChange}
@@ -128,8 +129,8 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange }) {
             </button>
             <div className="flex items-center gap-3 pl-4 border-l border-white/10">
               <div className="text-right hidden sm:block">
-                <p className="text-[10px] leading-none tracking-widest">ADMINISTRATOR</p>
-                <p className="text-[10px] text-orange-300 mt-1">Marcus Thorne</p>
+                <p className="text-[10px] leading-none tracking-widest uppercase">{user?.role || 'ADMINISTRATOR'}</p>
+                <p className="text-[10px] text-orange-300 mt-1">{user?.name || user?.username || 'Marcus Thorne'}</p>
               </div>
               <button className="text-orange-300 hover:scale-110 transition-transform duration-300">
                 <UserCircle size={30} />

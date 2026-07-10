@@ -121,7 +121,8 @@ export default function KineticCheckout({ onViewChange, cart = [], setCart, user
                 const existingOrders = JSON.parse(localStorage.getItem('gogo_orders') || '[]');
                 const newOrder = {
                     id: "#" + randomId,
-                    customer: `${formData.firstName} ${formData.lastName}`,
+                    username: user ? (user.username || user.name) : 'Guest',
+                    customer: `${formData.firstName} ${formData.lastName}`.trim(),
                     tier: user ? 'MEMBER' : 'PRO',
                     date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).toUpperCase(),
                     total: total.toLocaleString("th-TH") + " ฿",

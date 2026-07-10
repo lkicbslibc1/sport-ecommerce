@@ -31,6 +31,7 @@ function MainPageContent() {
     return hash || 'home';
   });
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [selectedOrder, setSelectedOrder] = useState(null);
   const [user, setUser] = useState(() => {
     try {
       return JSON.parse(localStorage.getItem('gogo_current_user')) || null;
@@ -128,7 +129,7 @@ function MainPageContent() {
       setCurrentView('home');
       return null;
     }
-    return <Profile onViewChange={setCurrentView} user={user} setUser={setUser} cart={cart} addToCart={addToCart} />;
+    return <Profile onViewChange={setCurrentView} user={user} setUser={setUser} cart={cart} addToCart={addToCart} setSelectedOrder={setSelectedOrder} />;
   }
   if (currentView.startsWith('order_status')) {
     const orderId = currentView.replace('order_status-', '');
