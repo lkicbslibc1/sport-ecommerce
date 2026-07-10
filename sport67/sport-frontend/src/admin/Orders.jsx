@@ -39,7 +39,7 @@ function GlassPanel({ className = "", children }) {
   );
 }
 
-export default function GogoAthleticOrders({ onNavigate, onViewChange, user }) {
+export default function GogoAthleticOrders({ onNavigate, onViewChange, user, setUser }) {
   const [ordersList, setOrdersList] = useState(() => {
     try {
       const stored = localStorage.getItem('gogo_orders');
@@ -92,6 +92,7 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange, user }) {
     <div className="min-h-screen w-full bg-neutral-950 text-neutral-100 flex">
       <Sidebar
         user={user}
+        setUser={setUser}
         activeItem="orders"
         onNavigate={onNavigate}
         onViewChange={onViewChange}
@@ -195,7 +196,7 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange, user }) {
               <table className="w-full text-left border-collapse min-w-[800px]">
                 <thead className="bg-neutral-900 border-b border-white/10">
                   <tr>
-                    {["Order ID", "Customer", "Date", "Total", "Status"].map(
+                    {["Order ID", "Username", "Customer Name", "Date", "Total", "Status"].map(
                       (h) => (
                         <th
                           key={h}
@@ -218,6 +219,9 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange, user }) {
                     >
                       <td className="p-6 text-sm text-orange-300 tracking-widest">
                         {order.id}
+                      </td>
+                      <td className="p-6 text-sm text-neutral-200">
+                        {order.username || 'Guest'}
                       </td>
                       <td className="p-6">
                         <div className="flex items-center gap-3">

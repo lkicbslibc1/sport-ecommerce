@@ -90,7 +90,7 @@ function GlassPanel({ className = "", children }) {
   );
 }
 
-export default function GogoAthleticTeam({ onNavigate, onViewChange, user }) {
+export default function GogoAthleticTeam({ onNavigate, onViewChange, user, setUser }) {
   const [team, setTeam] = useState(() => {
     const saved = localStorage.getItem("gogo_staff");
     if (saved) return JSON.parse(saved);
@@ -179,6 +179,8 @@ export default function GogoAthleticTeam({ onNavigate, onViewChange, user }) {
   return (
     <div className="min-h-screen w-full bg-neutral-950 text-neutral-100 flex">
       <Sidebar
+        user={user}
+        setUser={setUser}
         activeItem="team"
         onNavigate={onNavigate}
         onViewChange={onViewChange}

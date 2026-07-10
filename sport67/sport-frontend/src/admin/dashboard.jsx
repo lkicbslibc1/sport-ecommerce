@@ -40,7 +40,7 @@ function GlassPanel({ className = "", children }) {
   );
 }
 
-export default function GogoAthleticDashboard({ onViewChange, user }) {
+export default function GogoAthleticDashboard({ onViewChange, user, setUser }) {
   const [range, setRange] = useState("daily");
   const [currentPage, setCurrentPage] = useState(user?.role === 'employee' ? "orders" : "dashboard");
 
@@ -114,22 +114,23 @@ export default function GogoAthleticDashboard({ onViewChange, user }) {
   }, [products]);
 
   if (currentPage === "orders") {
-    return <GogoAthleticOrders onNavigate={setCurrentPage} onViewChange={onViewChange} user={user} />;
+    return <GogoAthleticOrders onNavigate={setCurrentPage} onViewChange={onViewChange} user={user} setUser={setUser} />;
   }
   if (currentPage === "inventory") {
-    return <GogoAthleticInventory onNavigate={setCurrentPage} onViewChange={onViewChange} user={user} />;
+    return <GogoAthleticInventory onNavigate={setCurrentPage} onViewChange={onViewChange} user={user} setUser={setUser} />;
   }
   if (currentPage === "products") {
-    return <GogoAthleticProducts onNavigate={setCurrentPage} onViewChange={onViewChange} user={user} />;
+    return <GogoAthleticProducts onNavigate={setCurrentPage} onViewChange={onViewChange} user={user} setUser={setUser} />;
   }
   if (currentPage === "team") {
-    return <GogoAthleticTeam onNavigate={setCurrentPage} onViewChange={onViewChange} user={user} />;
+    return <GogoAthleticTeam onNavigate={setCurrentPage} onViewChange={onViewChange} user={user} setUser={setUser} />;
   }
 
   return (
     <div className="min-h-screen w-full bg-neutral-950 text-neutral-100 flex">
       <Sidebar
         user={user}
+        setUser={setUser}
         activeItem="dashboard"
         onNavigate={setCurrentPage}
         onViewChange={onViewChange}
@@ -185,6 +186,15 @@ export default function GogoAthleticDashboard({ onViewChange, user }) {
                   src="https://lh3.googleusercontent.com/aida-public/AB6AXuDz-ybs2SMIcKqNd6cA5Y6eKUmJZuqUPoX89kMmLEUiYQo8aAMzIwB-BItNxUOPJWePJeqxJ8QByoD7yzUoNE2hYtRjsdBgEkKsTLO4jQE-m3DiArhxZCUV0mpDXagf8JKsRr7L2nVuRiv9KCnEoEnpw9aREw7V8ovWk-qYLSfu5CCbg-mCGxX28R2SM_ocNMsjzBol7TsfXGC9Z9CsjLLCy3wS2XyxPmYwOdawfJQyyHpWA_Io6vqw4ivfZknBwGk5selvwIiApQA"
                 />
               </div>
+              <button
+                onClick={() => {
+                  if (setUser) setUser(null);
+                  if (onViewChange) onViewChange('home');
+                }}
+                className="ml-4 text-[10px] font-bold uppercase tracking-widest text-neutral-400 hover:text-orange-300 border border-white/10 px-4 py-2 hover:border-orange-300 transition-colors"
+              >
+                Logout
+              </button>
             </div>
           </div>
         </header>

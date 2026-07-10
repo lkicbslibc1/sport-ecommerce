@@ -56,7 +56,7 @@ const COLOR_NAMES = [
     "green", "orange", "pink", "beige", "brown", "grey", "mixed"
 ];
 
-export default function GogoAthleticProducts({ onNavigate, onViewChange, user }) {
+export default function GogoAthleticProducts({ onNavigate, onViewChange, user, setUser }) {
     const { products, addProduct, updateProduct, deleteProduct } = useContext(ProductContext);
     const [searchFocused, setSearchFocused] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
@@ -256,6 +256,8 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange, user })
     return (
         <div className="min-h-screen w-full bg-neutral-950 text-neutral-100 flex">
             <Sidebar
+                user={user}
+                setUser={setUser}
                 activeItem="products"
                 onNavigate={onNavigate}
                 onViewChange={onViewChange}

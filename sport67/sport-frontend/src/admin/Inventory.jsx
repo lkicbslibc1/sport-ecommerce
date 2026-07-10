@@ -54,7 +54,7 @@ function GlassPanel({ className = "", children }) {
   );
 }
 
-export default function GogoAthleticInventory({ onNavigate, onViewChange, user }) {
+export default function GogoAthleticInventory({ onNavigate, onViewChange, user, setUser }) {
   const { products, updateProduct } = useContext(ProductContext);
   const [productsList, setProductsList] = useState([...products]);
   const [searchFocused, setSearchFocused] = useState(false);
@@ -134,6 +134,7 @@ export default function GogoAthleticInventory({ onNavigate, onViewChange, user }
     <div className="min-h-screen w-full bg-neutral-950 text-neutral-100 flex">
       <Sidebar
         user={user}
+        setUser={setUser}
         activeItem="inventory"
         onNavigate={onNavigate}
         onViewChange={onViewChange}

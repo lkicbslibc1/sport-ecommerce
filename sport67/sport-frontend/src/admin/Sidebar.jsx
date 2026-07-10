@@ -7,6 +7,7 @@ import {
   Users,
   Settings,
   HelpCircle,
+  LogOut,
 } from "lucide-react";
 
 const ADMIN_NAV_ITEMS = [
@@ -22,7 +23,7 @@ const EMPLOYEE_NAV_ITEMS = [
   { label: "Inventory", value: "inventory", icon: Package },
 ];
 
-export default function Sidebar({ activeItem, onNavigate, onViewChange, actionButton, user }) {
+export default function Sidebar({ activeItem, onNavigate, onViewChange, actionButton, user, setUser }) {
   const NAV_ITEMS = user?.role === 'employee' ? EMPLOYEE_NAV_ITEMS : ADMIN_NAV_ITEMS;
   return (
     <aside className="hidden md:flex md:w-64 shrink-0 h-screen sticky top-0 flex-col border-r border-white/5 bg-black py-8">
@@ -84,6 +85,16 @@ export default function Sidebar({ activeItem, onNavigate, onViewChange, actionBu
           <HelpCircle size={16} />
           <span className="text-[10px] uppercase tracking-widest">Support</span>
         </a>
+        <button
+          onClick={() => {
+            if (setUser) setUser(null);
+            if (onViewChange) onViewChange("home");
+          }}
+          className="w-full flex items-center gap-4 py-2 pl-5 text-red-400 hover:text-red-300 hover:bg-white/[0.02] transition-colors"
+        >
+          <LogOut size={16} />
+          <span className="text-[10px] uppercase tracking-widest text-left">Logout</span>
+        </button>
       </div>
     </aside>
   );

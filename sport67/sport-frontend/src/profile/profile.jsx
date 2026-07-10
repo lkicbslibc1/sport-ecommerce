@@ -12,11 +12,8 @@ export default function Profile({ onViewChange, user, setUser, cart, addToCart, 
         const allOrders = JSON.parse(stored);
         // Filter orders for the current user.
         // Assuming the checkout process saves customer name or username.
-        const userOrders = allOrders.filter(o => 
-          (o.username && (o.username === user.username || o.username === user.name)) ||
-          o.customer.toLowerCase().includes(user.name?.toLowerCase() || '') ||
-          o.customer === user.username
-        );
+        const currentUserUsername = user.username || user.name || 'Guest';
+        const userOrders = allOrders.filter(o => o.username === currentUserUsername);
         setOrders(userOrders);
       }
     } catch (e) {

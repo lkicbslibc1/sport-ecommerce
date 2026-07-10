@@ -13,7 +13,8 @@ export default function Navbar({ setCurrentView, user, setUser, cart = [] }) {
   useEffect(() => {
     if (isNotificationOpen) {
       const orders = JSON.parse(localStorage.getItem('gogo_orders') || '[]');
-      const userOrders = user && user.name !== 'Guest User' ? orders.filter(o => o.customer === user.name) : orders.slice(0, 5);
+      const currentUserUsername = user ? (user.username || user.name) : 'Guest';
+      const userOrders = currentUserUsername !== 'Guest' ? orders.filter(o => o.username === currentUserUsername) : orders.slice(0, 5);
       setNotifications(userOrders);
     }
   }, [isNotificationOpen, user]);

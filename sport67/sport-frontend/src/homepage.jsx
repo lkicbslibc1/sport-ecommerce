@@ -91,7 +91,18 @@ function MainPageContent() {
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
+  useEffect(() => {
+    if (user && (user.role === 'manager' || user.role === 'employee') && currentView !== 'dashboard') {
+      setCurrentView('dashboard');
+    }
+  }, [user, currentView]);
+
   const baseView = currentView.split('-')[0];
+
+  if (user && (user.role === 'manager' || user.role === 'employee')) {
+    return <Dashboard onViewChange={setCurrentView} user={user} setUser={setUser} />;
+  }
+
   if (['running', 'football', 'swimming', 'sport', 'men', 'women', 'kid', 'brand'].includes(baseView)) {
     const subCategory = currentView.includes('-') ? currentView.split('-')[1] : null;
     return <AllProducts onViewChange={setCurrentView} setSelectedProduct={setSelectedProduct} user={user} setUser={setUser} cart={cart} addToCart={addToCart} initialCategory={baseView} initialSubCategory={subCategory} />;
