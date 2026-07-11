@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Sidebar from "./Sidebar.jsx";
 import {
   LayoutDashboard,
@@ -18,7 +18,6 @@ import {
   Trash2,
   X,
 } from "lucide-react";
-
 
 
 const STATUS_STYLES = {
@@ -109,7 +108,7 @@ export default function GogoAthleticTeam({ onNavigate, onViewChange, user, setUs
   const [newMember, setNewMember] = useState({ name: "", email: "", role: "Support", status: "Active" });
 
   // Sync customers dynamically when the component mounts or when localstorage changes
-  React.useEffect(() => {
+  useEffect(() => {
     const handleStorageChange = () => {
       setCustomers(JSON.parse(localStorage.getItem("gogo_users") || "[]"));
     };
@@ -121,6 +120,9 @@ export default function GogoAthleticTeam({ onNavigate, onViewChange, user, setUs
       clearInterval(interval);
     };
   }, []);
+
+  // Check if user has manager or administrator privileges
+  const isManagerOrAdmin = user && (user.role === "manager" || user.role === "Administrator");
 
   const handleDelete = (id) => {
     const updated = team.filter((member) => member.id !== id);
@@ -161,6 +163,14 @@ export default function GogoAthleticTeam({ onNavigate, onViewChange, user, setUs
     setIsModalOpen(false);
   };
 
+  const handleRoleChange = (id, newRole) => {
+    const updated = team.map((t) =>
+      t.id === id ? { ...t, role: newRole } : t
+    );
+    setTeam(updated);
+    localStorage.setItem("gogo_staff", JSON.stringify(updated));
+  };
+
   const filteredTeam = team.filter((member) => {
     const matchesSearch =
       (member.name || "").toLowerCase().includes(search.toLowerCase()) ||
@@ -176,6 +186,9 @@ export default function GogoAthleticTeam({ onNavigate, onViewChange, user, setUs
     return matchesSearch;
   });
 
+  // Calculate awaiting invite count (customers who haven't been converted to staff)
+  const awaitingInvite = customers.filter(c => c.status === "Pending").length;
+
   return (
     <div className="min-h-screen w-full bg-neutral-950 text-neutral-100 flex">
       <Sidebar
@@ -185,7 +198,7 @@ export default function GogoAthleticTeam({ onNavigate, onViewChange, user, setUs
         onNavigate={onNavigate}
         onViewChange={onViewChange}
         actionButton={
-          user && user.role === "manager" ? (
+          isManagerOrAdmin ? (
             <button
               onClick={() => setIsModalOpen(true)}
               className="w-full bg-orange-600 text-white text-[10px] font-black py-4 px-2 uppercase tracking-widest hover:scale-105 transition-transform flex items-center justify-center gap-2"
@@ -306,7 +319,7 @@ export default function GogoAthleticTeam({ onNavigate, onViewChange, user, setUs
             <GlassPanel className="p-6 flex items-center justify-between">
               <div>
                 <p className="text-[10px] text-neutral-400 uppercase tracking-widest">Awaiting Invite</p>
-                <h4 className="text-3xl font-black italic text-indigo-300 mt-1">1</h4>
+                <h4 className="text-3xl font-black italic text-indigo-300 mt-1">{awaitingInvite}</h4>
               </div>
               <Clock size={32} className="text-neutral-600" />
             </GlassPanel>
@@ -343,17 +356,10 @@ export default function GogoAthleticTeam({ onNavigate, onViewChange, user, setUs
                         </div>
                       </td>
                       <td className="py-5 px-6">
-                        {user && user.role === "manager" ? (
+                        {isManagerOrAdmin ? (
                           <select
                             value={member.role}
-                            onChange={(e) => {
-                              const updatedRole = e.target.value;
-                              setTeam(
-                                team.map((t) =>
-                                  t.id === member.id ? { ...t, role: updatedRole } : t
-                                )
-                              );
-                            }}
+                            onChange={(e) => handleRoleChange(member.id, e.target.value)}
                             className={`text-[10px] px-2 py-1 font-bold uppercase tracking-wider bg-neutral-900 border border-white/10 rounded focus:ring-1 focus:ring-orange-300 ${ROLE_STYLES[member.role] || "text-neutral-300"}`}
                           >
                             <option value="Administrator" className="bg-neutral-950 text-neutral-100">Administrator</option>
@@ -376,7 +382,7 @@ export default function GogoAthleticTeam({ onNavigate, onViewChange, user, setUs
                         {member.joined}
                       </td>
                       <td className="py-5 px-6 text-right">
-                        {user && user.role === "manager" && (
+                        {isManagerOrAdmin && (
                           <button
                             onClick={() => handleDelete(member.id)}
                             className="text-neutral-500 hover:text-red-400 transition-colors p-1"
@@ -411,15 +417,15 @@ export default function GogoAthleticTeam({ onNavigate, onViewChange, user, setUs
                         </span>
                       </td>
                       <td className="py-5 px-6">
-                        <span className={`text-[10px] px-2.5 py-0.5 font-bold uppercase tracking-wider ${STATUS_STYLES.Active}`}>
-                          Active
+                        <span className={`text-[10px] px-2.5 py-0.5 font-bold uppercase tracking-wider ${STATUS_STYLES[customer.status] || STATUS_STYLES.Active}`}>
+                          {customer.status || "Active"}
                         </span>
                       </td>
                       <td className="py-5 px-6 text-xs text-neutral-400 font-mono">
                         {customer.joined || "N/A"}
                       </td>
                       <td className="py-5 px-6 text-right">
-                        {user && user.role === "manager" && (
+                        {isManagerOrAdmin && (
                           <button
                             onClick={() => handleDeleteCustomer(customer.email)}
                             className="text-neutral-500 hover:text-red-400 transition-colors p-1"
