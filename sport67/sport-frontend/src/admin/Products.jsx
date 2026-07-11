@@ -10,7 +10,8 @@ import {
     ChevronRight,
     X,
     Plus,
-    Trash2
+    Trash2,
+    Package
 } from "lucide-react";
 import { ProductContext } from "../data/products.jsx";
 
@@ -19,9 +20,33 @@ const STATUS_STYLES = {
     Draft: "bg-neutral-700/50 text-neutral-400 border border-neutral-600",
 };
 
+const STOCK_STYLES = {
+    "In Stock": {
+        dot: "bg-green-500",
+        badge: "bg-green-500/10 text-green-500 border border-green-500/20",
+        pulse: "animate-pulse",
+    },
+    "Low Stock": {
+        dot: "bg-orange-500",
+        badge: "bg-orange-500/10 text-orange-500 border border-orange-500/20",
+        pulse: "",
+    },
+    "Out of Stock": {
+        dot: "bg-red-400",
+        badge: "bg-red-400/10 text-red-400 border border-red-400/20",
+        pulse: "animate-ping",
+    },
+};
+
 function formatPrice(n) {
     return n.toLocaleString("th-TH", { minimumFractionDigits: 2 }) + " ฿";
 }
+
+const getStockStatus = (amount) => {
+    if (amount <= 0) return "Out of Stock";
+    if (amount <= 10) return "Low Stock";
+    return "In Stock";
+};
 
 function GlassPanel({ className = "", children }) {
     return (
@@ -62,12 +87,17 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange, user, s
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("All Categories");
     const [selectedStatus, setSelectedStatus] = useState("All Statuses");
+    const [selectedStockStatus, setSelectedStockStatus] = useState("All Statuses");
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 5; // Number of products per page
+    const itemsPerPage = 5;
 
     // Modal state
     const [modalOpen, setModalOpen] = useState(false);
-    const [currentProduct, setCurrentProduct] = useState(null); // null means adding
+    const [stockModalOpen, setStockModalOpen] = useState(false);
+    const [currentProduct, setCurrentProduct] = useState(null);
+    const [selectedItem, setSelectedItem] = useState(null);
+    const [newQty, setNewQty] = useState("");
+    const [adjustmentReason, setAdjustmentReason] = useState("Restock Received");
     const [selectedColors, setSelectedColors] = useState([]);
 
     const [formFields, setFormFields] = useState({
@@ -126,6 +156,29 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange, user, s
             : [];
         setSelectedColors(initialColors);
         setModalOpen(true);
+    };
+
+    const handleOpenAdjust = (item) => {
+        setSelectedItem(item);
+        setNewQty(item.amount.toString());
+        setStockModalOpen(true);
+    };
+
+    const handleStockFormSubmit = (e) => {
+        e.preventDefault();
+        if (!selectedItem) return;
+        const qtyNum = parseInt(newQty);
+        if (isNaN(qtyNum) || qtyNum < 0) {
+            alert("Please enter a valid stock quantity.");
+            return;
+        }
+
+        updateProduct({
+            id: selectedItem.id,
+            amount: qtyNum
+        });
+
+        setStockModalOpen(false);
     };
 
     const handleInputChange = (e) => {
@@ -219,7 +272,7 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange, user, s
         }
     };
 
-    // Filter logic
+    // Filter logic - รวมการฟิลเตอร์สถานะสต็อก
     const filteredProducts = useMemo(() => {
         return products.filter((item) => {
             const matchSearch =
@@ -236,9 +289,14 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange, user, s
                 selectedStatus === "All Statuses" ||
                 item.status === selectedStatus;
 
-            return matchSearch && matchCategory && matchStatus;
+            const itemStockStatus = getStockStatus(item.amount);
+            const matchStockStatus =
+                selectedStockStatus === "All Statuses" ||
+                itemStockStatus === selectedStockStatus;
+
+            return matchSearch && matchCategory && matchStatus && matchStockStatus;
         });
-    }, [products, searchQuery, selectedCategory, selectedStatus]);
+    }, [products, searchQuery, selectedCategory, selectedStatus, selectedStockStatus]);
 
     // Pagination logic
     const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
@@ -249,9 +307,8 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange, user, s
 
     // Reset to page 1 when filters change
     React.useEffect(() => {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         setCurrentPage(1);
-    }, [searchQuery, selectedCategory, selectedStatus]);
+    }, [searchQuery, selectedCategory, selectedStatus, selectedStockStatus]);
 
     return (
         <div className="min-h-screen w-full bg-neutral-950 text-neutral-100 flex">
@@ -305,9 +362,9 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange, user, s
                         </button>
                         <div className="flex items-center gap-2">
                             <span className="text-right hidden sm:block">
-                                <p className="text-xs block leading-none">ADMIN_042</p>
+                                <p className="text-xs block leading-none">{user?.name || user?.username || 'ADMIN_042'}</p>
                                 <p className="text-[10px] text-orange-300 uppercase font-bold tracking-widest mt-1">
-                                    Operational Manager
+                                    {user?.role || 'Operational Manager'}
                                 </p>
                             </span>
                             <button className="text-orange-300">
@@ -338,10 +395,14 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange, user, s
                                 <p className="text-[10px] uppercase font-bold tracking-widest text-neutral-400">Published</p>
                                 <p className="text-3xl italic font-black text-green-400">{products.filter(p => p.status === 'Published').length}</p>
                             </GlassPanel>
+                            <GlassPanel className="px-6 py-4 flex flex-col items-end border-r-4 border-red-400">
+                                <p className="text-[10px] uppercase font-bold tracking-widest text-neutral-400">Low Stock</p>
+                                <p className="text-3xl italic font-black text-red-400">{products.filter(p => p.amount <= 10).length}</p>
+                            </GlassPanel>
                         </div>
                     </div>
 
-                    {/* Filters */}
+                    {/* Filters - เพิ่มฟิลเตอร์สถานะสต็อก */}
                     <GlassPanel className="p-6 mb-8 flex flex-wrap items-center justify-between gap-6">
                         <div className="flex flex-wrap items-center gap-8">
                             <div className="flex flex-col gap-1">
@@ -372,6 +433,19 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange, user, s
                                     <option value="Draft" className="bg-neutral-950 text-neutral-100">Draft</option>
                                 </select>
                             </div>
+                            <div className="flex flex-col gap-1">
+                                <span className="text-[10px] text-neutral-400 uppercase tracking-widest">Stock Status</span>
+                                <select 
+                                    value={selectedStockStatus}
+                                    onChange={(e) => setSelectedStockStatus(e.target.value)}
+                                    className="bg-transparent border-0 border-b border-orange-300/30 text-xs uppercase py-1 focus:ring-0 focus:border-orange-300 pr-8 tracking-widest font-bold bg-neutral-900 text-neutral-100"
+                                >
+                                    <option value="All Statuses" className="bg-neutral-950 text-neutral-100">All Statuses</option>
+                                    <option value="In Stock" className="bg-neutral-950 text-neutral-100">In Stock</option>
+                                    <option value="Low Stock" className="bg-neutral-950 text-neutral-100">Low Stock</option>
+                                    <option value="Out of Stock" className="bg-neutral-950 text-neutral-100">Out of Stock</option>
+                                </select>
+                            </div>
                         </div>
                         <div className="flex items-center gap-4">
                             {user && user.role === "manager" ? (
@@ -390,30 +464,33 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange, user, s
                         </div>
                     </GlassPanel>
 
-                    {/* Products Table */}
+                    {/* Products Table - แสดงสถานะสต็อก */}
                     <GlassPanel className="overflow-hidden">
                         <div className="overflow-x-auto">
-                            <table className="w-full text-left border-collapse min-w-[900px]">
+                            <table className="w-full text-left border-collapse min-w-[1000px]">
                                 <thead className="bg-white/5 uppercase text-xs tracking-widest">
                                     <tr>
-                                        {["Product Name", "SKU", "Sport / Category", "Brand", "Price", "Stock", "Status"].map((h) => (
+                                        {["Product Name", "SKU", "Sport / Category", "Brand", "Price", "Stock Level", "Status"].map((h) => (
                                             <th key={h} className="px-6 py-5 font-bold">{h}</th>
                                         ))}
                                         <th className="px-6 py-5 font-bold text-right">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-white/5">
-                                    {paginatedProducts.map((item) => (
-                                        <tr
-                                            key={item.id}
-                                            className="group hover:bg-white/[0.02] hover:border-l-4 hover:border-orange-500 transition-colors"
-                                        >
-                                            <td className="px-6 py-6 flex items-center gap-4">
-                                                <div className="w-12 h-12 bg-neutral-900 border border-white/10 shrink-0 flex items-center justify-center overflow-hidden">
+                                    {paginatedProducts.map((item) => {
+                                        const stockStatusText = getStockStatus(item.amount);
+                                        const s = STOCK_STYLES[stockStatusText];
+                                        return (
+                                            <tr
+                                                key={item.id}
+                                                className="group hover:bg-white/[0.02] hover:border-l-4 hover:border-orange-500 transition-colors"
+                                            >
+                                                <td className="px-6 py-6 flex items-center gap-4">
+                                                    <div className="w-12 h-12 bg-neutral-900 border border-white/10 shrink-0 flex items-center justify-center overflow-hidden">
                                                         {item.image ? (
                                                             <img src={item.image} className="w-full h-full object-cover" alt={item.name} />
                                                         ) : (
-                                                            <Boxes size={20} className="text-neutral-600 group-hover:text-orange-300 transition-colors" />
+                                                            <Package size={20} className="text-neutral-600 group-hover:text-orange-300 transition-colors" />
                                                         )}
                                                     </div>
                                                     <div className="flex flex-col">
@@ -424,78 +501,93 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange, user, s
                                                             {item.targetGroup} / {item.productType}
                                                         </span>
                                                     </div>
-                                            </td>
-                                            <td className="px-6 py-6 text-neutral-400 font-mono text-sm">{item.sku}</td>
-                                            <td className="px-6 py-6 uppercase text-xs font-bold">{item.sportType}</td>
-                                            <td className="px-6 py-6 uppercase text-xs font-bold text-neutral-400">{item.brand}</td>
-                                            <td className="px-6 py-6 italic font-bold text-orange-300">{formatPrice(item.price)}</td>
-                                            <td className="px-6 py-6 font-bold">{item.amount}</td>
-                                            <td className="px-6 py-6">
-                                                <span className={"px-3 py-1 text-[10px] font-black uppercase tracking-widest " + STATUS_STYLES[item.status || "Published"]}>
-                                                    {item.status || "Published"}
-                                                </span>
-                                            </td>
-                                            <td className="px-6 py-6 text-right">
-                                                <div className="flex justify-end gap-2">
-                                                    <button
-                                                        onClick={() => handleOpenEdit(item)}
-                                                        className="bg-white/5 border border-white/10 hover:border-orange-300 p-2 transition-all hover:bg-orange-300 hover:text-neutral-950"
-                                                        title="Edit Product"
-                                                    >
-                                                        <Pencil size={16} />
-                                                    </button>
-                                                    {user && user.role === "manager" && (
+                                                </td>
+                                                <td className="px-6 py-6 text-neutral-400 font-mono text-sm">{item.sku}</td>
+                                                <td className="px-6 py-6 uppercase text-xs font-bold">{item.sportType}</td>
+                                                <td className="px-6 py-6 uppercase text-xs font-bold text-neutral-400">{item.brand}</td>
+                                                <td className="px-6 py-6 italic font-bold text-orange-300">{formatPrice(item.price)}</td>
+                                                <td className="px-6 py-6">
+                                                    <div className="flex items-center gap-3">
+                                                        <span className={"w-2 h-2 rounded-full " + s.dot + " " + s.pulse} />
+                                                        <span className={"px-3 py-1 text-[10px] font-black uppercase tracking-widest " + s.badge}>
+                                                            {stockStatusText} ({item.amount})
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-6">
+                                                    <span className={"px-3 py-1 text-[10px] font-black uppercase tracking-widest " + STATUS_STYLES[item.status || "Published"]}>
+                                                        {item.status || "Published"}
+                                                    </span>
+                                                </td>
+                                                <td className="px-6 py-6 text-right">
+                                                    <div className="flex justify-end gap-2">
                                                         <button
-                                                            onClick={() => handleDelete(item.id)}
-                                                            className="bg-white/5 border border-white/10 hover:border-red-500 p-2 transition-all hover:bg-red-500 hover:text-neutral-950 text-red-400"
-                                                            title="Delete Product"
+                                                            onClick={() => handleOpenEdit(item)}
+                                                            className="bg-white/5 border border-white/10 hover:border-orange-300 p-2 transition-all hover:bg-orange-300 hover:text-neutral-950"
+                                                            title="Edit Product"
                                                         >
-                                                            <Trash2 size={16} />
+                                                            <Pencil size={16} />
                                                         </button>
-                                                    )}
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))}
+                                                        <button
+                                                            onClick={() => handleOpenAdjust(item)}
+                                                            className="bg-white/5 border border-white/10 hover:border-orange-300 p-2 transition-all hover:bg-orange-300 hover:text-neutral-950"
+                                                            title="Adjust Stock"
+                                                        >
+                                                            <Package size={16} />
+                                                        </button>
+                                                        {user && user.role === "manager" && (
+                                                            <button
+                                                                onClick={() => handleDelete(item.id)}
+                                                                className="bg-white/5 border border-white/10 hover:border-red-500 p-2 transition-all hover:bg-red-500 hover:text-neutral-950 text-red-400"
+                                                                title="Delete Product"
+                                                            >
+                                                                <Trash2 size={16} />
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
                                 </tbody>
                             </table>
                         </div>
 
                         {/* Pagination */}
                         <div className="p-6 bg-white/5 flex flex-col md:flex-row justify-between items-center gap-4 border-t border-white/5">
-                        <p className="text-neutral-400 text-[10px] uppercase tracking-widest">
-                            Showing {(currentPage - 1) * itemsPerPage + 1}-
-                            {Math.min(currentPage * itemsPerPage, filteredProducts.length)} of {products.length} Products
-                        </p>
-                        <div className="flex items-center gap-2">
-                            <button 
-                                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                                disabled={currentPage === 1}
-                                className="p-2 border border-white/10 hover:bg-white/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                <ChevronLeft size={16} />
-                            </button>
-                            {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                            <p className="text-neutral-400 text-[10px] uppercase tracking-widest">
+                                Showing {(currentPage - 1) * itemsPerPage + 1}-
+                                {Math.min(currentPage * itemsPerPage, filteredProducts.length)} of {products.length} Products
+                            </p>
+                            <div className="flex items-center gap-2">
                                 <button 
-                                    key={page}
-                                    onClick={() => setCurrentPage(page)}
-                                    className={`px-4 py-2 font-black italic text-xs ${
-                                        currentPage === page 
-                                            ? "bg-orange-300 text-neutral-950" 
-                                            : "border border-white/10 hover:bg-white/10 text-neutral-300"
-                                    }`}
+                                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                    disabled={currentPage === 1}
+                                    className="p-2 border border-white/10 hover:bg-white/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
-                                    {page}
+                                    <ChevronLeft size={16} />
                                 </button>
-                            ))}
-                            <button 
-                                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                                disabled={currentPage === totalPages || totalPages === 0}
-                                className="p-2 border border-white/10 hover:bg-white/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                <ChevronRight size={16} />
-                            </button>
-                        </div>
+                                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                                    <button 
+                                        key={page}
+                                        onClick={() => setCurrentPage(page)}
+                                        className={`px-4 py-2 font-black italic text-xs ${
+                                            currentPage === page 
+                                                ? "bg-orange-300 text-neutral-950" 
+                                                : "border border-white/10 hover:bg-white/10 text-neutral-300"
+                                        }`}
+                                    >
+                                        {page}
+                                    </button>
+                                ))}
+                                <button 
+                                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                                    disabled={currentPage === totalPages || totalPages === 0}
+                                    className="p-2 border border-white/10 hover:bg-white/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    <ChevronRight size={16} />
+                                </button>
+                            </div>
                         </div>
                     </GlassPanel>
                 </main>
@@ -734,6 +826,95 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange, user, s
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {/* QUICK STOCK UPDATE MODAL - จาก Inventory */}
+            {stockModalOpen && selectedItem && (
+                <div className="fixed inset-0 bg-neutral-950/95 backdrop-blur-2xl z-[100] flex items-center justify-center p-6">
+                    <div className="w-full max-w-2xl bg-neutral-900 border border-orange-300/20 relative">
+                        <button
+                            onClick={() => setStockModalOpen(false)}
+                            className="absolute top-6 right-6 text-neutral-400 hover:text-orange-300 transition-colors"
+                        >
+                            <X size={32} />
+                        </button>
+                        <div className="p-8 sm:p-12">
+                            <h3 className="text-2xl sm:text-3xl uppercase italic font-black mb-8 border-b-4 border-orange-300 inline-block pb-2">
+                                Quick Stock Update
+                            </h3>
+                            <form className="space-y-8" onSubmit={handleStockFormSubmit}>
+                                <div className="flex flex-col gap-2">
+                                    <label className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold">
+                                        Gear Asset Name
+                                    </label>
+                                    <input
+                                        type="text"
+                                        disabled
+                                        value={selectedItem.name.toUpperCase()}
+                                        className="bg-white/5 border border-white/10 py-4 px-6 text-sm uppercase opacity-55 w-full outline-none"
+                                    />
+                                </div>
+                                <div className="grid grid-cols-2 gap-8">
+                                    <div className="flex flex-col gap-2">
+                                        <label className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold">
+                                            Current Qty
+                                        </label>
+                                        <input
+                                            disabled
+                                            type="number"
+                                            value={selectedItem.amount}
+                                            readOnly
+                                            className="bg-white/5 border border-white/10 py-4 px-6 italic font-black opacity-55 w-full outline-none"
+                                        />
+                                    </div>
+                                    <div className="flex flex-col gap-2">
+                                        <label className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold">
+                                            New Qty
+                                        </label>
+                                        <input
+                                            type="number"
+                                            placeholder="000"
+                                            value={newQty}
+                                            onChange={(e) => setNewQty(e.target.value)}
+                                            required
+                                            className="bg-neutral-800 border border-orange-300/50 focus:border-orange-300 focus:ring-0 py-4 px-6 italic font-black text-orange-300 w-full outline-none"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="flex flex-col gap-2">
+                                    <label className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold">
+                                        Reason for Adjustment
+                                    </label>
+                                    <select 
+                                        value={adjustmentReason}
+                                        onChange={(e) => setAdjustmentReason(e.target.value)}
+                                        className="bg-white/5 border border-white/10 focus:border-orange-300 focus:ring-0 py-4 px-6 uppercase text-sm w-full bg-neutral-900 text-neutral-100"
+                                    >
+                                        <option value="Restock Received" className="bg-neutral-950 text-neutral-100">Restock Received</option>
+                                        <option value="Return Processing" className="bg-neutral-950 text-neutral-100">Return Processing</option>
+                                        <option value="Damaged/Write-off" className="bg-neutral-950 text-neutral-100">Damaged/Write-off</option>
+                                        <option value="Cycle Count Adjustment" className="bg-neutral-950 text-neutral-100">Cycle Count Adjustment</option>
+                                    </select>
+                                </div>
+                                <div className="pt-4 flex gap-4">
+                                    <button
+                                        type="submit"
+                                        className="flex-1 bg-orange-300 text-neutral-950 py-4 uppercase italic font-black hover:scale-105 transition-transform"
+                                    >
+                                        Apply Changes
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setStockModalOpen(false)}
+                                        className="px-8 border border-white/10 hover:bg-neutral-100 hover:text-neutral-950 transition-colors uppercase text-xs font-bold tracking-widest"
+                                    >
+                                        Cancel
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </div>
             )}

@@ -13,14 +13,13 @@ import {
 const ADMIN_NAV_ITEMS = [
   { label: "Dashboard", value: "dashboard", icon: LayoutDashboard },
   { label: "Orders", value: "orders", icon: ShoppingCart },
-  { label: "Inventory", value: "inventory", icon: Package },
   { label: "Products", value: "products", icon: Boxes },
   { label: "Team", value: "team", icon: Users },
 ];
 
 const EMPLOYEE_NAV_ITEMS = [
   { label: "Orders", value: "orders", icon: ShoppingCart },
-  { label: "Inventory", value: "inventory", icon: Package },
+  { label: "Products", value: "products", icon: Boxes },
 ];
 
 export default function Sidebar({ activeItem, onNavigate, onViewChange, actionButton, user, setUser }) {

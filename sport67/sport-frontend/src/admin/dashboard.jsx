@@ -12,7 +12,6 @@ import {
   ShoppingCart
 } from "lucide-react";
 import GogoAthleticOrders from "./Orders.jsx";
-import GogoAthleticInventory from "./Inventory.jsx";
 import GogoAthleticProducts from "./Products.jsx";
 import GogoAthleticTeam from "./Team.jsx";
 import Sidebar from "./Sidebar.jsx";
@@ -44,9 +43,9 @@ export default function GogoAthleticDashboard({ onViewChange, user, setUser }) {
   const [range, setRange] = useState("daily");
   const [currentPage, setCurrentPage] = useState(user?.role === 'employee' ? "orders" : "dashboard");
 
-  // Restrict employee access
+// Restrict employee access
   React.useEffect(() => {
-    if (user?.role === 'employee' && !["orders", "inventory"].includes(currentPage)) {
+    if (user?.role === 'employee' && !["orders", "products"].includes(currentPage)) {
       setCurrentPage("orders");
     }
   }, [user, currentPage]);
@@ -113,11 +112,8 @@ export default function GogoAthleticDashboard({ onViewChange, user, setUser }) {
       }));
   }, [products]);
 
-  if (currentPage === "orders") {
+if (currentPage === "orders") {
     return <GogoAthleticOrders onNavigate={setCurrentPage} onViewChange={onViewChange} user={user} setUser={setUser} />;
-  }
-  if (currentPage === "inventory") {
-    return <GogoAthleticInventory onNavigate={setCurrentPage} onViewChange={onViewChange} user={user} setUser={setUser} />;
   }
   if (currentPage === "products") {
     return <GogoAthleticProducts onNavigate={setCurrentPage} onViewChange={onViewChange} user={user} setUser={setUser} />;
@@ -375,12 +371,12 @@ export default function GogoAthleticDashboard({ onViewChange, user, setUser }) {
                         </div>
                         <div className="text-right">
                           <p className="text-red-400 font-black">{status}</p>
-                          <button
-                            onClick={() => setCurrentPage("inventory")}
+<button
+                            onClick={() => setCurrentPage("products")}
                             className="text-orange-300 text-[10px] font-bold underline uppercase tracking-widest"
-                          >
+                        >
                             Restock
-                          </button>
+                        </button>
                         </div>
                       </div>
                     ))
