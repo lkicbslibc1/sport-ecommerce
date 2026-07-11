@@ -45,7 +45,7 @@ function Footer() {
     );
 }
 
-function InputField({ label, placeholder, span, type = "text", value, onChange, name, required }) {
+function InputField({ label, placeholder, span, type = "text", value, onChange, name, required, ...rest }) {
     const [focused, setFocused] = useState(false);
     return (
         <div className={`flex flex-col gap-2 ${span ? "md:col-span-2" : ""}`}>
@@ -70,6 +70,7 @@ function InputField({ label, placeholder, span, type = "text", value, onChange, 
                 required={required}
                 onFocus={() => setFocused(true)}
                 onBlur={() => setFocused(false)}
+                {...rest}
             />
         </div>
     );
@@ -100,7 +101,26 @@ export default function KineticCheckout({ onViewChange, cart = [], setCart, user
     });
 
     const handleInputChange = (e) => {
-        const { name, value } = e.target;
+        let { name, value } = e.target;
+
+        if (name === "cardNumber") {
+            const digits = value.replace(/\D/g, "");
+            const limitedDigits = digits.slice(0, 16);
+            const formatted = limitedDigits.match(/.{1,4}/g)?.join(" ") || limitedDigits;
+            value = formatted;
+        } else if (name === "expiry") {
+            const digits = value.replace(/\D/g, "");
+            const limitedDigits = digits.slice(0, 4);
+            if (limitedDigits.length > 2) {
+                value = `${limitedDigits.slice(0, 2)}/${limitedDigits.slice(2)}`;
+            } else {
+                value = limitedDigits;
+            }
+        } else if (name === "cvv") {
+            const digits = value.replace(/\D/g, "");
+            value = digits.slice(0, 3);
+        }
+
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
@@ -341,9 +361,9 @@ export default function KineticCheckout({ onViewChange, cart = [], setCart, user
                                     </div>
                                     {payMethod === "card" ? (
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                                            <InputField label="Card Number" placeholder="0000 0000 0000 0000" span name="cardNumber" value={formData.cardNumber} onChange={handleInputChange} required />
-                                            <InputField label="Expiration (MM/YY)" placeholder="12 / 28" name="expiry" value={formData.expiry} onChange={handleInputChange} required />
-                                            <InputField label="CVC" placeholder="***" type="password" name="cvv" value={formData.cvv} onChange={handleInputChange} required />
+                                            <InputField label="Card Number" placeholder="0000 0000 0000 0000" span name="cardNumber" value={formData.cardNumber} onChange={handleInputChange} required maxLength={19} />
+                                            <InputField label="Expiration (MM/YY)" placeholder="12/28" name="expiry" value={formData.expiry} onChange={handleInputChange} required maxLength={5} />
+                                            <InputField label="CVC" placeholder="***" type="password" name="cvv" value={formData.cvv} onChange={handleInputChange} required maxLength={3} />
                                         </div>
                                     ) : (
                                         <div className="p-6 border flex flex-col items-center justify-center gap-4" style={{ backgroundColor: C.surfaceContainer, borderColor: "rgba(255,255,255,0.05)" }}>

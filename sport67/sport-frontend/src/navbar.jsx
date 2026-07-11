@@ -11,13 +11,23 @@ export default function Navbar({ setCurrentView, user, setUser, cart = [] }) {
   const [notifications, setNotifications] = useState([]);
 
   useEffect(() => {
-    if (isNotificationOpen) {
+    const updateNotifications = () => {
       const orders = JSON.parse(localStorage.getItem('gogo_orders') || '[]');
       const currentUserUsername = user ? (user.username || user.name) : 'Guest';
       const userOrders = currentUserUsername !== 'Guest' ? orders.filter(o => o.username === currentUserUsername) : orders.slice(0, 5);
       setNotifications(userOrders);
-    }
-  }, [isNotificationOpen, user]);
+    };
+
+    updateNotifications();
+
+    window.addEventListener('storage', updateNotifications);
+    const interval = setInterval(updateNotifications, 1000);
+
+    return () => {
+      window.removeEventListener('storage', updateNotifications);
+      clearInterval(interval);
+    };
+  }, [user]);
   // Member Login Drawer state
   const [isLoginVisible, setIsLoginVisible] = useState(false);
   const [isLoginActive, setIsLoginActive] = useState(false);
@@ -279,13 +289,17 @@ export default function Navbar({ setCurrentView, user, setUser, cart = [] }) {
             )}
 
             {/* Notification Button */}
-            <div className="relative">
+            <div className="relative flex items-center">
               <button
                 onClick={() => setIsNotificationOpen(!isNotificationOpen)}
-                className="flex items-center gap-2 font-bold text-[11px] uppercase tracking-widest hover:text-primary transition cursor-pointer bg-transparent border-none"
+                className="relative flex items-center justify-center hover:text-primary transition cursor-pointer bg-transparent border-none p-1 text-white"
               >
                 <span className="material-symbols-outlined text-[22px]">notifications</span>
-                <span className="hidden sm:inline">Alerts</span>
+                {notifications.length > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-primary text-white text-[8px] font-black rounded-full min-w-[16px] h-4 px-1 flex items-center justify-center animate-pulse">
+                    {notifications.length}
+                  </span>
+                )}
               </button>
 
               {/* Notification Dropdown */}
