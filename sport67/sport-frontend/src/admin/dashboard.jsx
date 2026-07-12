@@ -16,6 +16,7 @@ import GogoAthleticProducts from "./Products.jsx";
 import GogoAthleticTeam from "./Team.jsx";
 import Sidebar from "./Sidebar.jsx";
 import { ProductContext, getStoredOrders } from "../data/products.jsx";
+import { TeamProvider } from "../data/team.js";
 
 const WEEK = [
   { day: "Mon", height: "h-2/3", amount: "32k ฿" },
@@ -119,7 +120,11 @@ if (currentPage === "orders") {
     return <GogoAthleticProducts onNavigate={setCurrentPage} onViewChange={onViewChange} user={user} setUser={setUser} />;
   }
   if (currentPage === "team") {
-    return <GogoAthleticTeam onNavigate={setCurrentPage} onViewChange={onViewChange} user={user} setUser={setUser} />;
+    return (
+      <TeamProvider>
+        <GogoAthleticTeam onNavigate={setCurrentPage} onViewChange={onViewChange} user={user} setUser={setUser} />
+      </TeamProvider>
+    );
   }
 
   return (
