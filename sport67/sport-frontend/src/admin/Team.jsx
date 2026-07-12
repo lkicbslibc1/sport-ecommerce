@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import React, { useState, useContext } from "react";
+=======
+import React, { useState, useEffect } from "react";
+>>>>>>> f89afd1332b037f810650d600752afbf3dfda418
 import Sidebar from "./Sidebar.jsx";
 import {
   LayoutDashboard,
@@ -19,7 +23,6 @@ import {
   X,
 } from "lucide-react";
 import { TeamContext } from "../data/team.js";
-
 
 const STATUS_STYLES = {
   Active: "bg-green-500/10 text-green-500 border border-green-500/20",
@@ -56,6 +59,26 @@ export default function GogoAthleticTeam({ onNavigate, onViewChange, user, setUs
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newMember, setNewMember] = useState({ name: "", email: "", role: "Support", status: "Active" });
 
+<<<<<<< HEAD
+=======
+  // Sync customers dynamically when the component mounts or when localstorage changes
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setCustomers(JSON.parse(localStorage.getItem("gogo_users") || "[]"));
+    };
+    window.addEventListener("storage", handleStorageChange);
+    // Poll to keep it instantly synchronized
+    const interval = setInterval(handleStorageChange, 1000);
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      clearInterval(interval);
+    };
+  }, []);
+
+  // Check if user has manager or administrator privileges
+  const isManagerOrAdmin = user && (user.role === "manager" || user.role === "Administrator");
+
+>>>>>>> f89afd1332b037f810650d600752afbf3dfda418
   const handleDelete = (id) => {
     deleteTeamMember(id);
   };
@@ -88,11 +111,20 @@ export default function GogoAthleticTeam({ onNavigate, onViewChange, user, setUs
     setIsModalOpen(false);
   };
 
+<<<<<<< HEAD
   const handleRoleChange = (memberId, newRole) => {
     const member = team.find(m => m.id === memberId);
     if (member) {
       updateTeamMember({ ...member, role: newRole });
     }
+=======
+  const handleRoleChange = (id, newRole) => {
+    const updated = team.map((t) =>
+      t.id === id ? { ...t, role: newRole } : t
+    );
+    setTeam(updated);
+    localStorage.setItem("gogo_staff", JSON.stringify(updated));
+>>>>>>> f89afd1332b037f810650d600752afbf3dfda418
   };
 
   const filteredTeam = team.filter((member) => {
@@ -110,6 +142,9 @@ export default function GogoAthleticTeam({ onNavigate, onViewChange, user, setUs
     return matchesSearch;
   });
 
+  // Calculate awaiting invite count (customers who haven't been converted to staff)
+  const awaitingInvite = customers.filter(c => c.status === "Pending").length;
+
   return (
     <div className="min-h-screen w-full bg-neutral-950 text-neutral-100 flex">
       <Sidebar
@@ -119,7 +154,7 @@ export default function GogoAthleticTeam({ onNavigate, onViewChange, user, setUs
         onNavigate={onNavigate}
         onViewChange={onViewChange}
         actionButton={
-          user && user.role === "manager" ? (
+          isManagerOrAdmin ? (
             <button
               onClick={() => setIsModalOpen(true)}
               className="w-full bg-orange-600 text-white text-[10px] font-black py-4 px-2 uppercase tracking-widest hover:scale-105 transition-transform flex items-center justify-center gap-2"
@@ -240,7 +275,7 @@ export default function GogoAthleticTeam({ onNavigate, onViewChange, user, setUs
             <GlassPanel className="p-6 flex items-center justify-between">
               <div>
                 <p className="text-[10px] text-neutral-400 uppercase tracking-widest">Awaiting Invite</p>
-                <h4 className="text-3xl font-black italic text-indigo-300 mt-1">1</h4>
+                <h4 className="text-3xl font-black italic text-indigo-300 mt-1">{awaitingInvite}</h4>
               </div>
               <Clock size={32} className="text-neutral-600" />
             </GlassPanel>
@@ -277,7 +312,7 @@ export default function GogoAthleticTeam({ onNavigate, onViewChange, user, setUs
                         </div>
                       </td>
                       <td className="py-5 px-6">
-                        {user && user.role === "manager" ? (
+                        {isManagerOrAdmin ? (
                           <select
                             value={member.role}
                             onChange={(e) => handleRoleChange(member.id, e.target.value)}
@@ -303,7 +338,7 @@ export default function GogoAthleticTeam({ onNavigate, onViewChange, user, setUs
                         {member.joined}
                       </td>
                       <td className="py-5 px-6 text-right">
-                        {user && user.role === "manager" && (
+                        {isManagerOrAdmin && (
                           <button
                             onClick={() => handleDelete(member.id)}
                             className="text-neutral-500 hover:text-red-400 transition-colors p-1"
@@ -338,15 +373,15 @@ export default function GogoAthleticTeam({ onNavigate, onViewChange, user, setUs
                         </span>
                       </td>
                       <td className="py-5 px-6">
-                        <span className={`text-[10px] px-2.5 py-0.5 font-bold uppercase tracking-wider ${STATUS_STYLES.Active}`}>
-                          Active
+                        <span className={`text-[10px] px-2.5 py-0.5 font-bold uppercase tracking-wider ${STATUS_STYLES[customer.status] || STATUS_STYLES.Active}`}>
+                          {customer.status || "Active"}
                         </span>
                       </td>
                       <td className="py-5 px-6 text-xs text-neutral-400 font-mono">
                         {customer.joined || "N/A"}
                       </td>
                       <td className="py-5 px-6 text-right">
-                        {user && user.role === "manager" && (
+                        {isManagerOrAdmin && (
                           <button
                             onClick={() => handleDeleteCustomer(customer.email)}
                             className="text-neutral-500 hover:text-red-400 transition-colors p-1"
