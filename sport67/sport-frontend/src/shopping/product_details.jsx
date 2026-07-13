@@ -17,6 +17,10 @@ export default function ProductDetails({ onViewChange, product, user, setUser, c
 
   if (!product) return null;
 
+  const currentImage = product.colorImages && product.colorImages[selectedColor]
+    ? product.colorImages[selectedColor]
+    : product.image;
+
   const handleAddToCart = () => {
     if (!user) {
       setShowLoginPopup(true);
@@ -50,7 +54,7 @@ export default function ProductDetails({ onViewChange, product, user, setUser, c
           {/* Image Gallery */}
           <div className="w-full lg:w-1/2 flex justify-center items-start">
             <div className="w-full max-w-lg relative overflow-hidden group">
-              <img src={product.image} alt={product.name} className="w-full h-auto object-contain group-hover:scale-105 transition-transform duration-700" />
+              <img src={currentImage} alt={product.name} className="w-full h-auto object-contain group-hover:scale-105 transition-transform duration-700" />
               {product.badge && (
                 <div className={`absolute top-6 left-6 ${product.badgeType === 'primary' ? 'bg-primary' : 'bg-tertiary'} text-white font-anybody font-black text-xs px-4 py-2 uppercase tracking-widest`}>
                   {product.badge}

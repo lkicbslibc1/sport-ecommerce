@@ -7,7 +7,33 @@ function getStoredProducts() {
   try {
     const stored = localStorage.getItem('gogo_products');
     if (stored) {
-      return JSON.parse(stored);
+      const parsed = JSON.parse(stored);
+      // Merge initial products' colorImages, colors, and images into the stored products
+      // to ensure update propagates correctly even if already in local storage.
+      const merged = parsed.map(p => {
+        const initial = INITIAL_PRODUCTS.find(ip => ip.id === p.id);
+        if (initial) {
+          return {
+            ...p,
+            image: initial.image,
+            colorImages: initial.colorImages || p.colorImages,
+            colors: initial.colors || p.colors,
+            colorNames: initial.colorNames || p.colorNames
+          };
+        }
+        return p;
+      });
+
+      // Add any products from INITIAL_PRODUCTS that are not in localStorage
+      const parsedIds = new Set(parsed.map(p => p.id));
+      const newFromInitial = INITIAL_PRODUCTS.filter(ip => !parsedIds.has(ip.id));
+      const finalProducts = [...merged, ...newFromInitial];
+      try {
+        localStorage.setItem('gogo_products', JSON.stringify(finalProducts));
+      } catch (saveError) {
+        console.error("Failed to save merged products to localStorage", saveError);
+      }
+      return finalProducts;
     }
   } catch (e) {
     console.error("Failed to parse products from localStorage", e);
