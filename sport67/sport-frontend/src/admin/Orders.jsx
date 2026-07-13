@@ -83,14 +83,32 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange, user, set
   const [selectedStatus, setSelectedStatus] = useState("All Statuses");
 
   const handleUpdateStatus = (orderId, newStatus) => {
+    let orderUsername = null;
+    let orderDate = null;
     const updated = ordersList.map(o => {
       if (o.id === orderId) {
+        orderUsername = o.username;
+        orderDate = o.date;
         return { ...o, status: newStatus };
       }
       return o;
     });
     setOrdersList(updated);
     saveOrders(updated);
+
+    if (orderUsername && orderUsername !== 'Guest') {
+        const allNotis = JSON.parse(localStorage.getItem('gogo_noti') || '{}');
+        const userNotis = allNotis[orderUsername] || [];
+        const newNoti = {
+            id: orderId,
+            date: orderDate,
+            title: "Order status updated",
+            status: newStatus,
+            read: false
+        };
+        allNotis[orderUsername] = [newNoti, ...userNotis];
+        localStorage.setItem('gogo_noti', JSON.stringify(allNotis));
+    }
   };
 
   const filteredOrders = useMemo(() => {

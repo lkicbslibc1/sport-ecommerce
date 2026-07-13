@@ -9,13 +9,26 @@ export default function Navbar({ setCurrentView, user, setUser, cart = [] }) {
   const [loginPassword, setLoginPassword] = useState('guest123');
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
     const updateNotifications = () => {
-      const orders = JSON.parse(localStorage.getItem('gogo_orders') || '[]');
       const currentUserUsername = user ? (user.username || user.name) : 'Guest';
-      const userOrders = currentUserUsername !== 'Guest' ? orders.filter(o => o.username === currentUserUsername) : orders.slice(0, 5);
-      setNotifications(userOrders);
+      
+      if (currentUserUsername === 'Guest') {
+        setNotifications([]);
+        setUnreadCount(0);
+        return;
+      }
+
+      const allNotis = JSON.parse(localStorage.getItem('gogo_noti') || '{}');
+      const userNotis = allNotis[currentUserUsername] || [];
+      
+      setNotifications(userNotis);
+
+      // Calculate unread count
+      const unread = userNotis.filter(n => !n.read).length;
+      setUnreadCount(unread);
     };
 
     updateNotifications();
@@ -292,13 +305,28 @@ export default function Navbar({ setCurrentView, user, setUser, cart = [] }) {
             {/* Notification Button */}
             <div className="relative flex items-center">
               <button
-                onClick={() => setIsNotificationOpen(!isNotificationOpen)}
+                onClick={() => {
+                  const newState = !isNotificationOpen;
+                  setIsNotificationOpen(newState);
+                  if (newState) {
+                    // Mark as read when opening
+                    const currentUserUsername = user ? (user.username || user.name) : 'Guest';
+                    if (currentUserUsername !== 'Guest') {
+                        const allNotis = JSON.parse(localStorage.getItem('gogo_noti') || '{}');
+                        if (allNotis[currentUserUsername]) {
+                            allNotis[currentUserUsername] = allNotis[currentUserUsername].map(n => ({...n, read: true}));
+                            localStorage.setItem('gogo_noti', JSON.stringify(allNotis));
+                        }
+                    }
+                    setUnreadCount(0);
+                  }
+                }}
                 className="relative flex items-center justify-center hover:text-primary transition cursor-pointer bg-transparent border-none p-1 text-white"
               >
                 <span className="material-symbols-outlined text-[22px]">notifications</span>
-                {notifications.length > 0 && (
+                {unreadCount > 0 && (
                   <span className="absolute -top-1 -right-1 bg-primary text-white text-[8px] font-black rounded-full min-w-[16px] h-4 px-1 flex items-center justify-center animate-pulse">
-                    {notifications.length}
+                    {unreadCount}
                   </span>
                 )}
               </button>
@@ -325,7 +353,7 @@ export default function Navbar({ setCurrentView, user, setUser, cart = [] }) {
                             <span className="text-[9px] text-white/40">{order.date}</span>
                           </div>
                           <p className="text-[11px] text-white/90 leading-relaxed mb-1">
-                            Purchase successful!
+                            {order.title || 'Purchase successful!'}
                           </p>
                           <p className="text-[10px] text-white/60 uppercase">
                             Status: <span className="text-white font-bold">{order.status}</span>

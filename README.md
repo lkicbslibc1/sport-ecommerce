@@ -152,55 +152,55 @@
 
   
 ## 12. Use Case Diagram
-![Use case Diagram](./img/usecase.png)
+![Use case Diagram](img/usecase.png)
 
 ## 13. Class Diagram
-![Class Diagram](./img/classdiagram.png)
+![Class Diagram](img/classdiagram.png)
 
 ## 14. Sequence Diagrams
-![Class Diagram](./img/sequence.png)
+![Sequence Diagram](img/sequence.png)
 
 ## 15. Wireframe
-![wireframe](./img/1.jpg)
-![wireframe2](./img/2.jpg)
-![wireframe3](./img/3.jpg)
-![wireframe4](./img/4.jpg)
-![wireframe5](./img/5.jpg)
-![wireframe6](./img/6.jpg)
-![wireframe7](./img/7.jpg)
-![wireframe8](./img/8.jpg)
-![wireframe9](./img/9.jpg)
-![wireframe10](./img/10.jpg)
+![wireframe](img/1.jpg)
+![wireframe2](img/2.jpg)
+![wireframe3](img/3.jpg)
+![wireframe4](img/4.jpg)
+![wireframe5](img/5.jpg)
+![wireframe6](img/6.jpg)
+![wireframe7](img/7.jpg)
+![wireframe8](img/8.jpg)
+![wireframe9](img/9.jpg)
+![wireframe10](img/10.jpg)
 
 ## 16. System Architecture
 
 ```mermaid
 graph TD
-    subgraph Tier1 [1. Presentation Tier / Frontend]
-        React[React + TypeScript]
-        UI[UI Design: Soft UI / Pastel Theme]
+    subgraph Tier1 ["1. Presentation Tier / Frontend"]
+        React["React + TypeScript"]
+        UI["UI Design: Soft UI / Pastel Theme"]
         React --- UI
     end
 
-    subgraph Tier2 [2. Logic Tier / Backend API]
-        Node[Node.js Server]
-        Storage[File Storage & Cleanup]
-        Drizzle[Drizzle ORM]
+    subgraph Tier2 ["2. Logic Tier / Backend API"]
+        Node["Node.js Server"]
+        Storage["File Storage & Cleanup"]
+        Drizzle["Drizzle ORM"]
         
         Node -- "จัดการอัปโหลดสลิป/รูปภาพ" --> Storage
         Node -- "จัดการตรรกะข้อมูล" --> Drizzle
     end
 
-    subgraph Tier3 [3. Data Tier / Database]
-        DB[(PostgreSQL)]
+    subgraph Tier3 ["3. Data Tier / Database"]
+        DB[("PostgreSQL")]
     end
 
     %% Data Flow
-    Tier1 -- "HTTP Requests (REST API)" --> Node
-    Node -- "JSON Responses" --> Tier1
+    React -- "HTTP Requests (REST API)" --> Node
+    Node -- "JSON Responses" --> React
     Drizzle -- "SQL Queries" <--> DB
 ```
 ## 17. Data schema
-![schema](./img/schema1.png)
-![schema2](./img/schema2.png)
-![schema3](./img/schema3.png)
+![schema](img/schema1.png)
+![schema2](img/schema2.png)
+![schema3](img/schema3.png)

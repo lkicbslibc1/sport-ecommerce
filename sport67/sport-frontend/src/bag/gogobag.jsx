@@ -237,7 +237,7 @@ export default function GoGoBag({ onViewChange, cart = [], setCart, user, setUse
                                             </span>
                                         </div>
                                         <div className="flex justify-between items-center" style={{ color: C.onSurfaceVariant }}>
-                                            <span className="text-[10px] uppercase tracking-widest">EST. TAX (8%)</span>
+                                            <span className="text-[10px] uppercase tracking-widest">EST. TAX (7%)</span>
                                             <span className="font-black">{tax.toLocaleString("th-TH")} ฿</span>
                                         </div>
                                     </div>

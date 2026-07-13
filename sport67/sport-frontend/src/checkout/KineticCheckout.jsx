@@ -139,9 +139,10 @@ export default function KineticCheckout({ onViewChange, cart = [], setCart, user
             // Construct and save order
             try {
                 const existingOrders = JSON.parse(localStorage.getItem('gogo_orders') || '[]');
+                const currentUsername = user ? (user.username || user.name) : 'Guest';
                 const newOrder = {
                     id: "#" + randomId,
-                    username: user ? (user.username || user.name) : 'Guest',
+                    username: currentUsername,
                     customer: `${formData.firstName} ${formData.lastName}`.trim(),
                     tier: user ? 'MEMBER' : 'PRO',
                     date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).toUpperCase(),
@@ -157,6 +158,20 @@ export default function KineticCheckout({ onViewChange, cart = [], setCart, user
                     actions: ["Update Status", "Mark Shipped", "Mark Preparing", "Cancel Order"]
                 };
                 localStorage.setItem('gogo_orders', JSON.stringify([newOrder, ...existingOrders]));
+
+                if (currentUsername !== 'Guest') {
+                    const allNotis = JSON.parse(localStorage.getItem('gogo_noti') || '{}');
+                    const userNotis = allNotis[currentUsername] || [];
+                    const newNoti = {
+                        id: newOrder.id,
+                        date: newOrder.date,
+                        title: "Purchase successful!",
+                        status: newOrder.status,
+                        read: false
+                    };
+                    allNotis[currentUsername] = [newNoti, ...userNotis];
+                    localStorage.setItem('gogo_noti', JSON.stringify(allNotis));
+                }
             } catch (err) {
                 console.error("Failed to save order to localStorage", err);
             }
@@ -164,7 +179,7 @@ export default function KineticCheckout({ onViewChange, cart = [], setCart, user
             setOrderId(randomId);
             setIsSubmitting(false);
             setIsSubmitted(true);
-            
+
             // Decrease product amount in local storage
             cart.forEach(item => {
                 const productInStore = products.find(p => p.id === item.id);
@@ -340,8 +355,7 @@ export default function KineticCheckout({ onViewChange, cart = [], setCart, user
                                 <div className="space-y-6">
                                     <div className="flex gap-4 mb-8">
                                         {[
-                                            { id: "card", label: "CREDIT CARD", icon: CreditCard },
-                                            { id: "wallet", label: "Digital Wallet", icon: Wallet },
+                                            { id: "card", label: "CREDIT CARD", icon: CreditCard }
                                         ].map((opt) => (
                                             <button
                                                 key={opt.id}
@@ -448,22 +462,10 @@ export default function KineticCheckout({ onViewChange, cart = [], setCart, user
                                 >
                                     {isSubmitting ? "PROCESSING..." : "COMPLETE PURCHASE"}
                                 </button>
-                                <p className="text-center text-[10px] mt-6 uppercase tracking-widest relative z-10" style={{ color: C.outline }}>
-                                    SECURE PAYMENTS BY KINETIC-SHIELD™
-                                </p>
+
                             </div>
 
-                            <div className="p-6 border flex gap-4" style={{ backgroundColor: C.surfaceContainer, borderColor: "rgba(255,255,255,0.05)" }}>
-                                <input
-                                    className="flex-grow border-b py-2 font-bold uppercase tracking-widest text-sm bg-transparent outline-none"
-                                    style={{ borderColor: "rgba(172,137,126,0.3)", color: C.onSurface }}
-                                    placeholder="PROMO CODE"
-                                    type="text"
-                                />
-                                <button type="button" className="text-[10px] font-black uppercase hover:underline bg-transparent border-none cursor-pointer" style={{ color: C.primary }}>
-                                    APPLY
-                                </button>
-                            </div>
+
                         </div>
                     </form>
                 )}
