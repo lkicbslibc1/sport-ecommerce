@@ -542,7 +542,7 @@ export default function Navbar({ setCurrentView, user, setUser, cart = [] }) {
                   alert("User account not found! Please create an account first.");
                   return;
                 } else if (!matchedUser.isActive) {
-                  alert("Account is deactivated.");
+                  alert("บัญชีนี้ถูกระงับ");
                   return;
                 } else if (matchedUser.password !== loginPassword) {
                   alert("Incorrect password! Please try again.");

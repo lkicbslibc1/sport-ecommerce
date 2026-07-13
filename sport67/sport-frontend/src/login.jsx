@@ -25,12 +25,19 @@ export default function Login({ onViewChange, user, setUser }) {
   const handleSubmit = (e) => {
     e.preventDefault();
 
+    const date = new Date().toLocaleDateString("en-US", {
+      month: "short",
+      day: "2-digit",
+      year: "numeric",
+    }).toUpperCase();
+
     const newUser = {
       id: Date.now(),
       username: formData.username,
       password: formData.password,
       role: 'customer',
-      isActive: true
+      isActive: true,
+      joined: date
     };
 
     // Save to gogo_users in localStorage
