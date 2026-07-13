@@ -4,8 +4,6 @@ import Navbar from './navbar.jsx';
 export default function Login({ onViewChange, user, setUser }) {
   const [formData, setFormData] = useState({
     username: '',
-    firstName: '',
-    lastName: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -27,12 +25,19 @@ export default function Login({ onViewChange, user, setUser }) {
   const handleSubmit = (e) => {
     e.preventDefault();
 
+    const date = new Date().toLocaleDateString("en-US", {
+      month: "short",
+      day: "2-digit",
+      year: "numeric",
+    }).toUpperCase();
+
     const newUser = {
       id: Date.now(),
       username: formData.username,
       password: formData.password,
       role: 'customer',
-      isActive: true
+      isActive: true,
+      joined: date
     };
 
     // Save to gogo_users in localStorage
@@ -107,30 +112,7 @@ export default function Login({ onViewChange, user, setUser }) {
                     required
                   />
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <div className="relative focus-within:scale-[1.01] transition-transform duration-200">
-                    <input
-                      className="w-full bg-transparent border-0 border-b-2 border-[#353534] font-label-xs text-label-xs text-[#e5e2e1] uppercase py-3 input-border-anim  placeholder:text-[#bdbdba]"
-                      placeholder="FIRST NAME"
-                      type="text"
-                      name="firstName"
-                      value={formData.firstName}
-                      onChange={handleChange}
-                      required
-                    />
-                  </div>
-                  <div className="relative focus-within:scale-[1.01] transition-transform duration-200">
-                    <input
-                      className="w-full bg-transparent border-0 border-b-2 border-[#353534] font-label-xs text-label-xs text-[#e5e2e1] uppercase py-3 input-border-anim placeholder:text-[#bdbdba]"
-                      placeholder="LAST NAME"
-                      type="text"
-                      name="lastName"
-                      value={formData.lastName}
-                      onChange={handleChange}
-                      required
-                    />
-                  </div>
-                </div>
+
                 <div className="relative focus-within:scale-[1.01] transition-transform duration-200">
                   <input
                     className="w-full bg-transparent border-0 border-b-2 border-[#353534] font-label-xs text-label-xs text-[#e5e2e1] uppercase py-3 input-border-anim placeholder:text-[#bdbdba]"

@@ -82,6 +82,13 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange, user, set
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("All Statuses");
 
+  const [selectedOrderIds, setSelectedOrderIds] = useState([]);
+  const [bulkStatus, setBulkStatus] = useState("Shipped");
+
+  React.useEffect(() => {
+    setSelectedOrderIds([]);
+  }, [searchQuery, selectedStatus]);
+
   const handleUpdateStatus = (orderId, newStatus) => {
     let orderUsername = null;
     let orderDate = null;
@@ -120,6 +127,51 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange, user, set
       return matchSearch && matchStatus;
     });
   }, [ordersList, searchQuery, selectedStatus]);
+
+  const handleSelectAll = (e) => {
+    if (e.target.checked) {
+      setSelectedOrderIds(filteredOrders.map(o => o.id));
+    } else {
+      setSelectedOrderIds([]);
+    }
+  };
+
+  const handleSelectOrder = (id) => {
+    setSelectedOrderIds(prev => 
+      prev.includes(id) ? prev.filter(orderId => orderId !== id) : [...prev, id]
+    );
+  };
+
+  const handleBulkUpdate = () => {
+    let allNotis = JSON.parse(localStorage.getItem('gogo_noti') || '{}');
+    let hasNotisChanged = false;
+
+    const updated = ordersList.map(o => {
+      if (selectedOrderIds.includes(o.id)) {
+        if (o.username && o.username !== 'Guest') {
+            const userNotis = allNotis[o.username] || [];
+            const newNoti = {
+                id: o.id,
+                date: o.date,
+                title: "Order status updated",
+                status: bulkStatus,
+                read: false
+            };
+            allNotis[o.username] = [newNoti, ...userNotis];
+            hasNotisChanged = true;
+        }
+        return { ...o, status: bulkStatus };
+      }
+      return o;
+    });
+    setOrdersList(updated);
+    saveOrders(updated);
+    setSelectedOrderIds([]);
+
+    if (hasNotisChanged) {
+        localStorage.setItem('gogo_noti', JSON.stringify(allNotis));
+    }
+  };
 
   // Dynamic statistics
   const todayOrdersCount = filteredOrders.length;
@@ -212,23 +264,50 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange, user, set
           </div>
 
           {/* Filters HUD */}
-          <GlassPanel className="p-6 mb-8 flex flex-wrap gap-6 items-center">
-            <div className="flex items-center gap-3">
-              <span className="text-[10px] uppercase tracking-widest text-neutral-400">
-                Filter Status:
-              </span>
-              <select
-                value={selectedStatus}
-                onChange={(e) => setSelectedStatus(e.target.value)}
-                className="bg-neutral-900 border border-white/10 text-neutral-100 text-xs py-2 px-4 focus:ring-orange-300 focus:border-orange-300"
-              >
-                <option value="All Statuses" className="bg-neutral-950 text-neutral-100">All Statuses</option>
-                <option value="Pending" className="bg-neutral-950 text-neutral-100">Pending</option>
-                <option value="Preparing" className="bg-neutral-950 text-neutral-100">Preparing</option>
-                <option value="Shipped" className="bg-neutral-950 text-neutral-100">Shipped</option>
-                <option value="Delivered" className="bg-neutral-950 text-neutral-100">Delivered</option>
-                <option value="Cancelled" className="bg-neutral-950 text-neutral-100">Cancelled</option>
-              </select>
+          <GlassPanel className="p-6 mb-8 flex flex-wrap gap-6 items-center justify-between">
+            <div className="flex flex-wrap gap-6 items-center">
+              <div className="flex items-center gap-3">
+                <span className="text-[10px] uppercase tracking-widest text-neutral-400">
+                  Filter Status:
+                </span>
+                <select
+                  value={selectedStatus}
+                  onChange={(e) => setSelectedStatus(e.target.value)}
+                  className="bg-neutral-900 border border-white/10 text-neutral-100 text-xs py-2 px-4 focus:ring-orange-300 focus:border-orange-300"
+                >
+                  <option value="All Statuses" className="bg-neutral-950 text-neutral-100">All Statuses</option>
+                  <option value="Pending" className="bg-neutral-950 text-neutral-100">Pending</option>
+                  <option value="Preparing" className="bg-neutral-950 text-neutral-100">Preparing</option>
+                  <option value="Shipped" className="bg-neutral-950 text-neutral-100">Shipped</option>
+                  <option value="Delivered" className="bg-neutral-950 text-neutral-100">Delivered</option>
+                  <option value="Cancelled" className="bg-neutral-950 text-neutral-100">Cancelled</option>
+                </select>
+              </div>
+
+              {selectedOrderIds.length > 0 && (
+                <div className="flex items-center gap-3 border-l border-white/10 pl-6 animate-fadeIn">
+                  <span className="text-[10px] uppercase tracking-widest text-orange-300 font-bold">
+                    {selectedOrderIds.length} Selected
+                  </span>
+                  <select
+                    value={bulkStatus}
+                    onChange={(e) => setBulkStatus(e.target.value)}
+                    className="bg-neutral-900 border border-white/10 text-neutral-100 text-xs py-2 px-4 focus:ring-orange-300 focus:border-orange-300"
+                  >
+                    <option value="Pending" className="bg-neutral-950 text-neutral-100">Pending</option>
+                    <option value="Preparing" className="bg-neutral-950 text-neutral-100">Preparing</option>
+                    <option value="Shipped" className="bg-neutral-950 text-neutral-100">Shipped</option>
+                    <option value="Delivered" className="bg-neutral-950 text-neutral-100">Delivered</option>
+                    <option value="Cancelled" className="bg-neutral-950 text-neutral-100">Cancelled</option>
+                  </select>
+                  <button
+                    onClick={handleBulkUpdate}
+                    className="bg-orange-600 hover:bg-orange-500 text-white text-[10px] font-black py-2 px-4 uppercase tracking-widest transition-colors"
+                  >
+                    Update Selected
+                  </button>
+                </div>
+              )}
             </div>
           </GlassPanel>
 
@@ -238,6 +317,14 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange, user, set
               <table className="w-full text-left border-collapse min-w-[800px]">
                 <thead className="bg-neutral-900 border-b border-white/10">
                   <tr>
+                    <th className="p-6 w-12">
+                      <input 
+                        type="checkbox" 
+                        checked={filteredOrders.length > 0 && selectedOrderIds.length === filteredOrders.length}
+                        onChange={handleSelectAll}
+                        className="w-4 h-4 accent-orange-500 cursor-pointer"
+                      />
+                    </th>
                     {["Order ID", "Username", "Customer Name", "Date", "Total", "Status"].map(
                       (h) => (
                         <th
@@ -257,8 +344,16 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange, user, set
                   {filteredOrders.map((order) => (
                     <tr
                       key={order.id}
-                      className="hover:bg-orange-600/5 hover:border-l-2 hover:border-orange-400 transition-colors"
+                      className={`hover:bg-orange-600/5 hover:border-l-2 hover:border-orange-400 transition-colors ${selectedOrderIds.includes(order.id) ? 'bg-orange-600/10 border-l-2 border-orange-400' : ''}`}
                     >
+                      <td className="p-6">
+                        <input 
+                          type="checkbox" 
+                          checked={selectedOrderIds.includes(order.id)}
+                          onChange={() => handleSelectOrder(order.id)}
+                          className="w-4 h-4 accent-orange-500 cursor-pointer"
+                        />
+                      </td>
                       <td className="p-6 text-sm text-orange-300 tracking-widest">
                         {order.id}
                       </td>

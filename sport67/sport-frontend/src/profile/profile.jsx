@@ -2,24 +2,65 @@ import React from 'react';
 import Navbar from '../navbar.jsx';
 
 export default function Profile({ onViewChange, user, setUser, cart, addToCart, setSelectedOrder }) {
+  const currentUserUsername = user?.username || user?.name || 'Guest';
+
   // Fetch real order history from localStorage
   const [orders, setOrders] = React.useState([]);
+  const [addresses, setAddresses] = React.useState([]);
+  const [showAddressModal, setShowAddressModal] = React.useState(false);
+  const [addressForm, setAddressForm] = React.useState({
+    firstName: '', lastName: '', phone: '', streetAddress: '', city: '', zipCode: '', isDefault: false
+  });
 
   React.useEffect(() => {
     try {
       const stored = localStorage.getItem('gogo_orders');
       if (stored) {
         const allOrders = JSON.parse(stored);
-        // Filter orders for the current user.
-        // Assuming the checkout process saves customer name or username.
-        const currentUserUsername = user.username || user.name || 'Guest';
         const userOrders = allOrders.filter(o => o.username === currentUserUsername);
         setOrders(userOrders);
       }
+      
+      const allAddresses = JSON.parse(localStorage.getItem('gogo_addresses') || '{}');
+      setAddresses(allAddresses[currentUserUsername] || []);
     } catch (e) {
-      console.error("Failed to load orders", e);
+      console.error("Failed to load data", e);
     }
-  }, [user]);
+  }, [user, currentUserUsername]);
+
+  const handleSaveAddress = (e) => {
+    e.preventDefault();
+    const allAddresses = JSON.parse(localStorage.getItem('gogo_addresses') || '{}');
+    let userAddrs = allAddresses[currentUserUsername] || [];
+    
+    let newAddr = { ...addressForm, id: Date.now().toString() };
+    if (newAddr.isDefault || userAddrs.length === 0) {
+      newAddr.isDefault = true;
+      userAddrs = userAddrs.map(a => ({...a, isDefault: false}));
+    }
+    
+    userAddrs.push(newAddr);
+    allAddresses[currentUserUsername] = userAddrs;
+    localStorage.setItem('gogo_addresses', JSON.stringify(allAddresses));
+    setAddresses(userAddrs);
+    setShowAddressModal(false);
+    setAddressForm({ firstName: '', lastName: '', phone: '', streetAddress: '', city: '', zipCode: '', isDefault: false });
+  };
+
+  const handleSetDefaultAddress = (addressId, index) => {
+    const allAddresses = JSON.parse(localStorage.getItem('gogo_addresses') || '{}');
+    let userAddrs = allAddresses[currentUserUsername] || [];
+    userAddrs = userAddrs.map((a, i) => {
+        const isMatch = a.id ? a.id === addressId : i === index;
+        return {
+            ...a,
+            isDefault: isMatch
+        };
+    });
+    allAddresses[currentUserUsername] = userAddrs;
+    localStorage.setItem('gogo_addresses', JSON.stringify(allAddresses));
+    setAddresses(userAddrs);
+  };
 
   // Split name into first and last name
   const nameParts = user.name ? user.name.split(' ') : ['Guest', 'User'];
@@ -71,10 +112,46 @@ export default function Profile({ onViewChange, user, setUser, cart, addToCart, 
                 setUser(null);
                 onViewChange('home');
               }}
-                className="w-full mt-6 border border-white/20 hover:bg-white hover:text-black py-4 font-anybody font-black text-xs uppercase tracking-widest transition-all duration-300"
+                className="w-full mt-6 border border-white/20 hover:bg-white hover:text-black py-4 font-anybody font-black text-xs uppercase tracking-widest transition-all duration-300 cursor-pointer"
               >
                 Logout
               </button>
+            </div>
+
+            {/* Addresses Section */}
+            <div className="glass p-8 border border-white/5 space-y-6 relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-1 bg-primary"></div>
+                <h3 className="font-anybody font-black text-xl uppercase tracking-widest border-b border-white/10 pb-6">My Addresses</h3>
+                
+                <div className="space-y-4">
+                  {addresses.length === 0 ? (
+                    <p className="text-sm text-on-surface-variant font-light">คุณยังไม่มีที่อยู่ (No addresses found)</p>
+                  ) : (
+                    addresses.map((addr, idx) => (
+                      <div key={idx} className="p-4 border border-white/10 relative mt-4">
+                        {addr.isDefault ? (
+                          <span className="absolute top-4 right-4 text-[10px] text-primary border border-primary px-2 py-0.5">ค่าเริ่มต้น</span>
+                        ) : (
+                          <button
+                            onClick={() => handleSetDefaultAddress(addr.id, idx)}
+                            className="absolute top-4 right-4 text-[10px] text-white border border-white/20 px-2 py-0.5 hover:bg-white/10 transition-colors cursor-pointer bg-transparent"
+                          >
+                            ตั้งเป็นค่าเริ่มต้น
+                          </button>
+                        )}
+                        <p className="font-bold text-sm text-white w-[70%]">{addr.firstName} {addr.lastName} | <span className="text-on-surface-variant font-light">{addr.phone}</span></p>
+                        <p className="text-xs text-on-surface-variant mt-2 leading-relaxed w-[70%]">{addr.streetAddress}<br/>{addr.city}, {addr.zipCode}</p>
+                      </div>
+                    ))
+                  )}
+                </div>
+
+                <button
+                  onClick={() => setShowAddressModal(true)}
+                  className="w-full mt-6 border border-primary text-primary hover:bg-primary hover:text-black py-4 font-anybody font-black text-xs uppercase tracking-widest transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer bg-transparent"
+                >
+                  + เพิ่มที่อยู่ใหม่
+                </button>
             </div>
           </div>
 
@@ -120,6 +197,53 @@ export default function Profile({ onViewChange, user, setUser, cart, addToCart, 
           </div>
         </div>
       </main>
+
+      {/* Address Modal */}
+      {showAddressModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+          <div className="bg-[#131313] border border-white/10 p-8 w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <h3 className="text-2xl font-anybody font-black italic uppercase mb-6 text-white">เพิ่มที่อยู่ใหม่</h3>
+            <form onSubmit={handleSaveAddress} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-[10px] uppercase text-on-surface-variant mb-1 block">First Name</label>
+                  <input required type="text" className="w-full bg-[#1c1b1b] border-b-2 border-white/10 p-3 text-white outline-none focus:border-primary" value={addressForm.firstName} onChange={e => setAddressForm({...addressForm, firstName: e.target.value})} />
+                </div>
+                <div>
+                  <label className="text-[10px] uppercase text-on-surface-variant mb-1 block">Last Name</label>
+                  <input required type="text" className="w-full bg-[#1c1b1b] border-b-2 border-white/10 p-3 text-white outline-none focus:border-primary" value={addressForm.lastName} onChange={e => setAddressForm({...addressForm, lastName: e.target.value})} />
+                </div>
+              </div>
+              <div>
+                <label className="text-[10px] uppercase text-on-surface-variant mb-1 block">Phone Number</label>
+                <input required type="tel" className="w-full bg-[#1c1b1b] border-b-2 border-white/10 p-3 text-white outline-none focus:border-primary" value={addressForm.phone} onChange={e => setAddressForm({...addressForm, phone: e.target.value})} />
+              </div>
+              <div>
+                <label className="text-[10px] uppercase text-on-surface-variant mb-1 block">Street Address</label>
+                <textarea required className="w-full bg-[#1c1b1b] border-b-2 border-white/10 p-3 text-white outline-none focus:border-primary resize-none h-20" value={addressForm.streetAddress} onChange={e => setAddressForm({...addressForm, streetAddress: e.target.value})}></textarea>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-[10px] uppercase text-on-surface-variant mb-1 block">City</label>
+                  <input required type="text" className="w-full bg-[#1c1b1b] border-b-2 border-white/10 p-3 text-white outline-none focus:border-primary" value={addressForm.city} onChange={e => setAddressForm({...addressForm, city: e.target.value})} />
+                </div>
+                <div>
+                  <label className="text-[10px] uppercase text-on-surface-variant mb-1 block">Zip Code</label>
+                  <input required type="text" className="w-full bg-[#1c1b1b] border-b-2 border-white/10 p-3 text-white outline-none focus:border-primary" value={addressForm.zipCode} onChange={e => setAddressForm({...addressForm, zipCode: e.target.value})} />
+                </div>
+              </div>
+              <div className="flex items-center gap-3 pt-4">
+                <input type="checkbox" id="isDefault" className="w-4 h-4 accent-primary" checked={addressForm.isDefault} onChange={e => setAddressForm({...addressForm, isDefault: e.target.checked})} />
+                <label htmlFor="isDefault" className="text-sm text-white cursor-pointer">ตั้งเป็นที่อยู่หลัก (Set as default)</label>
+              </div>
+              <div className="flex gap-4 pt-6">
+                <button type="button" onClick={() => setShowAddressModal(false)} className="flex-1 py-4 border border-white/20 text-white uppercase text-xs font-bold hover:bg-white/5 transition-colors">ยกเลิก</button>
+                <button type="submit" className="flex-1 py-4 bg-primary text-black uppercase text-xs font-bold hover:bg-orange-500 transition-colors border-none">บันทึก</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

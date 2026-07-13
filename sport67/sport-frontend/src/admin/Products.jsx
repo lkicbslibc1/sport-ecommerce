@@ -11,7 +11,10 @@ import {
     X,
     Plus,
     Trash2,
-    Package
+    Package,
+    ArrowUpDown,
+    ChevronUp,
+    ChevronDown
 } from "lucide-react";
 import { ProductContext } from "../data/products.jsx";
 
@@ -23,19 +26,36 @@ const STATUS_STYLES = {
 const STOCK_STYLES = {
     "In Stock": {
         dot: "bg-green-500",
-        badge: "bg-green-500/10 text-green-500 border border-green-500/20",
-        pulse: "animate-pulse",
+        pulse: "animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]",
+        badge: "text-green-400 bg-green-500/10 border border-green-500/20",
     },
     "Low Stock": {
-        dot: "bg-orange-500",
-        badge: "bg-orange-500/10 text-orange-500 border border-orange-500/20",
-        pulse: "",
+        dot: "bg-red-500",
+        pulse: "animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.6)]",
+        badge: "text-red-400 bg-red-500/10 border border-red-500/20",
     },
     "Out of Stock": {
-        dot: "bg-red-400",
-        badge: "bg-red-400/10 text-red-400 border border-red-400/20",
-        pulse: "animate-ping",
+        dot: "bg-neutral-500",
+        pulse: "",
+        badge: "text-neutral-400 bg-neutral-500/10 border border-neutral-500/20",
     },
+};
+
+const HighlightText = ({ text, query }) => {
+    if (!query) return <>{text}</>;
+    const regex = new RegExp(`(${query})`, "gi");
+    const parts = String(text).split(regex);
+    return (
+        <>
+            {parts.map((part, i) =>
+                part.toLowerCase() === query.toLowerCase() ? (
+                    <span key={i} className="text-orange-500 bg-orange-500/20 px-1 rounded">{part}</span>
+                ) : (
+                    <span key={i}>{part}</span>
+                )
+            )}
+        </>
+    );
 };
 
 function formatPrice(n) {
@@ -88,8 +108,9 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange, user, s
     const [selectedCategory, setSelectedCategory] = useState("All Categories");
     const [selectedStatus, setSelectedStatus] = useState("All Statuses");
     const [selectedStockStatus, setSelectedStockStatus] = useState("All Statuses");
+    const [sortField, setSortField] = useState("newest");
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 5;
+    const itemsPerPage = 10;
 
     // Modal state
     const [modalOpen, setModalOpen] = useState(false);
@@ -298,17 +319,52 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange, user, s
         });
     }, [products, searchQuery, selectedCategory, selectedStatus, selectedStockStatus]);
 
+    const handleSort = (key) => {
+        if (!key) return;
+        if (sortField === `${key}-asc`) {
+            setSortField(`${key}-desc`);
+        } else {
+            setSortField(`${key}-asc`);
+        }
+    };
+
+    const sortedProducts = useMemo(() => {
+        let result = [...filteredProducts];
+        if (sortField === "price-asc") {
+            result.sort((a, b) => a.price - b.price);
+        } else if (sortField === "price-desc") {
+            result.sort((a, b) => b.price - a.price);
+        } else if (sortField === "name-asc") {
+            result.sort((a, b) => a.name.localeCompare(b.name));
+        } else if (sortField === "name-desc") {
+            result.sort((a, b) => b.name.localeCompare(a.name));
+        } else if (sortField === "stock-asc") {
+            result.sort((a, b) => a.amount - b.amount);
+        } else if (sortField === "stock-desc") {
+            result.sort((a, b) => b.amount - a.amount);
+        } else if (sortField === "sport-asc") {
+            result.sort((a, b) => (a.sportType || "").localeCompare(b.sportType || ""));
+        } else if (sortField === "sport-desc") {
+            result.sort((a, b) => (b.sportType || "").localeCompare(a.sportType || ""));
+        } else if (sortField === "brand-asc") {
+            result.sort((a, b) => (a.brand || "").localeCompare(b.brand || ""));
+        } else if (sortField === "brand-desc") {
+            result.sort((a, b) => (b.brand || "").localeCompare(a.brand || ""));
+        }
+        return result;
+    }, [filteredProducts, sortField]);
+
     // Pagination logic
-    const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+    const totalPages = Math.ceil(sortedProducts.length / itemsPerPage);
     const paginatedProducts = useMemo(() => {
         const startIndex = (currentPage - 1) * itemsPerPage;
-        return filteredProducts.slice(startIndex, startIndex + itemsPerPage);
-    }, [filteredProducts, currentPage, itemsPerPage]);
+        return sortedProducts.slice(startIndex, startIndex + itemsPerPage);
+    }, [sortedProducts, currentPage, itemsPerPage]);
 
     // Reset to page 1 when filters change
     React.useEffect(() => {
         setCurrentPage(1);
-    }, [searchQuery, selectedCategory, selectedStatus, selectedStockStatus]);
+    }, [searchQuery, selectedCategory, selectedStatus, selectedStockStatus, sortField]);
 
     return (
         <div className="min-h-screen w-full bg-neutral-950 text-neutral-100 flex">
@@ -338,23 +394,7 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange, user, s
             <div className="flex-1 min-w-0">
                 {/* TOP NAVIGATION */}
                 <header className="sticky top-0 z-40 flex justify-between items-center h-16 px-6 md:px-12 bg-neutral-950/80 backdrop-blur-md border-b border-white/5">
-                    <div className="w-full max-w-md">
-                        <div className={"relative transition-all duration-200 " + (searchFocused ? "scale-105" : "")}>
-                            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500" />
-                            <input
-                                type="text"
-                                onFocus={() => setSearchFocused(true)}
-                                onBlur={() => setSearchFocused(false)}
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                placeholder="SEARCH PRODUCTS..."
-                                className={
-                                    "bg-transparent border-0 border-b w-full pl-10 py-2 focus:ring-0 text-sm uppercase tracking-tight placeholder:text-neutral-600 transition-colors " +
-                                    (searchFocused ? "border-orange-300" : "border-white/10")
-                                }
-                            />
-                        </div>
-                    </div>
+                    <div></div>
 
                     <div className="flex items-center gap-6">
                         <button className="text-neutral-300 hover:scale-110 transition-transform">
@@ -402,8 +442,8 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange, user, s
                         </div>
                     </div>
 
-                    {/* Filters - เพิ่มฟิลเตอร์สถานะสต็อก */}
-                    <GlassPanel className="p-6 mb-8 flex flex-wrap items-center justify-between gap-6">
+                    {/* Filters */}
+                    <GlassPanel className="p-6 mb-8 flex flex-col xl:flex-row items-start xl:items-center justify-between gap-6">
                         <div className="flex flex-wrap items-center gap-8">
                             <div className="flex flex-col gap-1">
                                 <span className="text-[10px] text-neutral-400 uppercase tracking-widest">Sport Type / Category</span>
@@ -447,17 +487,37 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange, user, s
                                 </select>
                             </div>
                         </div>
-                        <div className="flex items-center gap-4">
+
+                        <div className="flex flex-col sm:flex-row sm:items-end gap-6 w-full xl:w-auto mt-4 xl:mt-0">
+                            <div className="flex flex-col gap-1 w-full sm:w-80">
+                                <span className="text-[10px] text-neutral-400 uppercase tracking-widest">Search Products</span>
+                                <div className={"relative transition-all duration-200 " + (searchFocused ? "scale-105" : "")}>
+                                    <Search size={18} className="absolute left-0 top-1/2 -translate-y-1/2 text-orange-400" />
+                                    <input
+                                        type="text"
+                                        onFocus={() => setSearchFocused(true)}
+                                        onBlur={() => setSearchFocused(false)}
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        placeholder="Name, SKU, Brand..."
+                                        className={
+                                            "bg-transparent border-0 border-b pl-8 py-2 focus:ring-0 text-sm tracking-widest font-bold placeholder:text-neutral-600 transition-colors w-full text-neutral-100 uppercase " +
+                                            (searchFocused ? "border-orange-400" : "border-orange-400/50")
+                                        }
+                                    />
+                                </div>
+                            </div>
+                            
                             {user && user.role === "manager" ? (
                                 <button
                                     onClick={handleOpenAdd}
-                                    className="bg-orange-600 text-white px-6 py-2 uppercase text-xs font-black italic tracking-widest hover:scale-105 transition-transform flex items-center gap-2"
+                                    className="bg-orange-600 text-white px-6 py-2 uppercase text-sm font-black italic tracking-widest hover:scale-105 transition-transform flex items-center gap-2 whitespace-nowrap h-10"
                                 >
-                                    <Plus size={14} />
+                                    <Plus size={16} />
                                     Add Product
                                 </button>
                             ) : (
-                                <div className="text-[10px] text-neutral-500 uppercase tracking-widest">
+                                <div className="text-[10px] text-neutral-500 uppercase tracking-widest whitespace-nowrap h-10 flex items-center">
                                     Viewing Mode Only
                                 </div>
                             )}
@@ -470,10 +530,33 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange, user, s
                             <table className="w-full text-left border-collapse min-w-[1000px]">
                                 <thead className="bg-white/5 uppercase text-xs tracking-widest">
                                     <tr>
-                                        {["Product Name", "SKU", "Sport / Category", "Brand", "Price", "Stock Level", "Status"].map((h) => (
-                                            <th key={h} className="px-6 py-5 font-bold">{h}</th>
+                                        {[
+                                            { label: "Product Name", key: "name" },
+                                            { label: "SKU", key: null },
+                                            { label: "Sport / Category", key: "sport" },
+                                            { label: "Brand", key: "brand" },
+                                            { label: "Price", key: "price" },
+                                            { label: "Stock Level", key: "stock" },
+                                            { label: "Status", key: null }
+                                        ].map((h) => (
+                                            <th 
+                                                key={h.label} 
+                                                className={`px-6 py-5 font-bold ${h.key ? "cursor-pointer hover:text-orange-300 select-none" : ""}`}
+                                                onClick={() => handleSort(h.key)}
+                                            >
+                                                <div className="flex items-center gap-2">
+                                                    {h.label}
+                                                    {h.key && (
+                                                        <span className="text-neutral-500">
+                                                            {sortField === `${h.key}-asc` ? <ChevronUp size={14} className="text-orange-300"/> :
+                                                             sortField === `${h.key}-desc` ? <ChevronDown size={14} className="text-orange-300"/> :
+                                                             <ArrowUpDown size={14} />}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </th>
                                         ))}
-                                        <th className="px-6 py-5 font-bold text-right">Actions</th>
+                                        {user && user.role === "manager" && <th className="px-6 py-5 font-bold text-right">Actions</th>}
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-white/5">
@@ -495,16 +578,20 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange, user, s
                                                     </div>
                                                     <div className="flex flex-col">
                                                         <span className="italic font-black uppercase group-hover:text-orange-300 transition-colors">
-                                                            {item.name}
+                                                            <HighlightText text={item.name} query={searchQuery} />
                                                         </span>
                                                         <span className="text-[9px] text-neutral-500 tracking-wider">
                                                             {item.targetGroup} / {item.productType}
                                                         </span>
                                                     </div>
                                                 </td>
-                                                <td className="px-6 py-6 text-neutral-400 font-mono text-sm">{item.sku}</td>
+                                                <td className="px-6 py-6 text-neutral-400 font-mono text-sm">
+                                                    <HighlightText text={item.sku} query={searchQuery} />
+                                                </td>
                                                 <td className="px-6 py-6 uppercase text-xs font-bold">{item.sportType}</td>
-                                                <td className="px-6 py-6 uppercase text-xs font-bold text-neutral-400">{item.brand}</td>
+                                                <td className="px-6 py-6 uppercase text-xs font-bold text-neutral-400">
+                                                    <HighlightText text={item.brand} query={searchQuery} />
+                                                </td>
                                                 <td className="px-6 py-6 italic font-bold text-orange-300">{formatPrice(item.price)}</td>
                                                 <td className="px-6 py-6">
                                                     <div className="flex items-center gap-3">
@@ -519,23 +606,23 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange, user, s
                                                         {item.status || "Published"}
                                                     </span>
                                                 </td>
-                                                <td className="px-6 py-6 text-right">
-                                                    <div className="flex justify-end gap-2">
-                                                        <button
-                                                            onClick={() => handleOpenEdit(item)}
-                                                            className="bg-white/5 border border-white/10 hover:border-orange-300 p-2 transition-all hover:bg-orange-300 hover:text-neutral-950"
-                                                            title="Edit Product"
-                                                        >
-                                                            <Pencil size={16} />
-                                                        </button>
-                                                        <button
-                                                            onClick={() => handleOpenAdjust(item)}
-                                                            className="bg-white/5 border border-white/10 hover:border-orange-300 p-2 transition-all hover:bg-orange-300 hover:text-neutral-950"
-                                                            title="Adjust Stock"
-                                                        >
-                                                            <Package size={16} />
-                                                        </button>
-                                                        {user && user.role === "manager" && (
+                                                {user && user.role === "manager" && (
+                                                    <td className="px-6 py-6 text-right">
+                                                        <div className="flex justify-end gap-2">
+                                                            <button
+                                                                onClick={() => handleOpenEdit(item)}
+                                                                className="bg-white/5 border border-white/10 hover:border-orange-300 p-2 transition-all hover:bg-orange-300 hover:text-neutral-950"
+                                                                title="Edit Product"
+                                                            >
+                                                                <Pencil size={16} />
+                                                            </button>
+                                                            <button
+                                                                onClick={() => handleOpenAdjust(item)}
+                                                                className="bg-white/5 border border-white/10 hover:border-orange-300 p-2 transition-all hover:bg-orange-300 hover:text-neutral-950"
+                                                                title="Adjust Stock"
+                                                            >
+                                                                <Package size={16} />
+                                                            </button>
                                                             <button
                                                                 onClick={() => handleDelete(item.id)}
                                                                 className="bg-white/5 border border-white/10 hover:border-red-500 p-2 transition-all hover:bg-red-500 hover:text-neutral-950 text-red-400"
@@ -543,9 +630,9 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange, user, s
                                                             >
                                                                 <Trash2 size={16} />
                                                             </button>
-                                                        )}
-                                                    </div>
-                                                </td>
+                                                        </div>
+                                                    </td>
+                                                )}
                                             </tr>
                                         );
                                     })}
@@ -557,7 +644,7 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange, user, s
                         <div className="p-6 bg-white/5 flex flex-col md:flex-row justify-between items-center gap-4 border-t border-white/5">
                             <p className="text-neutral-400 text-[10px] uppercase tracking-widest">
                                 Showing {(currentPage - 1) * itemsPerPage + 1}-
-                                {Math.min(currentPage * itemsPerPage, filteredProducts.length)} of {products.length} Products
+                                {Math.min(currentPage * itemsPerPage, sortedProducts.length)} of {sortedProducts.length} Products
                             </p>
                             <div className="flex items-center gap-2">
                                 <button 
