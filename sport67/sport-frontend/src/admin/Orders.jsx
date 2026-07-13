@@ -47,9 +47,33 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange, user, set
     } catch (e) {
       console.error(e);
     }
-    const initialMock = [];
-    return initialMock;
+    return [];
   });
+
+  // Real-time sync: listen for storage events (cross-tab) + poll every 3s (same-tab)
+  React.useEffect(() => {
+    const syncOrders = () => {
+      try {
+        const stored = localStorage.getItem('gogo_orders');
+        if (stored) setOrdersList(JSON.parse(stored));
+      } catch (e) {
+        console.error(e);
+      }
+    };
+
+    const handleStorageEvent = (e) => {
+      if (e.key === 'gogo_orders') syncOrders();
+    };
+
+    window.addEventListener('storage', handleStorageEvent);
+    const interval = setInterval(syncOrders, 3000);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageEvent);
+      clearInterval(interval);
+    };
+  }, []);
+
 
   const [showActionModal, setShowActionModal] = useState(false);
 

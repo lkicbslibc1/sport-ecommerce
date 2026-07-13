@@ -16,17 +16,9 @@ import GogoAthleticProducts from "./Products.jsx";
 import GogoAthleticTeam from "./Team.jsx";
 import Sidebar from "./Sidebar.jsx";
 import { ProductContext, getStoredOrders } from "../data/products.jsx";
-import { TeamProvider } from "../data/team.js";
+import { TeamProvider } from "../data/team.jsx";
 
-const WEEK = [
-  { day: "Mon", height: "h-2/3", amount: "32k ฿" },
-  { day: "Tue", height: "h-1/2", amount: "24k ฿" },
-  { day: "Wed", height: "h-3/4", amount: "36k ฿" },
-  { day: "Thu", height: "h-2/5", amount: "19k ฿" },
-  { day: "Fri", height: "h-5/6", amount: "39k ฿" },
-  { day: "Sat", height: "h-4/5", amount: "37k ฿" },
-  { day: "Sun", height: "h-full", amount: "42k ฿", today: true },
-];
+
 
 function GlassPanel({ className = "", children }) {
   return (
@@ -90,6 +82,39 @@ export default function GogoAthleticDashboard({ onViewChange, user, setUser }) {
       status: p.amount === 0 ? "OUT OF STOCK" : `${p.amount} LEFT`
     })).slice(0, 5);
   }, [criticalProducts]);
+
+  // Compute last 7 days of revenue from real orders
+  const weekData = useMemo(() => {
+    const today = new Date();
+    const days = Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(today);
+      d.setDate(today.getDate() - (6 - i));
+      return d;
+    });
+
+    const results = days.map((d, i) => {
+      const dayName = d.toLocaleDateString("en-US", { weekday: "short" });
+      // Match orders by formatted date string
+      const dateKey = d.toLocaleDateString("en-US", {
+        month: "short", day: "2-digit", year: "numeric"
+      }).toUpperCase();
+      const dayOrders = ordersList.filter(
+        o => o.date && o.date.toUpperCase() === dateKey && o.status !== "Cancelled"
+      );
+      const total = dayOrders.reduce((sum, o) => {
+        return sum + (parseFloat((o.total || "0").replace(/,/g, "").replace(/[^\d.]/g, "")) || 0);
+      }, 0);
+      return { day: dayName, total, isToday: i === 6 };
+    });
+
+    const maxTotal = Math.max(...results.map(r => r.total), 1);
+    return results.map(r => ({
+      day: r.day,
+      amount: r.total > 0 ? r.total.toLocaleString("th-TH") + " ฿" : "0 ฿",
+      heightPct: Math.max(5, Math.round((r.total / maxTotal) * 100)),
+      today: r.isToday
+    }));
+  }, [ordersList]);
 
   // Best Sellers - now using products from context (real-time updates)
   const bestSellers = useMemo(() => {
@@ -318,17 +343,16 @@ if (currentPage === "orders") {
                 </div>
 
                 <div className="h-64 w-full flex items-end gap-2 px-2">
-                  {WEEK.map(({ day, height, amount, today }) => (
+                  {weekData.map(({ day, heightPct, amount, today }) => (
                     <div
                       key={day}
                       className={
                         "flex-1 relative group cursor-pointer transition-colors border-t-2 " +
-                        height +
-                        " " +
                         (today
                           ? "bg-orange-300 border-white"
                           : "bg-orange-300/20 hover:bg-orange-300/40 border-orange-300")
                       }
+                      style={{ height: heightPct + "%" }}
                     >
                       <div
                         className={
@@ -344,7 +368,7 @@ if (currentPage === "orders") {
                   ))}
                 </div>
                 <div className="flex justify-between mt-4 text-[10px] font-bold text-neutral-500 uppercase tracking-widest opacity-70">
-                  {WEEK.map(({ day }) => (
+                  {weekData.map(({ day }) => (
                     <span key={day}>{day}</span>
                   ))}
                 </div>

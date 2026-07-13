@@ -86,6 +86,7 @@ export default function Sidebar({ activeItem, onNavigate, onViewChange, actionBu
         </a>
         <button
           onClick={() => {
+            localStorage.removeItem('gogo_current_user');
             if (setUser) setUser(null);
             if (onViewChange) onViewChange("home");
           }}

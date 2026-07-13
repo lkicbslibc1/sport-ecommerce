@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-import React, { useState, useContext } from "react";
-=======
-import React, { useState, useEffect } from "react";
->>>>>>> f89afd1332b037f810650d600752afbf3dfda418
+import React, { useState, useEffect, useContext } from "react";
 import Sidebar from "./Sidebar.jsx";
 import {
   LayoutDashboard,
@@ -22,7 +18,7 @@ import {
   Trash2,
   X,
 } from "lucide-react";
-import { TeamContext } from "../data/team.js";
+import { TeamContext } from "../data/team.jsx";
 
 const STATUS_STYLES = {
   Active: "bg-green-500/10 text-green-500 border border-green-500/20",
@@ -52,33 +48,18 @@ function GlassPanel({ className = "", children }) {
 
 export default function GogoAthleticTeam({ onNavigate, onViewChange, user, setUser }) {
   const { team, customers, addTeamMember, updateTeamMember, deleteTeamMember, deleteCustomer, refreshTeam } = useContext(TeamContext);
-  
+
   const [activeTab, setActiveTab] = useState("staff"); // "staff" or "customers"
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("All");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newMember, setNewMember] = useState({ name: "", email: "", role: "Support", status: "Active" });
 
-<<<<<<< HEAD
-=======
-  // Sync customers dynamically when the component mounts or when localstorage changes
-  useEffect(() => {
-    const handleStorageChange = () => {
-      setCustomers(JSON.parse(localStorage.getItem("gogo_users") || "[]"));
-    };
-    window.addEventListener("storage", handleStorageChange);
-    // Poll to keep it instantly synchronized
-    const interval = setInterval(handleStorageChange, 1000);
-    return () => {
-      window.removeEventListener("storage", handleStorageChange);
-      clearInterval(interval);
-    };
-  }, []);
+  // Note: Customer/Team sync is handled by TeamContext (polling every 30s + storage event listener)
 
   // Check if user has manager or administrator privileges
   const isManagerOrAdmin = user && (user.role === "manager" || user.role === "Administrator");
 
->>>>>>> f89afd1332b037f810650d600752afbf3dfda418
   const handleDelete = (id) => {
     deleteTeamMember(id);
   };
@@ -105,26 +86,17 @@ export default function GogoAthleticTeam({ onNavigate, onViewChange, user, setUs
       status: newMember.status,
       joined: date,
     };
-    
+
     addTeamMember(memberData);
     setNewMember({ name: "", email: "", role: "Support", status: "Active" });
     setIsModalOpen(false);
   };
 
-<<<<<<< HEAD
-  const handleRoleChange = (memberId, newRole) => {
-    const member = team.find(m => m.id === memberId);
+  const handleRoleChange = (id, newRole) => {
+    const member = team.find((t) => t.id === id);
     if (member) {
       updateTeamMember({ ...member, role: newRole });
     }
-=======
-  const handleRoleChange = (id, newRole) => {
-    const updated = team.map((t) =>
-      t.id === id ? { ...t, role: newRole } : t
-    );
-    setTeam(updated);
-    localStorage.setItem("gogo_staff", JSON.stringify(updated));
->>>>>>> f89afd1332b037f810650d600752afbf3dfda418
   };
 
   const filteredTeam = team.filter((member) => {
@@ -219,21 +191,19 @@ export default function GogoAthleticTeam({ onNavigate, onViewChange, user, setUs
               <div className="flex border border-white/10 p-1 bg-neutral-900/50">
                 <button
                   onClick={() => setActiveTab("staff")}
-                  className={`px-4 py-1.5 text-xs uppercase tracking-widest font-black transition-all ${
-                    activeTab === "staff"
+                  className={`px-4 py-1.5 text-xs uppercase tracking-widest font-black transition-all ${activeTab === "staff"
                       ? "bg-orange-300 text-neutral-950"
                       : "text-neutral-400 hover:text-white"
-                  }`}
+                    }`}
                 >
                   Staff
                 </button>
                 <button
                   onClick={() => setActiveTab("customers")}
-                  className={`px-4 py-1.5 text-xs uppercase tracking-widest font-black transition-all ${
-                    activeTab === "customers"
+                  className={`px-4 py-1.5 text-xs uppercase tracking-widest font-black transition-all ${activeTab === "customers"
                       ? "bg-orange-300 text-neutral-950"
                       : "text-neutral-400 hover:text-white"
-                  }`}
+                    }`}
                 >
                   Customers ({customers.length})
                 </button>

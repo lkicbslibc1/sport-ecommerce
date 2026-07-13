@@ -24,6 +24,11 @@ export default function MainPage() {
   );
 }
 
+// Helper: get username for cart storage
+const getUsername = (u) => {
+  return u?.username || u?.name || 'guest';
+};
+
 function MainPageContent() {
   const [activeCategory, setActiveCategory] = useState('men');
   const [currentView, setCurrentView] = useState(() => {
@@ -50,17 +55,48 @@ function MainPageContent() {
 
   const [cart, setCart] = useState(() => {
     try {
-      return JSON.parse(localStorage.getItem('gogo_cart') || '[]');
+      const savedUser = JSON.parse(localStorage.getItem('gogo_current_user'));
+      const username = getUsername(savedUser);
+      const allCarts = JSON.parse(localStorage.getItem('gogo_cart') || '{}');
+      // If old data was an array, reset it to object
+      const safeAllCarts = Array.isArray(allCarts) ? {} : allCarts;
+      return safeAllCarts[username] || [];
     } catch {
       return [];
     }
   });
 
+  // When user changes (login / logout), load that user's cart
   useEffect(() => {
-    localStorage.setItem('gogo_cart', JSON.stringify(cart));
-  }, [cart]);
+    try {
+      const username = getUsername(user);
+      const allCarts = JSON.parse(localStorage.getItem('gogo_cart') || '{}');
+      const safeAllCarts = Array.isArray(allCarts) ? {} : allCarts;
+      setCart(safeAllCarts[username] || []);
+    } catch {
+      setCart([]);
+    }
+  }, [user]);
+
+  // Save cart to the global gogo_cart object under current user's name
+  useEffect(() => {
+    try {
+      const username = getUsername(user);
+      const allCarts = JSON.parse(localStorage.getItem('gogo_cart') || '{}');
+      const safeAllCarts = Array.isArray(allCarts) ? {} : allCarts;
+      safeAllCarts[username] = cart;
+      localStorage.setItem('gogo_cart', JSON.stringify(safeAllCarts));
+    } catch (e) {
+      console.error(e);
+    }
+  }, [cart, user]);
 
   const addToCart = (product, quantity = 1) => {
+    if (!user) {
+      alert("กรุณาเข้าสู่ระบบก่อนทำการสั่งซื้อสินค้า (Please login to add items to your bag)");
+      setCurrentView('login');
+      return;
+    }
     setCart(prevCart => {
       // Use custom cartId if provided (to differentiate colors/sizes), otherwise fallback to product.id
       const cartId = product.cartId || product.id;

@@ -66,7 +66,11 @@ export default function Profile({ onViewChange, user, setUser, cart, addToCart, 
               </div>
 
               <button
-                onClick={() => setUser({ name: 'Guest User', email: 'guest@gogo.com', role: 'user' })}
+              onClick={() => {
+                localStorage.removeItem('gogo_current_user');
+                setUser(null);
+                onViewChange('home');
+              }}
                 className="w-full mt-6 border border-white/20 hover:bg-white hover:text-black py-4 font-anybody font-black text-xs uppercase tracking-widest transition-all duration-300"
               >
                 Logout

@@ -268,8 +268,9 @@ export default function Navbar({ setCurrentView, user, setUser, cart = [] }) {
                     <button
                       onClick={() => {
                         setIsProfileDropdownOpen(false);
+                        localStorage.removeItem('gogo_current_user');
                         setUser(null);
-                        if (setCurrentView && (user.role === 'customer' || user.role === 'user')) setCurrentView('home');
+                        if (setCurrentView) setCurrentView('home');
                       }}
                       className="text-left px-4 py-3 text-[11px] font-bold uppercase tracking-widest text-white hover:bg-white/10 hover:text-primary transition-colors bg-transparent border-none w-full border-t border-white/5 cursor-pointer"
                     >

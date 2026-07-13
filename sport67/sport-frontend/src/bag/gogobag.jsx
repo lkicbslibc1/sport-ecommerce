@@ -163,7 +163,7 @@ export default function GoGoBag({ onViewChange, cart = [], setCart, user, setUse
     };
 
     const subtotal = cart.reduce((sum, i) => sum + i.price * i.quantity, 0);
-    const tax = subtotal * 0.07;
+    const tax = subtotal * 0.08;
     const total = subtotal + tax;
 
     return (
@@ -252,7 +252,14 @@ export default function GoGoBag({ onViewChange, cart = [], setCart, user, setUse
                                         </div>
                                     </div>
                                     <button
-                                        onClick={() => onViewChange('checkout')}
+                                        onClick={() => {
+                                            if (!user) {
+                                                alert("กรุณาเข้าสู่ระบบก่อนทำการสั่งซื้อสินค้า (Please login before checking out)");
+                                                onViewChange('login');
+                                            } else {
+                                                onViewChange('checkout');
+                                            }
+                                        }}
                                         className="w-full py-5 italic font-black uppercase flex items-center justify-center gap-4 group text-2xl transition-all border-none cursor-pointer"
                                         style={{ backgroundColor: "#ff4e00", color: "white" }}
                                     >
