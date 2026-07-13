@@ -17,6 +17,11 @@ import {
   Clock,
   Trash2,
   X,
+  ArrowUpDown,
+  ChevronUp,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { TeamContext } from "../data/team.jsx";
 
@@ -52,6 +57,10 @@ export default function GogoAthleticTeam({ onNavigate, onViewChange, user, setUs
   const [activeTab, setActiveTab] = useState("staff"); // "staff" or "customers"
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("All");
+  const [sortField, setSortField] = useState("newest");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchFocused, setSearchFocused] = useState(false);
+  const itemsPerPage = 10;
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newMember, setNewMember] = useState({ name: "", email: "", role: "Support", status: "Active" });
 
@@ -114,6 +123,40 @@ export default function GogoAthleticTeam({ onNavigate, onViewChange, user, setUs
     return matchesSearch;
   });
 
+  const sortData = (data) => {
+    let result = [...data];
+    if (sortField === "name-asc") {
+        result.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+    } else if (sortField === "name-desc") {
+        result.sort((a, b) => (b.name || "").localeCompare(a.name || ""));
+    }
+    return result;
+  };
+
+  const sortedTeam = sortData(filteredTeam);
+  const sortedCustomers = sortData(filteredCustomers);
+
+  const currentDataList = activeTab === "staff" ? sortedTeam : sortedCustomers;
+  const totalPages = Math.ceil(currentDataList.length / itemsPerPage);
+  
+  const paginatedData = currentDataList.slice(
+      (currentPage - 1) * itemsPerPage,
+      (currentPage - 1) * itemsPerPage + itemsPerPage
+  );
+
+  const handleSort = (key) => {
+      if (!key) return;
+      if (sortField === `${key}-asc`) {
+          setSortField(`${key}-desc`);
+      } else {
+          setSortField(`${key}-asc`);
+      }
+  };
+
+  React.useEffect(() => {
+      setCurrentPage(1);
+  }, [search, roleFilter, activeTab, sortField]);
+
   // Calculate awaiting invite count (customers who haven't been converted to staff)
   const awaitingInvite = customers.filter(c => c.status === "Pending").length;
 
@@ -145,19 +188,7 @@ export default function GogoAthleticTeam({ onNavigate, onViewChange, user, setUs
       <div className="flex-1 min-w-0">
         {/* TOP NAVIGATION */}
         <header className="sticky top-0 z-40 flex justify-between items-center h-16 px-6 md:px-12 bg-neutral-950/80 backdrop-blur-md border-b border-white/5">
-          <div className="relative">
-            <Search
-              size={16}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500"
-            />
-            <input
-              type="text"
-              placeholder="Search team members..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="bg-neutral-900 border-none focus:ring-1 focus:ring-orange-300 text-neutral-100 text-sm pl-10 pr-4 py-2 w-56 sm:w-80 placeholder:text-neutral-600"
-            />
-          </div>
+          <div></div>
 
           <div className="flex items-center gap-6">
             <button className="text-neutral-300 hover:scale-110 transition-transform duration-300">
@@ -187,40 +218,57 @@ export default function GogoAthleticTeam({ onNavigate, onViewChange, user, setUs
                 Roster & Operations
               </h3>
             </div>
-            <div className="flex gap-4 items-center">
-              <div className="flex border border-white/10 p-1 bg-neutral-900/50">
-                <button
-                  onClick={() => setActiveTab("staff")}
-                  className={`px-4 py-1.5 text-xs uppercase tracking-widest font-black transition-all ${activeTab === "staff"
-                      ? "bg-orange-300 text-neutral-950"
-                      : "text-neutral-400 hover:text-white"
-                    }`}
-                >
-                  Staff
-                </button>
-                <button
-                  onClick={() => setActiveTab("customers")}
-                  className={`px-4 py-1.5 text-xs uppercase tracking-widest font-black transition-all ${activeTab === "customers"
-                      ? "bg-orange-300 text-neutral-950"
-                      : "text-neutral-400 hover:text-white"
-                    }`}
-                >
-                  Customers ({customers.length})
-                </button>
+            <div className="flex flex-col sm:flex-row gap-6 items-start sm:items-center w-full sm:w-auto mt-4 sm:mt-0">
+              <div className="flex flex-wrap items-center gap-4 w-full sm:w-auto">
+                <div className="flex border border-white/10 p-1 bg-neutral-900/50">
+                  <button
+                    onClick={() => setActiveTab("staff")}
+                    className={`px-4 py-1.5 text-xs uppercase tracking-widest font-black transition-all ${activeTab === "staff"
+                        ? "bg-orange-300 text-neutral-950"
+                        : "text-neutral-400 hover:text-white"
+                      }`}
+                  >
+                    Staff
+                  </button>
+                  <button
+                    onClick={() => setActiveTab("customers")}
+                    className={`px-4 py-1.5 text-xs uppercase tracking-widest font-black transition-all ${activeTab === "customers"
+                        ? "bg-orange-300 text-neutral-950"
+                        : "text-neutral-400 hover:text-white"
+                      }`}
+                  >
+                    Customers ({customers.length})
+                  </button>
+                </div>
+                {activeTab === "staff" && (
+                  <select
+                    value={roleFilter}
+                    onChange={(e) => setRoleFilter(e.target.value)}
+                    className="bg-neutral-900 border border-white/10 text-neutral-300 text-xs px-4 py-2 focus:ring-1 focus:ring-orange-300 text-neutral-100 h-9"
+                  >
+                    <option value="All" className="bg-neutral-950 text-neutral-100">All Roles</option>
+                    <option value="Administrator" className="bg-neutral-950 text-neutral-100">Administrator</option>
+                    <option value="Manager" className="bg-neutral-950 text-neutral-100">Manager</option>
+                    <option value="Logistics" className="bg-neutral-950 text-neutral-100">Logistics</option>
+                    <option value="Support" className="bg-neutral-950 text-neutral-100">Support</option>
+                  </select>
+                )}
               </div>
-              {activeTab === "staff" && (
-                <select
-                  value={roleFilter}
-                  onChange={(e) => setRoleFilter(e.target.value)}
-                  className="bg-neutral-900 border border-white/10 text-neutral-300 text-xs px-4 py-2 focus:ring-1 focus:ring-orange-300 text-neutral-100"
-                >
-                  <option value="All" className="bg-neutral-950 text-neutral-100">All Roles</option>
-                  <option value="Administrator" className="bg-neutral-950 text-neutral-100">Administrator</option>
-                  <option value="Manager" className="bg-neutral-950 text-neutral-100">Manager</option>
-                  <option value="Logistics" className="bg-neutral-950 text-neutral-100">Logistics</option>
-                  <option value="Support" className="bg-neutral-950 text-neutral-100">Support</option>
-                </select>
-              )}
+              <div className={"relative transition-all duration-200 w-full sm:w-auto " + (searchFocused ? "scale-105" : "")}>
+                <Search size={18} className="absolute left-0 top-1/2 -translate-y-1/2 text-orange-400" />
+                <input
+                  type="text"
+                  onFocus={() => setSearchFocused(true)}
+                  onBlur={() => setSearchFocused(false)}
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="SEARCH MEMBERS..."
+                  className={
+                    "bg-transparent border-0 border-b pl-8 py-2 focus:ring-0 text-sm tracking-widest font-bold placeholder:text-neutral-600 transition-colors w-full sm:w-64 md:w-80 text-neutral-100 uppercase " +
+                    (searchFocused ? "border-orange-400" : "border-orange-400/50")
+                  }
+                />
+              </div>
             </div>
           </div>
 
@@ -256,16 +304,27 @@ export default function GogoAthleticTeam({ onNavigate, onViewChange, user, setUs
             <table className="w-full text-left border-collapse min-w-[700px]">
               <thead>
                 <tr className="border-b border-white/5 text-[10px] text-neutral-400 uppercase tracking-wider font-bold">
-                  <th className="py-5 px-6">Name</th>
+                  <th 
+                      className="py-5 px-6 cursor-pointer hover:text-orange-300 select-none"
+                      onClick={() => handleSort('name')}
+                  >
+                      <div className="flex items-center gap-2">
+                          Name
+                          <span className="text-neutral-500">
+                              {sortField === 'name-asc' ? <ChevronUp size={14} className="text-orange-300"/> :
+                               sortField === 'name-desc' ? <ChevronDown size={14} className="text-orange-300"/> :
+                               <ArrowUpDown size={14} />}
+                          </span>
+                      </div>
+                  </th>
                   <th className="py-5 px-6">Role</th>
                   <th className="py-5 px-6">Status</th>
                   <th className="py-5 px-6">Joined</th>
-                  <th className="py-5 px-6 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
                 {activeTab === "staff" ? (
-                  filteredTeam.map((member) => (
+                  paginatedData.map((member) => (
                     <tr key={member.id} className="hover:bg-white/[0.01] transition-colors group">
                       <td className="py-5 px-6">
                         <div className="flex items-center gap-3">
@@ -307,21 +366,10 @@ export default function GogoAthleticTeam({ onNavigate, onViewChange, user, setUs
                       <td className="py-5 px-6 text-xs text-neutral-400 font-mono">
                         {member.joined}
                       </td>
-                      <td className="py-5 px-6 text-right">
-                        {isManagerOrAdmin && (
-                          <button
-                            onClick={() => handleDelete(member.id)}
-                            className="text-neutral-500 hover:text-red-400 transition-colors p-1"
-                            title="Remove Member"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        )}
-                      </td>
                     </tr>
                   ))
                 ) : (
-                  filteredCustomers.map((customer) => (
+                  paginatedData.map((customer) => (
                     <tr key={customer.id || customer.email} className="hover:bg-white/[0.01] transition-colors group">
                       <td className="py-5 px-6">
                         <div className="flex items-center gap-3">
@@ -350,23 +398,12 @@ export default function GogoAthleticTeam({ onNavigate, onViewChange, user, setUs
                       <td className="py-5 px-6 text-xs text-neutral-400 font-mono">
                         {customer.joined || "N/A"}
                       </td>
-                      <td className="py-5 px-6 text-right">
-                        {isManagerOrAdmin && (
-                          <button
-                            onClick={() => handleDeleteCustomer(customer.email)}
-                            className="text-neutral-500 hover:text-red-400 transition-colors p-1"
-                            title="Remove Customer"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        )}
-                      </td>
                     </tr>
                   ))
                 )}
-                {((activeTab === "staff" && filteredTeam.length === 0) || (activeTab === "customers" && filteredCustomers.length === 0)) && (
+                {paginatedData.length === 0 && (
                   <tr>
-                    <td colSpan="5" className="text-center py-10 text-neutral-500 text-sm">
+                    <td colSpan="4" className="text-center py-10 text-neutral-500 text-sm">
                       No matching records found.
                     </td>
                   </tr>
@@ -374,6 +411,43 @@ export default function GogoAthleticTeam({ onNavigate, onViewChange, user, setUs
               </tbody>
             </table>
           </GlassPanel>
+
+          {/* Pagination */}
+          <div className="mt-4 p-4 bg-white/5 flex flex-col md:flex-row justify-between items-center gap-4 border border-white/5">
+              <p className="text-neutral-400 text-[10px] uppercase tracking-widest">
+                  Showing {(currentPage - 1) * itemsPerPage + 1}-
+                  {Math.min(currentPage * itemsPerPage, currentDataList.length)} of {currentDataList.length} Records
+              </p>
+              <div className="flex items-center gap-2">
+                  <button 
+                      onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                      disabled={currentPage === 1}
+                      className="p-2 border border-white/10 hover:bg-white/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                      <ChevronLeft size={16} />
+                  </button>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                      <button 
+                          key={page}
+                          onClick={() => setCurrentPage(page)}
+                          className={`px-4 py-2 font-black italic text-xs ${
+                              currentPage === page 
+                                  ? "bg-orange-300 text-neutral-950" 
+                                  : "border border-white/10 hover:bg-white/10 text-neutral-300"
+                          }`}
+                      >
+                          {page}
+                      </button>
+                  ))}
+                  <button 
+                      onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                      disabled={currentPage === totalPages || totalPages === 0}
+                      className="p-2 border border-white/10 hover:bg-white/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                      <ChevronRight size={16} />
+                  </button>
+              </div>
+          </div>
         </main>
       </div>
 

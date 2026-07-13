@@ -89,6 +89,65 @@ export default function KineticCheckout({ onViewChange, cart = [], setCart, user
     const [orderId, setOrderId] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    const currentUserUsername = user ? (user.username || user.name) : 'Guest';
+    const [addresses, setAddresses] = useState([]);
+    const [showAddressModal, setShowAddressModal] = useState(false);
+    const [showAddNewAddressModal, setShowAddNewAddressModal] = useState(false);
+    const [selectedAddress, setSelectedAddress] = useState(null);
+    const [addressForm, setAddressForm] = useState({
+        firstName: '', lastName: '', phone: '', streetAddress: '', city: '', zipCode: '', isDefault: false
+    });
+
+    const handleSaveAddress = (e) => {
+        e.preventDefault();
+        const allAddresses = JSON.parse(localStorage.getItem('gogo_addresses') || '{}');
+        let userAddrs = allAddresses[currentUserUsername] || [];
+        
+        let newAddr = { ...addressForm, id: Date.now().toString() };
+        if (newAddr.isDefault || userAddrs.length === 0) {
+          newAddr.isDefault = true;
+          userAddrs = userAddrs.map(a => ({...a, isDefault: false}));
+        }
+        
+        userAddrs.push(newAddr);
+        allAddresses[currentUserUsername] = userAddrs;
+        localStorage.setItem('gogo_addresses', JSON.stringify(allAddresses));
+        
+        setAddresses(userAddrs);
+        setShowAddNewAddressModal(false);
+        setSelectedAddress(newAddr);
+        setFormData(prev => ({
+            ...prev,
+            firstName: newAddr.firstName,
+            lastName: newAddr.lastName,
+            address: newAddr.streetAddress,
+            city: newAddr.city,
+            zipCode: newAddr.zipCode
+        }));
+        setAddressForm({ firstName: '', lastName: '', phone: '', streetAddress: '', city: '', zipCode: '', isDefault: false });
+    };
+
+    useEffect(() => {
+        if (currentUserUsername !== 'Guest') {
+            const allAddresses = JSON.parse(localStorage.getItem('gogo_addresses') || '{}');
+            const userAddrs = allAddresses[currentUserUsername] || [];
+            setAddresses(userAddrs);
+            
+            const defaultAddr = userAddrs.find(a => a.isDefault) || userAddrs[0];
+            if (defaultAddr) {
+                setSelectedAddress(defaultAddr);
+                setFormData(prev => ({
+                    ...prev,
+                    firstName: defaultAddr.firstName,
+                    lastName: defaultAddr.lastName,
+                    address: defaultAddr.streetAddress,
+                    city: defaultAddr.city,
+                    zipCode: defaultAddr.zipCode
+                }));
+            }
+        }
+    }, [currentUserUsername]);
+
     const [formData, setFormData] = useState({
         firstName: "",
         lastName: "",
@@ -275,17 +334,37 @@ export default function KineticCheckout({ onViewChange, cart = [], setCart, user
                                     >
                                         01
                                     </span>
-                                    <h2 className="italic uppercase font-black text-2xl" style={{ color: C.onSurface }}>
-                                        SHIPPING ADDRESS
-                                    </h2>
+                                    <div className="flex-1 flex justify-between items-center">
+                                        <h2 className="italic uppercase font-black text-2xl" style={{ color: C.onSurface }}>
+                                            SHIPPING ADDRESS
+                                        </h2>
+                                        {addresses.length > 0 && (
+                                            <button 
+                                                type="button" 
+                                                onClick={() => setShowAddressModal(true)}
+                                                className="text-[10px] uppercase tracking-widest border border-white/20 px-4 py-2 hover:bg-white/10 transition-colors cursor-pointer bg-transparent"
+                                                style={{ color: C.primary }}
+                                            >
+                                                Change Address
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                                    <InputField label="First Name" placeholder="ELIAS" name="firstName" value={formData.firstName} onChange={handleInputChange} required />
-                                    <InputField label="Last Name" placeholder="VANCE" name="lastName" value={formData.lastName} onChange={handleInputChange} required />
-                                    <InputField label="Street Address" placeholder="101 HIGH-PERFORMANCE WAY" span name="address" value={formData.address} onChange={handleInputChange} required />
-                                    <InputField label="City" placeholder="NEO TOKYO" name="city" value={formData.city} onChange={handleInputChange} required />
-                                    <InputField label="Zip Code" placeholder="90210-K" name="zipCode" value={formData.zipCode} onChange={handleInputChange} required />
-                                </div>
+                                
+                                {addresses.length > 0 && selectedAddress ? (
+                                    <div className="p-6 border border-white/10 bg-[#1c1b1b] relative">
+                                        <p className="font-bold text-sm text-white">{selectedAddress.firstName} {selectedAddress.lastName} | <span className="text-on-surface-variant font-light">{selectedAddress.phone}</span></p>
+                                        <p className="text-xs text-on-surface-variant mt-2 leading-relaxed">{selectedAddress.streetAddress}<br/>{selectedAddress.city}, {selectedAddress.zipCode}</p>
+                                    </div>
+                                ) : (
+                                    <button
+                                      type="button"
+                                      onClick={() => setShowAddNewAddressModal(true)}
+                                      className="w-full border border-primary text-primary hover:bg-primary hover:text-black py-4 font-anybody font-black text-xs uppercase tracking-widest transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer bg-transparent"
+                                    >
+                                      + เพิ่มที่อยู่ใหม่
+                                    </button>
+                                )}
                             </section>
 
                             {/* Shipping Method */}
@@ -468,6 +547,90 @@ export default function KineticCheckout({ onViewChange, cart = [], setCart, user
 
                         </div>
                     </form>
+                )}
+
+                {/* Address Selection Modal */}
+                {showAddressModal && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+                        <div className="bg-[#131313] border border-white/10 p-8 w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl">
+                            <h3 className="text-2xl font-anybody font-black italic uppercase mb-6 text-white">เลือกที่อยู่จัดส่ง</h3>
+                            <div className="space-y-4">
+                                {addresses.map((addr, idx) => (
+                                    <div 
+                                        key={idx} 
+                                        onClick={() => {
+                                            setSelectedAddress(addr);
+                                            setFormData(prev => ({
+                                                ...prev,
+                                                firstName: addr.firstName,
+                                                lastName: addr.lastName,
+                                                address: addr.streetAddress,
+                                                city: addr.city,
+                                                zipCode: addr.zipCode
+                                            }));
+                                            setShowAddressModal(false);
+                                        }}
+                                        className={`p-4 border cursor-pointer hover:border-primary transition-colors relative ${selectedAddress?.id === addr.id ? 'border-primary' : 'border-white/10'}`}
+                                    >
+                                        {addr.isDefault && <span className="absolute top-2 right-2 text-[10px] text-primary border border-primary px-2 py-0.5">ค่าเริ่มต้น</span>}
+                                        <p className="font-bold text-sm text-white">{addr.firstName} {addr.lastName} | <span className="text-on-surface-variant font-light">{addr.phone}</span></p>
+                                        <p className="text-xs text-on-surface-variant mt-2 leading-relaxed">{addr.streetAddress}<br/>{addr.city}, {addr.zipCode}</p>
+                                    </div>
+                                ))}
+                            </div>
+                            <div className="mt-6 flex justify-between items-center">
+                                <button type="button" onClick={() => { setShowAddressModal(false); setShowAddNewAddressModal(true); }} className="text-[10px] uppercase font-bold text-primary hover:underline bg-transparent border-none cursor-pointer">+ เพิ่มที่อยู่ใหม่</button>
+                                <button type="button" onClick={() => setShowAddressModal(false)} className="py-3 px-8 border border-white/20 text-white uppercase text-xs font-bold hover:bg-white/5 transition-colors cursor-pointer bg-transparent">ปิด (Close)</button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Add New Address Modal */}
+                {showAddNewAddressModal && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+                        <div className="bg-[#131313] border border-white/10 p-8 w-full max-w-lg max-h-[90vh] overflow-y-auto">
+                            <h3 className="text-2xl font-anybody font-black italic uppercase mb-6 text-white">เพิ่มที่อยู่ใหม่</h3>
+                            <form onSubmit={handleSaveAddress} className="space-y-4">
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                <label className="text-[10px] uppercase text-on-surface-variant mb-1 block">First Name</label>
+                                <input required type="text" className="w-full bg-[#1c1b1b] border-b-2 border-white/10 p-3 text-white outline-none focus:border-primary" value={addressForm.firstName} onChange={e => setAddressForm({...addressForm, firstName: e.target.value})} />
+                                </div>
+                                <div>
+                                <label className="text-[10px] uppercase text-on-surface-variant mb-1 block">Last Name</label>
+                                <input required type="text" className="w-full bg-[#1c1b1b] border-b-2 border-white/10 p-3 text-white outline-none focus:border-primary" value={addressForm.lastName} onChange={e => setAddressForm({...addressForm, lastName: e.target.value})} />
+                                </div>
+                            </div>
+                            <div>
+                                <label className="text-[10px] uppercase text-on-surface-variant mb-1 block">Phone Number</label>
+                                <input required type="tel" className="w-full bg-[#1c1b1b] border-b-2 border-white/10 p-3 text-white outline-none focus:border-primary" value={addressForm.phone} onChange={e => setAddressForm({...addressForm, phone: e.target.value})} />
+                            </div>
+                            <div>
+                                <label className="text-[10px] uppercase text-on-surface-variant mb-1 block">Street Address</label>
+                                <textarea required className="w-full bg-[#1c1b1b] border-b-2 border-white/10 p-3 text-white outline-none focus:border-primary resize-none h-20" value={addressForm.streetAddress} onChange={e => setAddressForm({...addressForm, streetAddress: e.target.value})}></textarea>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                <label className="text-[10px] uppercase text-on-surface-variant mb-1 block">City</label>
+                                <input required type="text" className="w-full bg-[#1c1b1b] border-b-2 border-white/10 p-3 text-white outline-none focus:border-primary" value={addressForm.city} onChange={e => setAddressForm({...addressForm, city: e.target.value})} />
+                                </div>
+                                <div>
+                                <label className="text-[10px] uppercase text-on-surface-variant mb-1 block">Zip Code</label>
+                                <input required type="text" className="w-full bg-[#1c1b1b] border-b-2 border-white/10 p-3 text-white outline-none focus:border-primary" value={addressForm.zipCode} onChange={e => setAddressForm({...addressForm, zipCode: e.target.value})} />
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-3 pt-4">
+                                <input type="checkbox" id="isDefault" className="w-4 h-4 accent-primary" checked={addressForm.isDefault} onChange={e => setAddressForm({...addressForm, isDefault: e.target.checked})} />
+                                <label htmlFor="isDefault" className="text-sm text-white cursor-pointer">ตั้งเป็นที่อยู่หลัก (Set as default)</label>
+                            </div>
+                            <div className="flex gap-4 pt-6">
+                                <button type="button" onClick={() => { setShowAddNewAddressModal(false); if(addresses.length > 0) setShowAddressModal(true); }} className="flex-1 py-4 border border-white/20 text-white uppercase text-xs font-bold hover:bg-white/5 transition-colors cursor-pointer">ยกเลิก</button>
+                                <button type="submit" className="flex-1 py-4 bg-primary text-black uppercase text-xs font-bold hover:bg-orange-500 transition-colors border-none cursor-pointer">บันทึก</button>
+                            </div>
+                            </form>
+                        </div>
+                    </div>
                 )}
             </main>
             <Footer />

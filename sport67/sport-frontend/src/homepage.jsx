@@ -166,7 +166,7 @@ function MainPageContent() {
     return <Adidas onViewChange={setCurrentView} user={user} setUser={setUser} cart={cart} addToCart={addToCart} />;
   }
   if (currentView === 'bag') {
-    return <GoGoBag onViewChange={setCurrentView} cart={cart} setCart={setCart} user={user} setUser={setUser} />;
+    return <GoGoBag onViewChange={setCurrentView} cart={cart} setCart={setCart} user={user} setUser={setUser} setSelectedProduct={setSelectedProduct} />;
   }
   if (currentView === 'checkout') {
     return <KineticCheckout onViewChange={setCurrentView} cart={cart} setCart={setCart} user={user} setUser={setUser} />;
@@ -210,8 +210,7 @@ function MainPageContent() {
                 Experience the next generation of high-performance compression gear designed for maximum mobility and endurance.
               </p>
               <div className="flex flex-wrap gap-6">
-                <button className="bg-primary hover:bg-orange-600 px-12 py-5 font-anybody font-black text-sm uppercase tracking-widest transition-all duration-300 transform hover:scale-105">Shop Now</button>
-                <button className="bg-transparent border border-white/30 hover:bg-white hover:text-black px-12 py-5 font-anybody font-black text-sm uppercase tracking-widest transition-all duration-300">View Lookbook</button>
+                <button onClick={() => setCurrentView('sport')} className="bg-primary hover:bg-orange-600 px-12 py-5 font-anybody font-black text-sm uppercase tracking-widest transition-all duration-300 transform hover:scale-105">Shop Now</button>
               </div>
             </div>
           </div>

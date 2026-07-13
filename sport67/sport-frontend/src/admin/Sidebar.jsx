@@ -27,8 +27,8 @@ export default function Sidebar({ activeItem, onNavigate, onViewChange, actionBu
   return (
     <aside className="hidden md:flex md:w-64 shrink-0 h-screen sticky top-0 flex-col border-r border-white/5 bg-black py-8">
       {/* BRAND LOGO */}
-      <div 
-        className="px-8 mb-10 cursor-pointer" 
+      <div
+        className="px-8 mb-10 cursor-pointer"
         onClick={() => onViewChange && onViewChange("home")}
       >
         <h1 className="text-2xl italic font-black tracking-tighter text-orange-300">
@@ -70,20 +70,7 @@ export default function Sidebar({ activeItem, onNavigate, onViewChange, actionBu
 
       {/* FOOTER CONTROLS */}
       <div className="border-t border-white/5 p-4 space-y-1 mt-auto">
-        <a
-          href="#"
-          className="flex items-center gap-4 py-2 pl-5 text-neutral-400 hover:text-orange-300 hover:bg-white/[0.02] transition-colors"
-        >
-          <Settings size={16} />
-          <span className="text-[10px] uppercase tracking-widest">Settings</span>
-        </a>
-        <a
-          href="#"
-          className="flex items-center gap-4 py-2 pl-5 text-neutral-400 hover:text-orange-300 hover:bg-white/[0.02] transition-colors"
-        >
-          <HelpCircle size={16} />
-          <span className="text-[10px] uppercase tracking-widest">Support</span>
-        </a>
+
         <button
           onClick={() => {
             localStorage.removeItem('gogo_current_user');
