@@ -54,7 +54,7 @@ function Footer() {
     );
 }
 
-function BagItem({ item, updateQuantity, removeItem }) {
+function BagItem({ item, updateQuantity, removeItem, onViewChange, setSelectedProduct }) {
     return (
         <div
             className="p-6 md:p-8 flex flex-col md:flex-row gap-8 relative overflow-hidden group border"
@@ -64,7 +64,16 @@ function BagItem({ item, updateQuantity, removeItem }) {
                 backdropFilter: "blur(12px)",
             }}
         >
-            <div className="w-full md:w-48 h-48 overflow-hidden" style={{ backgroundColor: C.surfaceContainer }}>
+            <div 
+                className="w-full md:w-48 h-48 overflow-hidden cursor-pointer" 
+                style={{ backgroundColor: C.surfaceContainer }}
+                onClick={() => {
+                    if(setSelectedProduct && onViewChange) {
+                        setSelectedProduct(item);
+                        onViewChange('product_details');
+                    }
+                }}
+            >
                 <img
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                     src={item.image}
@@ -74,7 +83,16 @@ function BagItem({ item, updateQuantity, removeItem }) {
             <div className="flex-grow flex flex-col justify-between">
                 <div className="flex justify-between items-start">
                     <div>
-                        <h3 className="text-2xl md:text-3xl uppercase italic font-black mb-1" style={{ color: C.onSurface }}>
+                        <h3 
+                            className="text-2xl md:text-3xl uppercase italic font-black mb-1 cursor-pointer hover:opacity-80 transition-opacity" 
+                            style={{ color: C.onSurface }}
+                            onClick={() => {
+                                if(setSelectedProduct && onViewChange) {
+                                    setSelectedProduct(item);
+                                    onViewChange('product_details');
+                                }
+                            }}
+                        >
                             {item.name}
                         </h3>
                         <p className="text-[10px] tracking-widest uppercase" style={{ color: C.onSurfaceVariant }}>
@@ -145,7 +163,7 @@ function BagItem({ item, updateQuantity, removeItem }) {
     );
 }
 
-export default function GoGoBag({ onViewChange, cart = [], setCart, user, setUser }) {
+export default function GoGoBag({ onViewChange, cart = [], setCart, user, setUser, setSelectedProduct }) {
     useEffect(() => {
         window.scrollTo(0, 0);
     }, []);
@@ -203,6 +221,8 @@ export default function GoGoBag({ onViewChange, cart = [], setCart, user, setUse
                                     item={item}
                                     updateQuantity={updateQuantity}
                                     removeItem={removeItem}
+                                    onViewChange={onViewChange}
+                                    setSelectedProduct={setSelectedProduct}
                                 />
                             ))}
 

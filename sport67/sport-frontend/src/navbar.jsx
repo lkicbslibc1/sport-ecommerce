@@ -5,8 +5,8 @@ export default function Navbar({ setCurrentView, user, setUser, cart = [] }) {
   const [searchValue, setSearchValue] = useState('');
   const [isMobileNavLowOpacity, setIsMobileNavLowOpacity] = useState(false);
   const [selectedRole, setSelectedRole] = useState('user');
-  const [loginIdentifier, setLoginIdentifier] = useState('guest@gogo.com');
-  const [loginPassword, setLoginPassword] = useState('guest123');
+  const [loginIdentifier, setLoginIdentifier] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -83,8 +83,8 @@ export default function Navbar({ setCurrentView, user, setUser, cart = [] }) {
       setLoginIdentifier('employee');
       setLoginPassword('employee123');
     } else {
-      setLoginIdentifier('guest');
-      setLoginPassword('guest123');
+      setLoginIdentifier('');
+      setLoginPassword('');
     }
     setTimeout(() => {
       setIsLoginActive(true);
@@ -126,8 +126,7 @@ export default function Navbar({ setCurrentView, user, setUser, cart = [] }) {
     const existingUsers = JSON.parse(localStorage.getItem("gogo_users") || "[]");
     const baseUsers = [
       { id: 1, username: 'manager', password: 'manager123', role: 'manager', isActive: true },
-      { id: 2, username: 'employee', password: 'employee123', role: 'employee', isActive: true },
-      { id: 3, username: 'guest', password: 'guest123', role: 'customer', isActive: true }
+      { id: 2, username: 'employee', password: 'employee123', role: 'employee', isActive: true }
     ];
     let updated = false;
     baseUsers.forEach(baseUser => {
@@ -543,7 +542,7 @@ export default function Navbar({ setCurrentView, user, setUser, cart = [] }) {
                   alert("User account not found! Please create an account first.");
                   return;
                 } else if (!matchedUser.isActive) {
-                  alert("Account is deactivated.");
+                  alert("บัญชีนี้ถูกระงับ");
                   return;
                 } else if (matchedUser.password !== loginPassword) {
                   alert("Incorrect password! Please try again.");
