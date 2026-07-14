@@ -21,6 +21,7 @@ export const orderStatusEnum = pgEnum('order_status', ['pending', 'delivery', 's
 export const users = pgTable('users', {
     id: serial('id').primaryKey(),
     username: varchar('username', { length: 255 }).unique().notNull(),
+    email: varchar('email', { length: 255 }).unique().notNull(),
     password: varchar('password', { length: 255 }).notNull(),
     role: userRoleEnum('role').notNull(),
     isActive: boolean('is_active').default(true),

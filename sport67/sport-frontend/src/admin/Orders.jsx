@@ -190,15 +190,6 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange, user, set
         activeItem="orders"
         onNavigate={onNavigate}
         onViewChange={onViewChange}
-        actionButton={
-          <button
-            onClick={() => setShowActionModal(true)}
-            className="w-full bg-orange-600 text-white text-[10px] font-black py-4 px-2 uppercase tracking-widest hover:scale-105 transition-transform flex items-center justify-center gap-2"
-          >
-            <Plus size={16} />
-            Orders Action
-          </button>
-        }
       />
 
       <div className="flex-1 min-w-0">

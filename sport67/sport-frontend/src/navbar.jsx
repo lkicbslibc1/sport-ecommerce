@@ -535,7 +535,8 @@ export default function Navbar({ setCurrentView, user, setUser, cart = [] }) {
                 const existingUsers = JSON.parse(localStorage.getItem("gogo_users") || "[]");
 
                 const matchedUser = existingUsers.find(
-                  u => u.username && u.username.toLowerCase() === loginIdentifier.toLowerCase()
+                  u => (u.username && u.username.toLowerCase() === loginIdentifier.toLowerCase()) ||
+                       (u.email && u.email.toLowerCase() === loginIdentifier.toLowerCase())
                 );
 
                 if (!matchedUser) {
@@ -550,10 +551,10 @@ export default function Navbar({ setCurrentView, user, setUser, cart = [] }) {
                 }
 
                 name = matchedUser.username;
-                email = matchedUser.username; // keep it simple as username is the primary identifier
+                email = matchedUser.email || matchedUser.username;
                 role = matchedUser.role;
 
-                setUser({ name, email, role });
+                setUser({ username: matchedUser.username, name, email, role });
                 if (role === 'employee' || role === 'manager') {
                   if (setCurrentView) setCurrentView('dashboard');
                 }

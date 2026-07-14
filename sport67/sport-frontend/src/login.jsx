@@ -34,6 +34,7 @@ export default function Login({ onViewChange, user, setUser }) {
     const newUser = {
       id: Date.now(),
       username: formData.username,
+      email: formData.email,
       password: formData.password,
       role: 'customer',
       isActive: true,
@@ -43,14 +44,22 @@ export default function Login({ onViewChange, user, setUser }) {
     // Save to gogo_users in localStorage
     const existingUsers = JSON.parse(localStorage.getItem("gogo_users") || "[]");
 
-    // Check if username already exists
-    if (!existingUsers.some(u => u.username.toLowerCase() === formData.username.toLowerCase())) {
+    // Check if username or email already exists
+    const usernameExists = existingUsers.some(u => u.username.toLowerCase() === formData.username.toLowerCase());
+    const emailExists = existingUsers.some(u => u.email && u.email.toLowerCase() === formData.email.toLowerCase());
+
+    if (usernameExists) {
+      alert("Username already exists!");
+    } else if (emailExists) {
+      alert("Email already exists!");
+    } else {
       existingUsers.push(newUser);
       localStorage.setItem("gogo_users", JSON.stringify(existingUsers));
 
       if (setUser) {
         setUser({
           username: formData.username,
+          email: formData.email,
           role: 'customer'
         });
       }
@@ -58,8 +67,6 @@ export default function Login({ onViewChange, user, setUser }) {
       if (onViewChange) {
         onViewChange('home');
       }
-    } else {
-      alert("Username already exists!");
     }
   };
 
