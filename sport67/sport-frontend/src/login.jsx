@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from './navbar.jsx';
+import { useAlert } from './contexts/AlertContext.jsx';
 
 export default function Login({ onViewChange, user, setUser }) {
+  const { showAlert } = useAlert();
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -22,8 +24,21 @@ export default function Login({ onViewChange, user, setUser }) {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Validate Email Format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      showAlert("รูปแบบอีเมลไม่ถูกต้อง", "warning");
+      return;
+    }
+
+    // Validate Password Match
+    if (formData.password !== formData.confirmPassword) {
+      showAlert("รหัสผ่านไม่ตรงกัน", "warning");
+      return;
+    }
 
     const date = new Date().toLocaleDateString("en-US", {
       month: "short",
@@ -41,32 +56,45 @@ export default function Login({ onViewChange, user, setUser }) {
       joined: date
     };
 
-    // Save to gogo_users in localStorage
-    const existingUsers = JSON.parse(localStorage.getItem("gogo_users") || "[]");
+    try {
+      // Fetch users from API
+      const res = await fetch('http://localhost:5000/api/users');
+      const existingUsers = res.ok ? await res.json() : [];
 
-    // Check if username or email already exists
-    const usernameExists = existingUsers.some(u => u.username.toLowerCase() === formData.username.toLowerCase());
-    const emailExists = existingUsers.some(u => u.email && u.email.toLowerCase() === formData.email.toLowerCase());
+      // Check if username or email already exists
+      const usernameExists = existingUsers.some(u => u.username.toLowerCase() === formData.username.toLowerCase());
+      const emailExists = existingUsers.some(u => u.email && u.email.toLowerCase() === formData.email.toLowerCase());
 
-    if (usernameExists) {
-      alert("Username already exists!");
-    } else if (emailExists) {
-      alert("Email already exists!");
-    } else {
-      existingUsers.push(newUser);
-      localStorage.setItem("gogo_users", JSON.stringify(existingUsers));
+      if (usernameExists) {
+        showAlert("Username already exists!", "error");
+      } else if (emailExists) {
+        showAlert("Email already exists!", "error");
+      } else {
+        existingUsers.push(newUser);
 
-      if (setUser) {
-        setUser({
-          username: formData.username,
-          email: formData.email,
-          role: 'customer'
+        // Save to API
+        await fetch('http://localhost:5000/api/users', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(existingUsers)
         });
+
+        if (setUser) {
+          setUser({
+            username: formData.username,
+            name: formData.username,
+            email: formData.email,
+            role: 'customer'
+          });
+        }
+        showAlert(`Account created successfully for ${formData.username}!`, "success");
+        if (onViewChange) {
+          onViewChange('home');
+        }
       }
-      alert(`Account created successfully for ${formData.username}!`);
-      if (onViewChange) {
-        onViewChange('home');
-      }
+    } catch (error) {
+      console.error("Failed to register user", error);
+      showAlert("Error creating account. Please try again.", "error");
     }
   };
 

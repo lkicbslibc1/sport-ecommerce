@@ -73,11 +73,10 @@ export default function Sidebar({ activeItem, onNavigate, onViewChange, actionBu
 
         <button
           onClick={() => {
-            localStorage.removeItem('gogo_current_user');
             if (setUser) setUser(null);
-            if (onViewChange) onViewChange("home");
+            if (onViewChange) onViewChange('home');
           }}
-          className="w-full flex items-center gap-4 py-2 pl-5 text-red-400 hover:text-red-300 hover:bg-white/[0.02] transition-colors"
+          className="w-full flex items-center gap-4 text-xs font-bold uppercase tracking-widest text-neutral-500 hover:text-orange-300 transition-colors p-4"
         >
           <LogOut size={16} />
           <span className="text-[10px] uppercase tracking-widest text-left">Logout</span>

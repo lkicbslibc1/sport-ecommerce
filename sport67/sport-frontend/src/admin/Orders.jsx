@@ -14,7 +14,6 @@ import {
 import { getStoredOrders, saveOrders } from "../data/products.jsx";
 
 const STATUS_STYLES = {
-  Pending: "bg-neutral-700 text-neutral-200",
   Preparing: "bg-indigo-300 text-indigo-950",
   Shipped: "bg-orange-600 text-orange-50",
   Delivered: "bg-orange-300 text-orange-950",
@@ -35,38 +34,20 @@ function GlassPanel({ className = "", children }) {
 }
 
 export default function GogoAthleticOrders({ onNavigate, onViewChange, user, setUser }) {
-  const [ordersList, setOrdersList] = useState(() => {
-    try {
-      const stored = localStorage.getItem('gogo_orders');
-      if (stored) return JSON.parse(stored);
-    } catch (e) {
-      console.error(e);
-    }
-    return [];
-  });
+  const [ordersList, setOrdersList] = useState([]);
 
-  // Real-time sync: listen for storage events (cross-tab) + poll every 3s (same-tab)
   React.useEffect(() => {
-    const syncOrders = () => {
+    async function loadOrders() {
       try {
-        const stored = localStorage.getItem('gogo_orders');
-        if (stored) setOrdersList(JSON.parse(stored));
+        const stored = await getStoredOrders();
+        setOrdersList(stored || []);
       } catch (e) {
         console.error(e);
       }
-    };
-
-    const handleStorageEvent = (e) => {
-      if (e.key === 'gogo_orders') syncOrders();
-    };
-
-    window.addEventListener('storage', handleStorageEvent);
-    const interval = setInterval(syncOrders, 3000);
-
-    return () => {
-      window.removeEventListener('storage', handleStorageEvent);
-      clearInterval(interval);
-    };
+    }
+    loadOrders();
+    const interval = setInterval(loadOrders, 5000);
+    return () => clearInterval(interval);
   }, []);
 
 
@@ -84,7 +65,7 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange, user, set
     setSelectedOrderIds([]);
   }, [searchQuery, selectedStatus]);
 
-  const handleUpdateStatus = (orderId, newStatus) => {
+  const handleUpdateStatus = async (orderId, newStatus) => {
     let orderUsername = null;
     let orderDate = null;
     const updated = ordersList.map(o => {
@@ -96,20 +77,30 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange, user, set
       return o;
     });
     setOrdersList(updated);
-    saveOrders(updated);
+    await saveOrders(updated);
 
     if (orderUsername && orderUsername !== 'Guest') {
-      const allNotis = JSON.parse(localStorage.getItem('gogo_noti') || '{}');
-      const userNotis = allNotis[orderUsername] || [];
-      const newNoti = {
-        id: orderId,
-        date: orderDate,
-        title: "Order status updated",
-        status: newStatus,
-        read: false
-      };
-      allNotis[orderUsername] = [newNoti, ...userNotis];
-      localStorage.setItem('gogo_noti', JSON.stringify(allNotis));
+      try {
+        const notiRes = await fetch('http://localhost:5000/api/noti');
+        const allNotis = notiRes.ok ? await notiRes.json() : {};
+        const userNotis = allNotis[orderUsername] || [];
+        const newNoti = {
+          id: orderId,
+          date: orderDate,
+          title: "Order status updated",
+          status: newStatus,
+          read: false
+        };
+        allNotis[orderUsername] = [newNoti, ...userNotis];
+        
+        await fetch('http://localhost:5000/api/noti', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(allNotis)
+        });
+      } catch (err) {
+        console.error("Failed to save noti:", err);
+      }
     }
   };
 
@@ -137,9 +128,15 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange, user, set
     );
   };
 
-  const handleBulkUpdate = () => {
-    let allNotis = JSON.parse(localStorage.getItem('gogo_noti') || '{}');
+  const handleBulkUpdate = async () => {
     let hasNotisChanged = false;
+    let allNotis = {};
+    try {
+      const notiRes = await fetch('http://localhost:5000/api/noti');
+      if (notiRes.ok) allNotis = await notiRes.json();
+    } catch (err) {
+      console.error(err);
+    }
 
     const updated = ordersList.map(o => {
       if (selectedOrderIds.includes(o.id)) {
@@ -159,12 +156,21 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange, user, set
       }
       return o;
     });
+    
     setOrdersList(updated);
-    saveOrders(updated);
+    await saveOrders(updated);
     setSelectedOrderIds([]);
 
     if (hasNotisChanged) {
-      localStorage.setItem('gogo_noti', JSON.stringify(allNotis));
+      try {
+        await fetch('http://localhost:5000/api/noti', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(allNotis)
+        });
+      } catch (err) {
+        console.error(err);
+      }
     }
   };
 
@@ -173,7 +179,7 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange, user, set
   const revenueTotal = filteredOrders
     .filter(o => o.status !== "Cancelled")
     .reduce((sum, o) => {
-      const val = parseFloat(o.total.replace(/,/g, '')) || 0;
+      const val = o.total || 0;
       return sum + val;
     }, 0);
 
@@ -186,7 +192,7 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange, user, set
   }, [selectedOrder]);
 
   const selectedOrderTax = selectedOrderSubtotal * 0.07;
-  const selectedOrderTotalNum = selectedOrder ? (parseFloat((selectedOrder.total || "0").replace(/,/g, '').replace(' ฿', '')) || 0) : 0;
+  const selectedOrderTotalNum = selectedOrder ? (selectedOrder.total || 0) : 0;
   const selectedOrderShipping = Math.max(0, selectedOrderTotalNum - selectedOrderSubtotal - selectedOrderTax);
 
   return (
@@ -274,7 +280,6 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange, user, set
                   className="bg-neutral-900 border border-white/10 text-neutral-100 text-xs py-2 px-4 focus:ring-orange-300 focus:border-orange-300"
                 >
                   <option value="All Statuses" className="bg-neutral-950 text-neutral-100">All Statuses</option>
-                  <option value="Pending" className="bg-neutral-950 text-neutral-100">Pending</option>
                   <option value="Preparing" className="bg-neutral-950 text-neutral-100">Preparing</option>
                   <option value="Shipped" className="bg-neutral-950 text-neutral-100">Shipped</option>
                   <option value="Delivered" className="bg-neutral-950 text-neutral-100">Delivered</option>
@@ -292,7 +297,6 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange, user, set
                     onChange={(e) => setBulkStatus(e.target.value)}
                     className="bg-neutral-900 border border-white/10 text-neutral-100 text-xs py-2 px-4 focus:ring-orange-300 focus:border-orange-300"
                   >
-                    <option value="Pending" className="bg-neutral-950 text-neutral-100">Pending</option>
                     <option value="Preparing" className="bg-neutral-950 text-neutral-100">Preparing</option>
                     <option value="Shipped" className="bg-neutral-950 text-neutral-100">Shipped</option>
                     <option value="Delivered" className="bg-neutral-950 text-neutral-100">Delivered</option>
@@ -368,7 +372,7 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange, user, set
                       </td>
                       <td className="p-6 text-neutral-400 text-xs">{order.date}</td>
                       <td className="p-6 font-bold tracking-tighter">
-                        {order.total}
+                        {(order.total || 0).toLocaleString("th-TH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ฿
                       </td>
                       <td className="p-6">
                         <span
@@ -394,7 +398,6 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange, user, set
                             onChange={(e) => handleUpdateStatus(order.id, e.target.value)}
                             className="bg-neutral-900 border border-white/10 text-[10px] uppercase font-black focus:ring-1 focus:ring-orange-300 cursor-pointer px-4 py-1.5 text-neutral-100"
                           >
-                            <option value="Pending" className="bg-neutral-950 text-neutral-100">Pending</option>
                             <option value="Preparing" className="bg-neutral-950 text-neutral-100">Preparing</option>
                             <option value="Shipped" className="bg-neutral-950 text-neutral-100">Shipped</option>
                             <option value="Delivered" className="bg-neutral-950 text-neutral-100">Delivered</option>
@@ -527,7 +530,7 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange, user, set
                 <div className="h-px bg-white/10 my-4" />
                 <div className="flex justify-between text-xl font-black">
                   <span>TOTAL</span>
-                  <span>{selectedOrder.total}</span>
+                  <span>{selectedOrderTotalNum.toLocaleString("th-TH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ฿</span>
                 </div>
               </section>
             </div>
@@ -564,22 +567,7 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange, user, set
               </button>
             </div>
             <div className="flex-1 p-6 space-y-4">
-              <button
-                onClick={() => {
-                  const pendingOrders = ordersList.filter(o => o.status === "Pending");
-                  if (pendingOrders.length > 0) {
-                    const updated = ordersList.map(o =>
-                      o.status === "Pending" ? { ...o, status: "Preparing" } : o
-                    );
-                    setOrdersList(updated);
-                    saveOrders(updated);
-                  }
-                  setShowActionModal(false);
-                }}
-                className="w-full bg-orange-600 text-white py-3 text-xs font-bold uppercase tracking-widest hover:bg-orange-500 transition-colors"
-              >
-                Process All Pending Orders
-              </button>
+
               <button
                 onClick={() => {
                   const preparingOrders = ordersList.filter(o => o.status === "Preparing");

@@ -47,16 +47,22 @@ export default function GogoAthleticDashboard({ onViewChange, user, setUser }) {
   // Get products and orders from context and localStorage
   const { products } = useContext(ProductContext);
 
-  const ordersList = useMemo(() => {
-    return getStoredOrders();
-  }, [currentPage]); // re-evaluate when page switches to keep sync
+  const [ordersList, setOrdersList] = useState([]);
+  
+  React.useEffect(() => {
+    const loadOrders = async () => {
+      const fetchedOrders = await getStoredOrders();
+      setOrdersList(fetchedOrders || []);
+    };
+    loadOrders();
+  }, [currentPage]);
 
   // Dynamic Metrics - now using products from context
   const totalRevenue = useMemo(() => {
     return ordersList
       .filter(o => o.status !== 'Cancelled')
       .reduce((sum, o) => {
-        const val = parseFloat(o.total.replace(/,/g, '').replace(/[^\d.]/g, '')) || 0;
+        const val = o.total || 0;
         return sum + val;
       }, 0);
   }, [ordersList]);
@@ -103,7 +109,7 @@ export default function GogoAthleticDashboard({ onViewChange, user, setUser }) {
           o => o.date && o.date.toUpperCase() === dateKey && o.status !== "Cancelled"
         );
         const total = dayOrders.reduce((sum, o) => {
-          return sum + (parseFloat((o.total || "0").replace(/,/g, "").replace(/[^\d.]/g, "")) || 0);
+          return sum + (o.total || 0);
         }, 0);
         return { label: dayName, total, isCurrent: i === 6 };
       });
@@ -135,7 +141,7 @@ export default function GogoAthleticDashboard({ onViewChange, user, setUser }) {
             return orderTime >= startTime && orderTime <= endTime;
         });
 
-        const total = weekOrders.reduce((sum, o) => sum + (parseFloat((o.total || "0").replace(/,/g, "").replace(/[^\d.]/g, "")) || 0), 0);
+        const total = weekOrders.reduce((sum, o) => sum + (o.total || 0), 0);
         return { label, total, isCurrent: i === 6 };
       });
       return results;

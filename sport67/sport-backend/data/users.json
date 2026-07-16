@@ -1,0 +1,27 @@
+[
+  {
+    "id": 1,
+    "username": "manager",
+    "email": "manager@gogo.com",
+    "password": "123",
+    "role": "manager",
+    "isActive": true
+  },
+  {
+    "id": 2,
+    "username": "employee",
+    "email": "staff@gogo.com",
+    "password": "123",
+    "role": "employee",
+    "isActive": true
+  },
+  {
+    "id": 1784219904887,
+    "username": "mook3",
+    "email": "mook@gmail.com",
+    "password": "1",
+    "role": "customer",
+    "isActive": true,
+    "joined": "JUL 16, 2026"
+  }
+]

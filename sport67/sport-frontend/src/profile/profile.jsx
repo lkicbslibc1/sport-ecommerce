@@ -11,71 +11,117 @@ export default function Profile({ onViewChange, user, setUser, cart, addToCart, 
   const [addressForm, setAddressForm] = React.useState({
     firstName: '', lastName: '', phone: '', streetAddress: '', city: '', zipCode: '', isDefault: false
   });
+  const [orderFilter, setOrderFilter] = React.useState('All');
 
   React.useEffect(() => {
+    async function fetchData() {
+      try {
+        const [ordersRes, addressesRes] = await Promise.all([
+          fetch('http://localhost:5000/api/orders'),
+          fetch('http://localhost:5000/api/addresses')
+        ]);
+
+        if (ordersRes.ok) {
+          const allOrders = await ordersRes.json();
+          const userOrders = allOrders.filter(o => o.username === currentUserUsername);
+          setOrders(userOrders);
+        }
+
+        if (addressesRes.ok) {
+          const allAddresses = await addressesRes.json();
+          setAddresses(allAddresses[currentUserUsername] || []);
+        }
+      } catch (e) {
+        console.error("Failed to load data", e);
+      }
+    }
+    if (currentUserUsername !== 'Guest') {
+      fetchData();
+    }
+  }, [currentUserUsername]);
+
+  const handleSaveAddress = async (e) => {
+    e.preventDefault();
     try {
-      const stored = localStorage.getItem('gogo_orders');
-      if (stored) {
-        const allOrders = JSON.parse(stored);
-        const userOrders = allOrders.filter(o => o.username === currentUserUsername);
-        setOrders(userOrders);
+      const res = await fetch('http://localhost:5000/api/addresses');
+      const allAddresses = res.ok ? await res.json() : {};
+      let userAddrs = allAddresses[currentUserUsername] || [];
+
+      let newAddr = { ...addressForm, id: Date.now().toString() };
+      if (newAddr.isDefault || userAddrs.length === 0) {
+        newAddr.isDefault = true;
+        userAddrs = userAddrs.map(a => ({ ...a, isDefault: false }));
       }
 
-      const allAddresses = JSON.parse(localStorage.getItem('gogo_addresses') || '{}');
-      setAddresses(allAddresses[currentUserUsername] || []);
-    } catch (e) {
-      console.error("Failed to load data", e);
+      userAddrs.push(newAddr);
+      allAddresses[currentUserUsername] = userAddrs;
+
+      await fetch('http://localhost:5000/api/addresses', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(allAddresses)
+      });
+
+      setAddresses(userAddrs);
+      setShowAddressModal(false);
+      setAddressForm({ firstName: '', lastName: '', phone: '', streetAddress: '', city: '', zipCode: '', isDefault: false });
+    } catch (err) {
+      console.error("Failed to save address:", err);
     }
-  }, [user, currentUserUsername]);
-
-  const handleSaveAddress = (e) => {
-    e.preventDefault();
-    const allAddresses = JSON.parse(localStorage.getItem('gogo_addresses') || '{}');
-    let userAddrs = allAddresses[currentUserUsername] || [];
-
-    let newAddr = { ...addressForm, id: Date.now().toString() };
-    if (newAddr.isDefault || userAddrs.length === 0) {
-      newAddr.isDefault = true;
-      userAddrs = userAddrs.map(a => ({ ...a, isDefault: false }));
-    }
-
-    userAddrs.push(newAddr);
-    allAddresses[currentUserUsername] = userAddrs;
-    localStorage.setItem('gogo_addresses', JSON.stringify(allAddresses));
-    setAddresses(userAddrs);
-    setShowAddressModal(false);
-    setAddressForm({ firstName: '', lastName: '', phone: '', streetAddress: '', city: '', zipCode: '', isDefault: false });
   };
 
-  const handleSetDefaultAddress = (addressId, index) => {
-    const allAddresses = JSON.parse(localStorage.getItem('gogo_addresses') || '{}');
-    let userAddrs = allAddresses[currentUserUsername] || [];
-    userAddrs = userAddrs.map((a, i) => {
-      const isMatch = a.id ? a.id === addressId : i === index;
-      return {
-        ...a,
-        isDefault: isMatch
-      };
-    });
-    allAddresses[currentUserUsername] = userAddrs;
-    localStorage.setItem('gogo_addresses', JSON.stringify(allAddresses));
-    setAddresses(userAddrs);
+  const handleSetDefaultAddress = async (addressId, index) => {
+    try {
+      const res = await fetch('http://localhost:5000/api/addresses');
+      const allAddresses = res.ok ? await res.json() : {};
+      let userAddrs = allAddresses[currentUserUsername] || [];
+      userAddrs = userAddrs.map((a, i) => {
+        const isMatch = a.id ? a.id === addressId : i === index;
+        return {
+          ...a,
+          isDefault: isMatch
+        };
+      });
+      allAddresses[currentUserUsername] = userAddrs;
+
+      await fetch('http://localhost:5000/api/addresses', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(allAddresses)
+      });
+
+      setAddresses(userAddrs);
+    } catch (err) {
+      console.error("Failed to set default address:", err);
+    }
   };
 
-  const handleDeleteAddress = (addressId, index) => {
-    const allAddresses = JSON.parse(localStorage.getItem('gogo_addresses') || '{}');
-    let userAddrs = allAddresses[currentUserUsername] || [];
-    userAddrs = userAddrs.filter((a, i) => {
-      return a.id ? a.id !== addressId : i !== index;
-    });
-    // If the deleted address was default, make the first one default
-    if (userAddrs.length > 0 && !userAddrs.some(a => a.isDefault)) {
-      userAddrs[0].isDefault = true;
+  const handleDeleteAddress = async (addressId, index) => {
+    try {
+      const res = await fetch('http://localhost:5000/api/addresses');
+      const allAddresses = res.ok ? await res.json() : {};
+      let userAddrs = allAddresses[currentUserUsername] || [];
+      userAddrs = userAddrs.filter((a, i) => {
+        return a.id ? a.id !== addressId : i !== index;
+      });
+      if (userAddrs.length > 0 && !userAddrs.some(a => a.isDefault)) {
+        userAddrs[0].isDefault = true;
+      }
+      allAddresses[currentUserUsername] = userAddrs;
+
+      await fetch('http://localhost:5000/api/addresses', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(allAddresses)
+      });
+
+      setAddresses(userAddrs);
+    } catch (err) {
+      console.error("Failed to delete address:", err);
     }
-    allAddresses[currentUserUsername] = userAddrs;
-    localStorage.setItem('gogo_addresses', JSON.stringify(allAddresses));
-    setAddresses(userAddrs);
   };
+
+  const filteredOrders = orders.filter(order => orderFilter === 'All' || order.status.toLowerCase() === orderFilter.toLowerCase());
 
 
   return (
@@ -113,7 +159,6 @@ export default function Profile({ onViewChange, user, setUser, cart, addToCart, 
 
               <button
                 onClick={() => {
-                  localStorage.removeItem('gogo_current_user');
                   setUser(null);
                   onViewChange('home');
                 }}
@@ -174,11 +219,27 @@ export default function Profile({ onViewChange, user, setUser, cart, addToCart, 
               ประวัติการสั่งซื้อ <span className="text-on-surface-variant text-xl">(Order History)</span>
             </h3>
 
+            {/* Filter Bar */}
+            <div className="flex w-full mb-8 border-b border-white/10">
+              {['All', 'Preparing', 'Shipped', 'Delivered', 'Cancelled'].map(status => (
+                <button
+                  key={status}
+                  onClick={() => setOrderFilter(status)}
+                  className={`flex-1 py-4 text-xs font-bold uppercase tracking-widest transition-all cursor-pointer border-b-4 bg-transparent ${orderFilter === status
+                    ? 'border-primary text-primary bg-primary/5'
+                    : 'border-transparent text-white hover:bg-white/5 hover:text-primary/70'
+                    }`}
+                >
+                  {status === 'All' ? 'All' : status}
+                </button>
+              ))}
+            </div>
+
             <div className="space-y-6">
-              {orders.length === 0 ? (
+              {filteredOrders.length === 0 ? (
                 <p className="text-sm text-on-surface-variant font-light">คุณยังไม่มีประวัติการสั่งซื้อ (No order history found)</p>
               ) : (
-                orders.map(order => (
+                filteredOrders.map(order => (
                   <div key={order.id} onClick={() => onViewChange(`order_status-${order.id}`)} className="glass p-6 border border-white/5 hover:border-primary/50 transition-colors cursor-pointer group">
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4 border-b border-white/10 pb-4">
                       <div>
@@ -186,11 +247,16 @@ export default function Profile({ onViewChange, user, setUser, cart, addToCart, 
                         <p className="text-xs text-on-surface-variant mt-1">{order.date}</p>
                       </div>
                       <div className="text-right">
-                        <span className={`text-[10px] font-black px-3 py-1 uppercase tracking-widest ${order.status === 'Delivered' ? 'bg-green-500/20 text-green-400' : 'bg-orange-500/20 text-orange-400'
+                        <span className={`text-[10px] font-black px-3 py-1 uppercase tracking-widest ${order.status === 'Delivered' ? 'bg-green-500/20 text-green-400' :
+                            order.status === 'Shipped' ? 'bg-blue-500/20 text-blue-400' :
+                              order.status === 'Cancelled' ? 'bg-red-500/20 text-red-400' :
+                                'bg-orange-500/20 text-orange-400'
                           }`}>
                           {order.status}
                         </span>
-                        <p className="font-anybody font-black italic mt-2">{typeof order.total === 'number' ? order.total.toLocaleString() + ' ฿' : order.total}</p>
+                        <p className="font-anybody font-black italic mt-2">
+                          {(order.total || 0).toLocaleString("th-TH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ฿
+                        </p>
                       </div>
                     </div>
                     <div className="space-y-2">

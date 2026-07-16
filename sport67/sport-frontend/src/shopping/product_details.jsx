@@ -46,6 +46,7 @@ export default function ProductDetails({ onViewChange, product, user, setUser, c
       cartId: `${product.id}-${selectedColor}-${selectedSize}`,
       selectedColor,
       selectedSize,
+      image: currentImage,
     };
     if (addToCart) {
       addToCart(productToAdd, quantity);

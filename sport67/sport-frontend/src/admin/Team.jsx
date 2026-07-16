@@ -65,19 +65,31 @@ export default function GogoAthleticTeam({ onNavigate, onViewChange, user, setUs
   const [selectedCustomerOrders, setSelectedCustomerOrders] = useState(null);
 
   useEffect(() => {
-    const loadData = () => {
-      const storedUsers = JSON.parse(localStorage.getItem('gogo_users') || '[]');
-      setUsers(storedUsers);
-      const storedOrders = JSON.parse(localStorage.getItem('gogo_orders') || '[]');
-      setOrders(storedOrders);
+    const loadData = async () => {
+      try {
+        const [usersRes, ordersRes] = await Promise.all([
+          fetch('http://localhost:5000/api/users'),
+          fetch('http://localhost:5000/api/orders')
+        ]);
+        
+        if (usersRes.ok) {
+          const apiUsers = await usersRes.json();
+          setUsers(apiUsers);
+        }
+        
+        if (ordersRes.ok) {
+          const apiOrders = await ordersRes.json();
+          setOrders(apiOrders);
+        }
+      } catch (error) {
+        console.error("Failed to load data for admin panel:", error);
+      }
     };
     loadData();
 
-    const handleStorage = (e) => {
-      if (e.key === 'gogo_users' || e.key === 'gogo_orders') loadData();
-    };
-    window.addEventListener('storage', handleStorage);
-    return () => window.removeEventListener('storage', handleStorage);
+    // Optionally set up an interval to poll since we aren't using storage events anymore
+    const interval = setInterval(loadData, 10000);
+    return () => clearInterval(interval);
   }, []);
 
   const team = users.filter(u => u.role === 'employee' || u.role === 'manager');
@@ -85,7 +97,7 @@ export default function GogoAthleticTeam({ onNavigate, onViewChange, user, setUs
 
   const isManagerOrAdmin = user && user.role === "manager";
 
-  const handleAddMember = (e) => {
+  const handleAddMember = async (e) => {
     e.preventDefault();
     if (!newMember.username) return;
 
@@ -107,13 +119,22 @@ export default function GogoAthleticTeam({ onNavigate, onViewChange, user, setUs
 
     const updatedUsers = [...users, memberData];
     setUsers(updatedUsers);
-    localStorage.setItem("gogo_users", JSON.stringify(updatedUsers));
+    
+    try {
+      await fetch('http://localhost:5000/api/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedUsers)
+      });
+    } catch (error) {
+      console.error("Failed to add user:", error);
+    }
 
     setNewMember({ username: "", email: "", password: "", role: "employee", status: "Active" });
     setIsModalOpen(false);
   };
 
-  const handleRoleChange = (id, newRoleValue) => {
+  const handleRoleChange = async (id, newRoleValue) => {
     const updatedUsers = users.map(u => {
       if (u.id === id) {
         return { ...u, role: newRoleValue };
@@ -121,10 +142,19 @@ export default function GogoAthleticTeam({ onNavigate, onViewChange, user, setUs
       return u;
     });
     setUsers(updatedUsers);
-    localStorage.setItem('gogo_users', JSON.stringify(updatedUsers));
+    
+    try {
+      await fetch('http://localhost:5000/api/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedUsers)
+      });
+    } catch (error) {
+      console.error("Failed to update role:", error);
+    }
   };
 
-  const handleToggleBan = (id, currentIsActive) => {
+  const handleToggleBan = async (id, currentIsActive) => {
     const updatedUsers = users.map(u => {
       if (u.id === id) {
         return { ...u, isActive: !currentIsActive };
@@ -132,7 +162,16 @@ export default function GogoAthleticTeam({ onNavigate, onViewChange, user, setUs
       return u;
     });
     setUsers(updatedUsers);
-    localStorage.setItem('gogo_users', JSON.stringify(updatedUsers));
+    
+    try {
+      await fetch('http://localhost:5000/api/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedUsers)
+      });
+    } catch (error) {
+      console.error("Failed to toggle ban status:", error);
+    }
   };
 
   const filteredTeam = team.filter((member) => {
@@ -612,7 +651,7 @@ export default function GogoAthleticTeam({ onNavigate, onViewChange, user, setUs
                         
                         <div className="flex flex-col justify-end items-start sm:items-end border-t sm:border-t-0 sm:border-l border-white/10 pt-4 sm:pt-0 sm:pl-6 min-w-[120px]">
                           <span className="text-[10px] text-neutral-500 uppercase tracking-widest mb-1">Total</span>
-                          <span className="text-xl font-black">{order.total}</span>
+                          <span className="text-xl font-black">{(order.total || 0).toLocaleString("th-TH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ฿</span>
                         </div>
                       </div>
                     ))}

@@ -137,18 +137,20 @@ input:-webkit-autofill:active {
   -webkit-text-fill-color: #e5e2e1 !important;
 }
 
-/* Drawer slide-in animation */
-@keyframes slideIn {
-  from {
-    transform: translateX(100%);
+/* Modal pop-up animation */
+@keyframes modalPop {
+  0% {
+    opacity: 0;
+    transform: scale(0.9) translateY(20px);
   }
-  to {
-    transform: translateX(0);
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
   }
 }
 
-.animate-slideIn {
-  animation: slideIn 0.3s ease-out;
+.animate-modalPop {
+  animation: modalPop 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 /* Custom Scrollbar */

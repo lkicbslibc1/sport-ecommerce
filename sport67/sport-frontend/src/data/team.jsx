@@ -1,76 +1,75 @@
 import { createContext, useContext, useState, useEffect } from "react";
 
-// API base URL - can be configured for different environments
-const API_BASE_URL = "http://localhost:3001/api";
+// API base URL - pointing to our new Express backend
+const API_BASE_URL = "http://localhost:5000/api";
 
 // API functions for team members
 const teamAPI = {
   getAll: async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/team`);
-      if (!response.ok) throw new Error('Failed to fetch team');
-      return await response.json();
+      const response = await fetch(`${API_BASE_URL}/users`);
+      if (!response.ok) throw new Error('Failed to fetch users');
+      const allUsers = await response.json();
+      // Filter only managers and employees
+      return allUsers.filter(u => u.role === 'manager' || u.role === 'employee');
     } catch (error) {
-      console.error("API error, falling back to localStorage:", error);
-      // Fallback to localStorage if API fails
-      const stored = localStorage.getItem('gogo_staff');
-      return stored ? JSON.parse(stored) : [];
+      console.error("API error, falling back to empty array:", error);
+      return [];
     }
   },
 
   add: async (member) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/team`, {
+      const response = await fetch(`${API_BASE_URL}/users`);
+      const allUsers = await response.json();
+      const newMember = { ...member, id: Date.now() };
+      const updated = [...allUsers, newMember];
+      
+      await fetch(`${API_BASE_URL}/users`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(member)
+        body: JSON.stringify(updated)
       });
-      if (!response.ok) throw new Error('Failed to add team member');
-      return await response.json();
-    } catch (error) {
-      console.error("API error, using localStorage:", error);
-      // Fallback to localStorage
-      const stored = JSON.parse(localStorage.getItem('gogo_staff') || '[]');
-      const newMember = { ...member, id: Date.now() };
-      const updated = [...stored, newMember];
-      localStorage.setItem('gogo_staff', JSON.stringify(updated));
       return newMember;
+    } catch (error) {
+      console.error("API error adding member:", error);
+      throw error;
     }
   },
 
   update: async (id, updatedMember) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/team/${id}`, {
-        method: 'PUT',
+      const response = await fetch(`${API_BASE_URL}/users`);
+      const allUsers = await response.json();
+      const updated = allUsers.map(m => m.id === id ? { ...m, ...updatedMember } : m);
+      
+      await fetch(`${API_BASE_URL}/users`, {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedMember)
+        body: JSON.stringify(updated)
       });
-      if (!response.ok) throw new Error('Failed to update team member');
-      return await response.json();
-    } catch (error) {
-      console.error("API error, using localStorage:", error);
-      // Fallback to localStorage
-      const stored = JSON.parse(localStorage.getItem('gogo_staff') || '[]');
-      const updated = stored.map(m => m.id === id ? { ...m, ...updatedMember } : m);
-      localStorage.setItem('gogo_staff', JSON.stringify(updated));
       return { id, ...updatedMember };
+    } catch (error) {
+      console.error("API error updating member:", error);
+      throw error;
     }
   },
 
   delete: async (id) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/team/${id}`, {
-        method: 'DELETE'
+      const response = await fetch(`${API_BASE_URL}/users`);
+      const allUsers = await response.json();
+      const updated = allUsers.filter(m => m.id !== id);
+      
+      await fetch(`${API_BASE_URL}/users`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updated)
       });
-      if (!response.ok) throw new Error('Failed to delete team member');
       return true;
     } catch (error) {
-      console.error("API error, using localStorage:", error);
-      // Fallback to localStorage
-      const stored = JSON.parse(localStorage.getItem('gogo_staff') || '[]');
-      const updated = stored.filter(m => m.id !== id);
-      localStorage.setItem('gogo_staff', JSON.stringify(updated));
-      return true;
+      console.error("API error deleting member:", error);
+      throw error;
     }
   }
 };
@@ -79,40 +78,38 @@ const teamAPI = {
 const customerAPI = {
   getAll: async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/customers`);
-      if (!response.ok) throw new Error('Failed to fetch customers');
-      return await response.json();
+      const response = await fetch(`${API_BASE_URL}/users`);
+      if (!response.ok) throw new Error('Failed to fetch users');
+      const allUsers = await response.json();
+      // Filter only customers
+      return allUsers.filter(u => u.role === 'customer' || !u.role);
     } catch (error) {
-      console.error("API error, falling back to localStorage:", error);
-      // Fallback to localStorage
-      const stored = localStorage.getItem('gogo_users');
-      return stored ? JSON.parse(stored) : [];
+      console.error("API error, falling back to empty array:", error);
+      return [];
     }
   },
 
   delete: async (email) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/customers/${encodeURIComponent(email)}`, {
-        method: 'DELETE'
+      const response = await fetch(`${API_BASE_URL}/users`);
+      const allUsers = await response.json();
+      const updated = allUsers.filter(c => c.email !== email);
+      
+      await fetch(`${API_BASE_URL}/users`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updated)
       });
-      if (!response.ok) throw new Error('Failed to delete customer');
       return true;
     } catch (error) {
-      console.error("API error, using localStorage:", error);
-      // Fallback to localStorage
-      const stored = JSON.parse(localStorage.getItem('gogo_users') || '[]');
-      const updated = stored.filter(c => c.email !== email);
-      localStorage.setItem('gogo_users', JSON.stringify(updated));
-      return true;
+      console.error("API error deleting customer:", error);
+      throw error;
     }
   }
 };
 
 // Team Context
 const TeamContext = createContext(null);
-
-// Export the context for direct use with useContext
-export { TeamContext };
 
 // Custom hook to use team context
 export function useTeam() {
@@ -143,48 +140,6 @@ export function TeamProvider({ children }) {
     };
 
     fetchData();
-  }, []);
-
-  // Listen for storage changes from other tabs/windows (fallback sync)
-  useEffect(() => {
-    const handleStorageChange = (e) => {
-      if (e.key === 'gogo_staff') {
-        try {
-          const updated = JSON.parse(e.newValue);
-          if (updated) {
-            setTeam(updated);
-          }
-        } catch (err) {
-          console.error("Failed to parse storage event", err);
-        }
-      }
-      if (e.key === 'gogo_users') {
-        try {
-          const updated = JSON.parse(e.newValue);
-          if (updated) {
-            setCustomers(updated);
-          }
-        } catch (err) {
-          console.error("Failed to parse storage event", err);
-        }
-      }
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
-  }, []);
-
-  // Poll to keep data synchronized (fallback)
-  useEffect(() => {
-    const interval = setInterval(async () => {
-      const [teamData, customerData] = await Promise.all([
-        teamAPI.getAll(),
-        customerAPI.getAll()
-      ]);
-      setTeam(teamData);
-      setCustomers(customerData);
-    }, 30000); // Poll every 30 seconds
-    return () => clearInterval(interval);
   }, []);
 
   const addTeamMember = async (member) => {

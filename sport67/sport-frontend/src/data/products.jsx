@@ -1,98 +1,56 @@
 import { createContext, useContext, useState, useEffect } from "react";
-import { INITIAL_PRODUCTS } from "./product";
 
+const INITIAL_PRODUCTS = [];
 
+const API_BASE_URL = 'http://localhost:5000/api';
 
-function getStoredProducts() {
+async function fetchFromAPI(resource, fallbackData) {
   try {
-    const stored = localStorage.getItem('gogo_products');
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      // Merge initial products' colorImages, colors, and images into the stored products
-      // to ensure update propagates correctly even if already in local storage.
-      const merged = parsed.map(p => {
-        const initial = INITIAL_PRODUCTS.find(ip => ip.id === p.id);
-        if (initial) {
-          return {
-            ...p,
-            image: initial.image,
-            sizes: initial.sizes || p.sizes,
-            colorImages: initial.colorImages || p.colorImages,
-            colors: initial.colors || p.colors,
-            colorNames: initial.colorNames || p.colorNames
-          };
-        }
-        return p;
-      });
-
-      // Add any products from INITIAL_PRODUCTS that are not in localStorage
-      const parsedIds = new Set(parsed.map(p => p.id));
-      const newFromInitial = INITIAL_PRODUCTS.filter(ip => !parsedIds.has(ip.id));
-      const finalProducts = [...merged, ...newFromInitial];
-      try {
-        localStorage.setItem('gogo_products', JSON.stringify(finalProducts));
-      } catch (saveError) {
-        console.error("Failed to save merged products to localStorage", saveError);
-      }
-      return finalProducts;
+    const res = await fetch(`${API_BASE_URL}/${resource}`);
+    if (res.ok) {
+      return await res.json();
     }
-  } catch (e) {
-    console.error("Failed to parse products from localStorage", e);
+  } catch (error) {
+    console.error(`API Error fetching ${resource}:`, error);
   }
-  return INITIAL_PRODUCTS;
+  return fallbackData;
 }
-// Save products to localStorage
-function saveProducts(products) {
+
+async function saveToAPI(resource, data) {
   try {
-    localStorage.setItem('gogo_products', JSON.stringify(products));
-  } catch (e) {
-    console.error("Failed to save products to localStorage", e);
+    await fetch(`${API_BASE_URL}/${resource}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+  } catch (error) {
+    console.error(`API Error saving ${resource}:`, error);
   }
 }
 
-// Get orders from localStorage or return empty array
-function getStoredOrders() {
-  try {
-    const stored = localStorage.getItem('gogo_orders');
-    if (stored) {
-      return JSON.parse(stored);
-    }
-  } catch (e) {
-    console.error("Failed to parse orders from localStorage", e);
-  }
-  return [];
+// Export orders functions for use in other components
+export async function getStoredOrders() {
+  return await fetchFromAPI('orders', []);
 }
 
-// Save orders to localStorage
-function saveOrders(orders) {
-  try {
-    localStorage.setItem('gogo_orders', JSON.stringify(orders));
-  } catch (e) {
-    console.error("Failed to save orders to localStorage", e);
-  }
+export async function saveOrders(orders) {
+  await saveToAPI('orders', orders);
 }
 
-// Initialize localStorage on app start (only if not already set)
-function initializeStorage() {
-  try {
-    if (!localStorage.getItem('gogo_products')) {
-      localStorage.setItem('gogo_products', JSON.stringify(INITIAL_PRODUCTS));
-    }
-    if (!localStorage.getItem('gogo_orders')) {
-      localStorage.setItem('gogo_orders', JSON.stringify([]));
-    }
-  } catch (e) {
-    console.error("Failed to initialize storage", e);
-  }
+// Get reviews
+export async function getStoredReviews() {
+  return await fetchFromAPI('reviews', {});
+}
+
+// Save reviews
+export async function saveReviews(reviews) {
+  await saveToAPI('reviews', reviews);
 }
 
 // Product Context
 const ProductContext = createContext(null);
-
-// Export the context for direct use with useContext
 export { ProductContext };
 
-// Custom hook to use product context
 export function useProducts() {
   const context = useContext(ProductContext);
   if (!context) {
@@ -103,59 +61,80 @@ export function useProducts() {
 
 // Product Provider Component
 export function ProductProvider({ children }) {
-  const [products, setProducts] = useState(getStoredProducts);
+  const [products, setProducts] = useState(INITIAL_PRODUCTS);
 
-  // Initialize localStorage on first load
+  // Initialize from API on first load
   useEffect(() => {
-    initializeStorage();
-  }, []);
-
-  // Listen for storage changes from other tabs/windows
-  useEffect(() => {
-    const handleStorageChange = (e) => {
-      if (e.key === 'gogo_products') {
-        try {
-          const updated = JSON.parse(e.newValue);
-          if (updated) {
-            setProducts(updated);
+    async function loadProducts() {
+      const fetchedProducts = await fetchFromAPI('products', INITIAL_PRODUCTS);
+      
+      if (fetchedProducts && fetchedProducts.length > 0) {
+        // Merge with initial products to ensure image/colors remain intact
+        const merged = fetchedProducts.map(p => {
+          const initial = INITIAL_PRODUCTS.find(ip => ip.id === p.id);
+          if (initial) {
+            return {
+              ...p,
+              image: initial.image,
+              sizes: initial.sizes || p.sizes,
+              colorImages: initial.colorImages || p.colorImages,
+              colors: initial.colors || p.colors,
+              colorNames: initial.colorNames || p.colorNames
+            };
           }
-        } catch (err) {
-          console.error("Failed to parse storage event", err);
-        }
-      }
-    };
+          return p;
+        });
 
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+        // Add any products from INITIAL_PRODUCTS that are not in the fetched list
+        const parsedIds = new Set(merged.map(p => p.id));
+        const newFromInitial = INITIAL_PRODUCTS.filter(ip => !parsedIds.has(ip.id));
+        const finalProducts = [...merged, ...newFromInitial];
+
+        setProducts(finalProducts);
+        // Sync back the fully merged list to API
+        saveToAPI('products', finalProducts);
+      } else {
+        // Empty API, seed with initial products
+        setProducts(INITIAL_PRODUCTS);
+        saveToAPI('products', INITIAL_PRODUCTS);
+      }
+    }
+    loadProducts();
   }, []);
 
-  const addProduct = (product) => {
+  const addProduct = async (product) => {
     const newProducts = [...products, product];
     setProducts(newProducts);
-    saveProducts(newProducts);
+    await saveToAPI('products', newProducts);
   };
 
-  const updateProduct = (updatedProduct) => {
+  const updateProduct = async (updatedProduct) => {
     setProducts(prev => {
       const index = prev.findIndex(p => p.id === updatedProduct.id);
       if (index !== -1) {
         const newProducts = [...prev];
         newProducts[index] = { ...prev[index], ...updatedProduct };
-        saveProducts(newProducts);
+        // Fire and forget save to API so state updates immediately
+        saveToAPI('products', newProducts);
         return newProducts;
       }
       return prev;
     });
   };
 
-  const deleteProduct = (id) => {
-    const newProducts = products.filter(p => p.id !== id);
-    setProducts(newProducts);
-    saveProducts(newProducts);
+  const deleteProduct = async (id) => {
+    setProducts(prev => {
+      const newProducts = prev.filter(p => p.id !== id);
+      saveToAPI('products', newProducts);
+      return newProducts;
+    });
   };
 
-  const refreshProducts = () => {
-    setProducts(getStoredProducts());
+  const refreshProducts = async () => {
+    const fetched = await fetchFromAPI('products', INITIAL_PRODUCTS);
+    if (fetched && fetched.length > 0) {
+      setProducts(fetched);
+    }
   };
 
   return (
@@ -171,30 +150,4 @@ export function ProductProvider({ children }) {
   );
 }
 
-// Export initial products for reference (fallback only)
 export { INITIAL_PRODUCTS };
-
-// Export orders functions for use in other components
-export { getStoredOrders, saveOrders };
-
-// Get reviews from localStorage
-export function getStoredReviews() {
-  try {
-    const stored = localStorage.getItem('gogo_reviews');
-    if (stored) {
-      return JSON.parse(stored);
-    }
-  } catch (e) {
-    console.error("Failed to parse reviews from localStorage", e);
-  }
-  return {};
-}
-
-// Save reviews to localStorage
-export function saveReviews(reviews) {
-  try {
-    localStorage.setItem('gogo_reviews', JSON.stringify(reviews));
-  } catch (e) {
-    console.error("Failed to save reviews to localStorage", e);
-  }
-}
