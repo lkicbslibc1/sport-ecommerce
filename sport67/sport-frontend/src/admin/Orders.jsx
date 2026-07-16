@@ -182,6 +182,18 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange, user, set
       return sum + val;
     }, 0);
 
+  const selectedOrderSubtotal = useMemo(() => {
+    if (!selectedOrder || !selectedOrder.items) return 0;
+    return selectedOrder.items.reduce((sum, item) => {
+      const p = parseFloat((item.price || "0").replace(/,/g, '').replace(' ฿', '')) || 0;
+      return sum + (p * item.qty);
+    }, 0);
+  }, [selectedOrder]);
+
+  const selectedOrderTax = selectedOrderSubtotal * 0.07;
+  const selectedOrderTotalNum = selectedOrder ? (parseFloat((selectedOrder.total || "0").replace(/,/g, '').replace(' ฿', '')) || 0) : 0;
+  const selectedOrderShipping = Math.max(0, selectedOrderTotalNum - selectedOrderSubtotal - selectedOrderTax);
+
   return (
     <div className="min-h-screen w-full bg-neutral-950 text-neutral-100 flex">
       <Sidebar
@@ -428,12 +440,12 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange, user, set
 
       {/* ORDER DETAILS DRAWER */}
       {isOpen && (
-        <div className="fixed inset-0 z-[100]">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
           <div
             className="absolute inset-0 bg-neutral-950/95 backdrop-blur-2xl"
             onClick={() => setSelectedOrder(null)}
           />
-          <div className="absolute right-0 top-0 bottom-0 w-full max-w-[500px] bg-neutral-900 border-l border-white/10 shadow-2xl flex flex-col animate-slideIn">
+          <div className="relative w-full max-w-[600px] max-h-[90vh] bg-neutral-900 border border-white/10 shadow-2xl flex flex-col">
             <div className="p-8 border-b border-white/10 flex justify-between items-center">
               <div>
                 <h3 className="text-2xl italic uppercase font-black text-orange-300">
@@ -463,18 +475,26 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange, user, set
                       key={idx}
                       className="flex gap-4 p-4 bg-neutral-950 border border-white/10"
                     >
-                      <div className="w-16 h-16 bg-neutral-800 shrink-0 flex items-center justify-center">
-                        <Package size={24} className="text-neutral-600" />
+                      <div className="w-16 h-16 bg-white shrink-0 flex items-center justify-center overflow-hidden p-1 rounded">
+                        {item.image || (item.colorImages && item.selectedColor && item.colorImages[item.selectedColor]) ? (
+                          <img 
+                            src={item.colorImages && item.selectedColor && item.colorImages[item.selectedColor] ? item.colorImages[item.selectedColor] : item.image} 
+                            alt={item.name} 
+                            className="w-full h-full object-contain" 
+                          />
+                        ) : (
+                          <Package size={24} className="text-neutral-600" />
+                        )}
                       </div>
                       <div className="flex-1">
                         <p className="font-bold text-xs uppercase">{item.name}</p>
                         <p className="text-[10px] text-neutral-400">SKU: {item.sku}</p>
                         <div className="flex justify-between items-end mt-2">
                           <span className="text-[10px] text-neutral-400">
-                            Qty: {item.qty}
+                            Qty: {item.qty} &times; {item.price}
                           </span>
                           <span className="font-bold text-orange-300">
-                            {item.price}
+                            {((parseFloat((item.price || "0").replace(/,/g, '').replace(' ฿', '')) || 0) * item.qty).toLocaleString("th-TH")} ฿
                           </span>
                         </div>
                       </div>
@@ -487,11 +507,17 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange, user, set
               <section className="bg-neutral-950 border border-white/10 p-6 space-y-2">
                 <div className="flex justify-between text-xs text-neutral-400">
                   <span>Subtotal</span>
-                  <span>{selectedOrder.total}</span>
+                  <span>{selectedOrderSubtotal.toLocaleString("th-TH")} ฿</span>
+                </div>
+                <div className="flex justify-between text-xs text-neutral-400">
+                  <span>Tax (7%)</span>
+                  <span>{selectedOrderTax.toLocaleString("th-TH")} ฿</span>
                 </div>
                 <div className="flex justify-between text-xs text-neutral-400">
                   <span>Shipping</span>
-                  <span className="text-orange-300">FREE</span>
+                  <span className={selectedOrderShipping === 0 ? "text-orange-300" : ""}>
+                    {selectedOrderShipping === 0 ? "FREE" : `${selectedOrderShipping.toLocaleString("th-TH")} ฿`}
+                  </span>
                 </div>
                 <div className="h-px bg-white/10 my-4" />
                 <div className="flex justify-between text-xl font-black">
