@@ -260,7 +260,7 @@ export default function KineticCheckout({ onViewChange, cart = [], setCart, user
                 customer: `${selectedAddress.firstName} ${selectedAddress.lastName}`.trim(),
                 shippingAddress: selectedAddress,
                 date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).toUpperCase(),
-                total: total.toLocaleString("th-TH") + " ฿",
+                total: Number(total.toFixed(2)),
                 status: "Preparing",
                 items: cart.map(i => ({
                     id: i.id,

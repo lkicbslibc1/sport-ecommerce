@@ -226,8 +226,8 @@ export default function Profile({ onViewChange, user, setUser, cart, addToCart, 
                   key={status}
                   onClick={() => setOrderFilter(status)}
                   className={`flex-1 py-4 text-xs font-bold uppercase tracking-widest transition-all cursor-pointer border-b-4 bg-transparent ${orderFilter === status
-                      ? 'border-primary text-primary bg-primary/5'
-                      : 'border-transparent text-white hover:bg-white/5 hover:text-primary/70'
+                    ? 'border-primary text-primary bg-primary/5'
+                    : 'border-transparent text-white hover:bg-white/5 hover:text-primary/70'
                     }`}
                 >
                   {status === 'All' ? 'All' : status}
@@ -247,15 +247,16 @@ export default function Profile({ onViewChange, user, setUser, cart, addToCart, 
                         <p className="text-xs text-on-surface-variant mt-1">{order.date}</p>
                       </div>
                       <div className="text-right">
-                        <span className={`text-[10px] font-black px-3 py-1 uppercase tracking-widest ${
-                          order.status === 'Delivered' ? 'bg-green-500/20 text-green-400' : 
-                          order.status === 'Shipped' ? 'bg-blue-500/20 text-blue-400' :
-                          order.status === 'Cancelled' ? 'bg-red-500/20 text-red-400' :
-                          'bg-orange-500/20 text-orange-400'
-                        }`}>
+                        <span className={`text-[10px] font-black px-3 py-1 uppercase tracking-widest ${order.status === 'Delivered' ? 'bg-green-500/20 text-green-400' :
+                            order.status === 'Shipped' ? 'bg-blue-500/20 text-blue-400' :
+                              order.status === 'Cancelled' ? 'bg-red-500/20 text-red-400' :
+                                'bg-orange-500/20 text-orange-400'
+                          }`}>
                           {order.status}
                         </span>
-                        <p className="font-anybody font-black italic mt-2">{typeof order.total === 'number' ? order.total.toLocaleString() + ' ฿' : order.total}</p>
+                        <p className="font-anybody font-black italic mt-2">
+                          {(order.total || 0).toLocaleString("th-TH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ฿
+                        </p>
                       </div>
                     </div>
                     <div className="space-y-2">

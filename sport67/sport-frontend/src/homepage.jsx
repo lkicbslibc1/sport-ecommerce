@@ -55,7 +55,7 @@ function MainPageContent() {
     if (user) {
       localStorage.setItem('gogo_current_user', JSON.stringify(user));
     } else {
-      localStorage.removeItem('gogo_current_userr');
+      localStorage.removeItem('gogo_current_user');
     }
   }, [user]);
 

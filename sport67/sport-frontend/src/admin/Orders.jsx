@@ -179,7 +179,7 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange, user, set
   const revenueTotal = filteredOrders
     .filter(o => o.status !== "Cancelled")
     .reduce((sum, o) => {
-      const val = parseFloat(o.total.replace(/,/g, '')) || 0;
+      const val = o.total || 0;
       return sum + val;
     }, 0);
 
@@ -192,7 +192,7 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange, user, set
   }, [selectedOrder]);
 
   const selectedOrderTax = selectedOrderSubtotal * 0.07;
-  const selectedOrderTotalNum = selectedOrder ? (parseFloat((selectedOrder.total || "0").replace(/,/g, '').replace(' ฿', '')) || 0) : 0;
+  const selectedOrderTotalNum = selectedOrder ? (selectedOrder.total || 0) : 0;
   const selectedOrderShipping = Math.max(0, selectedOrderTotalNum - selectedOrderSubtotal - selectedOrderTax);
 
   return (
@@ -372,7 +372,7 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange, user, set
                       </td>
                       <td className="p-6 text-neutral-400 text-xs">{order.date}</td>
                       <td className="p-6 font-bold tracking-tighter">
-                        {order.total}
+                        {(order.total || 0).toLocaleString("th-TH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ฿
                       </td>
                       <td className="p-6">
                         <span
@@ -530,7 +530,7 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange, user, set
                 <div className="h-px bg-white/10 my-4" />
                 <div className="flex justify-between text-xl font-black">
                   <span>TOTAL</span>
-                  <span>{selectedOrder.total}</span>
+                  <span>{selectedOrderTotalNum.toLocaleString("th-TH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ฿</span>
                 </div>
               </section>
             </div>

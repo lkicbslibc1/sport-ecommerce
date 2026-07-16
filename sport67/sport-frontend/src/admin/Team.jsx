@@ -651,7 +651,7 @@ export default function GogoAthleticTeam({ onNavigate, onViewChange, user, setUs
                         
                         <div className="flex flex-col justify-end items-start sm:items-end border-t sm:border-t-0 sm:border-l border-white/10 pt-4 sm:pt-0 sm:pl-6 min-w-[120px]">
                           <span className="text-[10px] text-neutral-500 uppercase tracking-widest mb-1">Total</span>
-                          <span className="text-xl font-black">{order.total}</span>
+                          <span className="text-xl font-black">{(order.total || 0).toLocaleString("th-TH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ฿</span>
                         </div>
                       </div>
                     ))}
