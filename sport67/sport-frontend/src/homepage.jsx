@@ -15,6 +15,7 @@ import Profile from './profile/profile.jsx';
 import OrderStatus from './profile/OrderStatus.jsx';
 import { ProductProvider } from './data/products.jsx';
 import ProductDetails from './shopping/product_details.jsx';
+import { useAlert } from './contexts/AlertContext.jsx';
 
 export default function MainPage() {
   return (
@@ -30,6 +31,7 @@ const getUsername = (u) => {
 };
 
 function MainPageContent() {
+  const { showAlert } = useAlert();
   const [activeCategory, setActiveCategory] = useState('men');
   const [currentView, setCurrentView] = useState(() => {
     const hash = window.location.hash.replace('#', '');
@@ -38,62 +40,73 @@ function MainPageContent() {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [user, setUser] = useState(() => {
-    try {
-      return JSON.parse(localStorage.getItem('gogo_current_user')) || null;
-    } catch {
-      return null;
+    const saved = localStorage.getItem('gogo_current_user');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        return null;
+      }
     }
+    return null;
   });
 
   useEffect(() => {
     if (user) {
       localStorage.setItem('gogo_current_user', JSON.stringify(user));
     } else {
-      localStorage.removeItem('gogo_current_user');
+      localStorage.removeItem('gogo_current_userr');
     }
   }, [user]);
 
-  const [cart, setCart] = useState(() => {
-    try {
-      const savedUser = JSON.parse(localStorage.getItem('gogo_current_user'));
-      const username = getUsername(savedUser);
-      const allCarts = JSON.parse(localStorage.getItem('gogo_cart') || '{}');
-      // If old data was an array, reset it to object
-      const safeAllCarts = Array.isArray(allCarts) ? {} : allCarts;
-      return safeAllCarts[username] || [];
-    } catch {
-      return [];
-    }
-  });
+  const [cart, setCart] = useState([]);
+  const [isCartLoaded, setIsCartLoaded] = useState(false);
 
-  // When user changes (login / logout), load that user's cart
+  // When user changes (login / logout), load that user's cart from API
   useEffect(() => {
-    try {
-      const username = getUsername(user);
-      const allCarts = JSON.parse(localStorage.getItem('gogo_cart') || '{}');
-      const safeAllCarts = Array.isArray(allCarts) ? {} : allCarts;
-      setCart(safeAllCarts[username] || []);
-    } catch {
-      setCart([]);
+    async function fetchCart() {
+      try {
+        const username = getUsername(user);
+        const res = await fetch('http://localhost:5000/api/cart');
+        const allCarts = res.ok ? await res.json() : {};
+        const safeAllCarts = Array.isArray(allCarts) ? {} : allCarts;
+        setCart(safeAllCarts[username] || []);
+        setIsCartLoaded(true);
+      } catch (err) {
+        console.error("Failed to fetch cart:", err);
+        setCart([]);
+        setIsCartLoaded(true);
+      }
     }
+    setIsCartLoaded(false);
+    fetchCart();
   }, [user]);
 
-  // Save cart to the global gogo_cart object under current user's name
+  // Save cart to the global cart object under current user's name
   useEffect(() => {
-    try {
-      const username = getUsername(user);
-      const allCarts = JSON.parse(localStorage.getItem('gogo_cart') || '{}');
-      const safeAllCarts = Array.isArray(allCarts) ? {} : allCarts;
-      safeAllCarts[username] = cart;
-      localStorage.setItem('gogo_cart', JSON.stringify(safeAllCarts));
-    } catch (e) {
-      console.error(e);
+    if (!isCartLoaded) return;
+    async function saveCart() {
+      try {
+        const username = getUsername(user);
+        const res = await fetch('http://localhost:5000/api/cart');
+        const allCarts = res.ok ? await res.json() : {};
+        const safeAllCarts = Array.isArray(allCarts) ? {} : allCarts;
+        safeAllCarts[username] = cart;
+        await fetch('http://localhost:5000/api/cart', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(safeAllCarts)
+        });
+      } catch (e) {
+        console.error("Failed to save cart:", e);
+      }
     }
-  }, [cart, user]);
+    saveCart();
+  }, [cart, user, isCartLoaded]);
 
   const addToCart = (product, quantity = 1) => {
     if (!user) {
-      alert("กรุณาเข้าสู่ระบบก่อนทำการสั่งซื้อสินค้า (Please login to add items to your bag)");
+      showAlert("กรุณาเข้าสู่ระบบก่อนทำการสั่งซื้อสินค้า (Please login to add items to your bag)", "warning");
       setCurrentView('login');
       return;
     }
@@ -108,7 +121,7 @@ function MainPageContent() {
       }
       return [...prevCart, { ...product, quantity, cartId }];
     });
-    alert(`${product.name} has been added to your shopping bag!`);
+    showAlert(`${product.name} has been added to your shopping bag!`, "success");
   };
 
   useEffect(() => {

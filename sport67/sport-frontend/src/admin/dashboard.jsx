@@ -47,16 +47,22 @@ export default function GogoAthleticDashboard({ onViewChange, user, setUser }) {
   // Get products and orders from context and localStorage
   const { products } = useContext(ProductContext);
 
-  const ordersList = useMemo(() => {
-    return getStoredOrders();
-  }, [currentPage]); // re-evaluate when page switches to keep sync
+  const [ordersList, setOrdersList] = useState([]);
+  
+  React.useEffect(() => {
+    const loadOrders = async () => {
+      const fetchedOrders = await getStoredOrders();
+      setOrdersList(fetchedOrders || []);
+    };
+    loadOrders();
+  }, [currentPage]);
 
   // Dynamic Metrics - now using products from context
   const totalRevenue = useMemo(() => {
     return ordersList
       .filter(o => o.status !== 'Cancelled')
       .reduce((sum, o) => {
-        const val = parseFloat(o.total.replace(/,/g, '').replace(/[^\d.]/g, '')) || 0;
+        const val = parseFloat((o.total || "0").replace(/,/g, '').replace(/[^\d.]/g, '')) || 0;
         return sum + val;
       }, 0);
   }, [ordersList]);

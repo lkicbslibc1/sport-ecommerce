@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useAlert } from './contexts/AlertContext.jsx';
 
 export default function Navbar({ setCurrentView, user, setUser, cart = [] }) {
+  const { showAlert } = useAlert();
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const [searchValue, setSearchValue] = useState('');
   const [isMobileNavLowOpacity, setIsMobileNavLowOpacity] = useState(false);
@@ -12,7 +14,7 @@ export default function Navbar({ setCurrentView, user, setUser, cart = [] }) {
   const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
-    const updateNotifications = () => {
+    const updateNotifications = async () => {
       const currentUserUsername = user ? (user.username || user.name) : 'Guest';
       
       if (currentUserUsername === 'Guest') {
@@ -21,23 +23,24 @@ export default function Navbar({ setCurrentView, user, setUser, cart = [] }) {
         return;
       }
 
-      const allNotis = JSON.parse(localStorage.getItem('gogo_noti') || '{}');
-      const userNotis = allNotis[currentUserUsername] || [];
-      
-      setNotifications(userNotis);
+      try {
+        const res = await fetch('http://localhost:5000/api/noti');
+        const allNotis = res.ok ? await res.json() : {};
+        const userNotis = allNotis[currentUserUsername] || [];
+        
+        setNotifications(userNotis);
 
-      // Calculate unread count
-      const unread = userNotis.filter(n => !n.read).length;
-      setUnreadCount(unread);
+        const unread = userNotis.filter(n => !n.read).length;
+        setUnreadCount(unread);
+      } catch (err) {
+        console.error("Failed to fetch notifications:", err);
+      }
     };
 
     updateNotifications();
-
-    window.addEventListener('storage', updateNotifications);
-    const interval = setInterval(updateNotifications, 1000);
+    const interval = setInterval(updateNotifications, 5000);
 
     return () => {
-      window.removeEventListener('storage', updateNotifications);
       clearInterval(interval);
     };
   }, [user]);
@@ -122,22 +125,8 @@ export default function Navbar({ setCurrentView, user, setUser, cart = [] }) {
   };
 
   useEffect(() => {
-    // Seed base users for roles if not exist
-    const existingUsers = JSON.parse(localStorage.getItem("gogo_users") || "[]");
-    const baseUsers = [
-      { id: 1, username: 'manager', password: 'manager123', role: 'manager', isActive: true },
-      { id: 2, username: 'employee', password: 'employee123', role: 'employee', isActive: true }
-    ];
-    let updated = false;
-    baseUsers.forEach(baseUser => {
-      if (!existingUsers.some(u => u.username === baseUser.username)) {
-        existingUsers.push(baseUser);
-        updated = true;
-      }
-    });
-    if (updated) {
-      localStorage.setItem("gogo_users", JSON.stringify(existingUsers));
-    }
+    // Backend API already has the base users (manager, employee) seeded.
+    // No need to seed localStorage here anymore.
   }, []);
 
   useEffect(() => {
@@ -265,7 +254,7 @@ export default function Navbar({ setCurrentView, user, setUser, cart = [] }) {
                 </button>
 
                 {isProfileDropdownOpen && (
-                  <div className="absolute right-0 mt-6 w-48 py-2 bg-[#131313] border border-white/10 shadow-xl z-50 flex flex-col">
+                  <div className="absolute right-0 top-[45px] w-48 py-2 bg-[#131313] border border-white/10 shadow-xl z-50 flex flex-col">
                     {(user.role === 'customer' || user.role === 'user') && (
                       <button
                         onClick={() => {
@@ -280,7 +269,6 @@ export default function Navbar({ setCurrentView, user, setUser, cart = [] }) {
                     <button
                       onClick={() => {
                         setIsProfileDropdownOpen(false);
-                        localStorage.removeItem('gogo_current_user');
                         setUser(null);
                         if (setCurrentView) setCurrentView('home');
                       }}
@@ -304,20 +292,28 @@ export default function Navbar({ setCurrentView, user, setUser, cart = [] }) {
             {/* Notification Button */}
             <div className="relative flex items-center">
               <button
-                onClick={() => {
+                onClick={async () => {
                   const newState = !isNotificationOpen;
                   setIsNotificationOpen(newState);
                   if (newState) {
-                    // Mark as read when opening
                     const currentUserUsername = user ? (user.username || user.name) : 'Guest';
                     if (currentUserUsername !== 'Guest') {
-                        const allNotis = JSON.parse(localStorage.getItem('gogo_noti') || '{}');
+                      try {
+                        const res = await fetch('http://localhost:5000/api/noti');
+                        const allNotis = res.ok ? await res.json() : {};
                         if (allNotis[currentUserUsername]) {
                             allNotis[currentUserUsername] = allNotis[currentUserUsername].map(n => ({...n, read: true}));
-                            localStorage.setItem('gogo_noti', JSON.stringify(allNotis));
+                            await fetch('http://localhost:5000/api/noti', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify(allNotis)
+                            });
                         }
+                        setUnreadCount(0);
+                      } catch(err) {
+                        console.error("Failed to mark notifications as read:", err);
+                      }
                     }
-                    setUnreadCount(0);
                   }
                 }}
                 className="relative flex items-center justify-center hover:text-primary transition cursor-pointer bg-transparent border-none p-1 text-white"
@@ -332,7 +328,7 @@ export default function Navbar({ setCurrentView, user, setUser, cart = [] }) {
 
               {/* Notification Dropdown */}
               {isNotificationOpen && (
-                <div className="absolute right-0 mt-6 w-80 bg-[#131313] border border-white/10 shadow-2xl z-50">
+                <div className="absolute right-0 top-[45px] w-80 bg-[#131313] border border-white/10 shadow-2xl z-50">
                   <div className="p-4 border-b border-white/10 flex justify-between items-center bg-[#0e0e0e]">
                     <h3 className="text-[12px] font-bold uppercase tracking-widest text-white">Notifications</h3>
                     <button onClick={() => setIsNotificationOpen(false)} className="text-white/50 hover:text-white cursor-pointer bg-transparent border-none">
@@ -526,39 +522,46 @@ export default function Navbar({ setCurrentView, user, setUser, cart = [] }) {
             <h2 className="text-5xl font-anybody font-black italic uppercase tracking-tighter mb-12">Member Login</h2>
             <form
               className="space-y-6"
-              onSubmit={(e) => {
+              onSubmit={async (e) => {
                 e.preventDefault();
                 let name = "Guest User";
                 let email = "guest@gogo.com";
                 let role = selectedRole;
 
-                const existingUsers = JSON.parse(localStorage.getItem("gogo_users") || "[]");
+                try {
+                  const res = await fetch('http://localhost:5000/api/users');
+                  const existingUsers = res.ok ? await res.json() : [];
 
-                const matchedUser = existingUsers.find(
-                  u => (u.username && u.username.toLowerCase() === loginIdentifier.toLowerCase()) ||
-                       (u.email && u.email.toLowerCase() === loginIdentifier.toLowerCase())
-                );
+                  const matchedUser = existingUsers.find(
+                    u => (u.username && u.username.toLowerCase() === loginIdentifier.toLowerCase()) ||
+                         (u.email && u.email.toLowerCase() === loginIdentifier.toLowerCase())
+                  );
 
-                if (!matchedUser) {
-                  alert("User account not found! Please create an account first.");
-                  return;
-                } else if (!matchedUser.isActive) {
-                  alert("บัญชีนี้ถูกระงับ");
-                  return;
-                } else if (matchedUser.password !== loginPassword) {
-                  alert("Incorrect password! Please try again.");
-                  return;
+                  if (!matchedUser) {
+                    showAlert("User account not found! Please create an account first.", "error");
+                    return;
+                  } else if (!matchedUser.isActive) {
+                    showAlert("บัญชีนี้ถูกระงับ", "error");
+                    return;
+                  } else if (matchedUser.password !== loginPassword) {
+                    showAlert("Incorrect password! Please try again.", "error");
+                    return;
+                  }
+
+                  name = matchedUser.username;
+                  email = matchedUser.email || matchedUser.username;
+                  role = matchedUser.role;
+
+                  setUser({ username: matchedUser.username, name, email, role });
+                  
+                  if (role === 'employee' || role === 'manager') {
+                    if (setCurrentView) setCurrentView('dashboard');
+                  }
+                  closeLoginDrawer();
+                } catch (error) {
+                  console.error("Login API error:", error);
+                  showAlert("Error connecting to server. Please try again.", "error");
                 }
-
-                name = matchedUser.username;
-                email = matchedUser.email || matchedUser.username;
-                role = matchedUser.role;
-
-                setUser({ username: matchedUser.username, name, email, role });
-                if (role === 'employee' || role === 'manager') {
-                  if (setCurrentView) setCurrentView('dashboard');
-                }
-                closeLoginDrawer();
               }}
             >
 

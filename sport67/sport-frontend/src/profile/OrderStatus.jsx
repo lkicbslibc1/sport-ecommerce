@@ -1,24 +1,31 @@
 import React, { useEffect, useState } from 'react';
 import Navbar from '../navbar.jsx';
 import { ArrowLeft, Package, Truck, Receipt, Box, XCircle, Star, MessageSquare } from 'lucide-react';
-import { getStoredReviews, saveReviews, saveOrders } from '../data/products.jsx';
+import { getStoredReviews, saveReviews, saveOrders, useProducts } from '../data/products.jsx';
+import { useAlert } from '../contexts/AlertContext.jsx';
 
 export default function OrderStatus({ onViewChange, user, setUser, cart, orderId }) {
+  const { products } = useProducts();
   const [order, setOrder] = useState(null);
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
   const [reviewingItem, setReviewingItem] = useState(null);
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState('');
+  const { showAlert } = useAlert();
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    try {
-      const orders = JSON.parse(localStorage.getItem('gogo_orders')) || [];
-      const foundOrder = orderId ? orders.find(o => o.id === orderId) : orders[0];
-      setOrder(foundOrder || null);
-    } catch (e) {
-      console.error(e);
+    async function loadOrder() {
+      try {
+        const res = await fetch('http://localhost:5000/api/orders');
+        const orders = res.ok ? await res.json() : [];
+        const foundOrder = orderId ? orders.find(o => o.id === orderId) : orders[0];
+        setOrder(foundOrder || null);
+      } catch (e) {
+        console.error("Failed to load order", e);
+      }
     }
+    loadOrder();
   }, [orderId]);
 
   if (!order) {
@@ -30,36 +37,40 @@ export default function OrderStatus({ onViewChange, user, setUser, cart, orderId
     );
   }
 
-  const status = order.status || 'Pending';
+  const status = order.status || 'Preparing';
   const isCancelled = status === 'Cancelled';
   
-  const isPendingActive = !isCancelled;
-  const isPreparingActive = status === 'Preparing' || status === 'Shipped' || status === 'Delivered';
+  const isPreparingActive = !isCancelled;
   const isShippedActive = status === 'Shipped' || status === 'Delivered';
   const isDeliveredActive = status === 'Delivered';
 
   let progressWidth = '0%';
   if (isDeliveredActive) progressWidth = '100%';
-  else if (isShippedActive) progressWidth = '66%';
-  else if (isPreparingActive) progressWidth = '33%';
+  else if (isShippedActive) progressWidth = '50%';
+  else if (isPreparingActive) progressWidth = '0%';
 
-  const handleReviewSubmit = () => {
+  const handleReviewSubmit = async () => {
     if (!reviewingItem) return;
 
-    const allReviews = getStoredReviews();
+    const allReviews = await getStoredReviews() || {};
     let productId = reviewingItem.id;
     
     // Fallback if id is missing in order item (older orders)
     if (!productId) {
-      const allProducts = JSON.parse(localStorage.getItem('gogo_products') || '[]');
-      const matchedProduct = allProducts.find(p => p.name === reviewingItem.name);
-      if (matchedProduct) {
-        productId = matchedProduct.id;
+      try {
+        const res = await fetch('http://localhost:5000/api/products');
+        const allProducts = res.ok ? await res.json() : [];
+        const matchedProduct = allProducts.find(p => p.name === reviewingItem.name);
+        if (matchedProduct) {
+          productId = matchedProduct.id;
+        }
+      } catch (err) {
+        console.error(err);
       }
     }
 
     if (!productId) {
-      alert("Could not find product ID for review.");
+      showAlert("Could not find product ID for review.", "error");
       return;
     }
     
@@ -79,7 +90,8 @@ export default function OrderStatus({ onViewChange, user, setUser, cart, orderId
 
     // Update order item to mark as reviewed
     try {
-      const orders = JSON.parse(localStorage.getItem('gogo_orders')) || [];
+      const res = await fetch('http://localhost:5000/api/orders');
+      const orders = res.ok ? await res.json() : [];
       const updatedOrders = orders.map(o => {
         if (o.id === order.id) {
           const updatedItems = o.items.map((item, index) => {
@@ -92,7 +104,7 @@ export default function OrderStatus({ onViewChange, user, setUser, cart, orderId
         }
         return o;
       });
-      saveOrders(updatedOrders);
+      await saveOrders(updatedOrders);
       
       // Update local state
       const updatedOrder = updatedOrders.find(o => o.id === order.id);
@@ -176,20 +188,8 @@ export default function OrderStatus({ onViewChange, user, setUser, cart, orderId
                 </div>
 
                 <div className="flex flex-col md:flex-row justify-between relative gap-12 md:gap-0 z-10 px-4 md:px-0">
-                  {/* Step 1: Paid/Pending */}
-                  <div className="flex flex-col items-center gap-4">
-                    <div className={`w-16 h-16 rounded-full flex items-center justify-center border-4 ${isPendingActive ? 'bg-primary border-background shadow-[0_0_20px_rgba(255,87,25,0.3)] text-white' : 'bg-surface-container-high border-background text-white/40'}`}>
-                      <Receipt size={28} />
-                    </div>
-                    <div className={`text-center ${!isPendingActive && 'opacity-40'}`}>
-                      <h4 className={`font-black italic uppercase text-sm md:text-lg ${isPendingActive && 'text-primary'}`}>ชำระเงินแล้ว</h4>
-                      <p className="text-[10px] text-on-surface-variant uppercase tracking-widest">Pending</p>
-                    </div>
-                  </div>
-
-                  {/* Step 2: Preparing */}
+                  {/* Step 1: Preparing */}
                   <div className="flex flex-col items-center gap-4 relative">
-                    <div className={`absolute -left-1/2 right-1/2 top-8 h-1 ${isPreparingActive ? 'bg-primary' : 'bg-white/10'} -translate-y-1/2 md:hidden`}></div>
                     <div className={`w-16 h-16 rounded-full flex items-center justify-center border-4 ${isPreparingActive ? 'bg-primary border-background shadow-[0_0_20px_rgba(255,87,25,0.3)] text-white' : 'bg-surface-container-high border-background text-white/40'}`}>
                       <Box size={28} />
                     </div>
@@ -231,12 +231,13 @@ export default function OrderStatus({ onViewChange, user, setUser, cart, orderId
             <h4 className="font-black uppercase tracking-widest text-sm mb-6 border-b border-white/10 pb-4">รายการสินค้า (Items)</h4>
             <div className="space-y-6">
               {order.items && order.items.map((item, idx) => {
-                const allProducts = JSON.parse(localStorage.getItem('gogo_products') || '[]');
-                const fullProduct = allProducts.find(p => p.id === item.id || p.name === item.name) || item;
-                const currentColor = item.color || fullProduct.color;
-                const currentImage = (fullProduct.colorImages && currentColor && fullProduct.colorImages[currentColor]) 
-                    ? fullProduct.colorImages[currentColor] 
-                    : item.image || fullProduct.image;
+                const matchedProduct = products.find(p => p.id === item.id);
+                const currentColor = item.color;
+                let currentImage = item.image;
+
+                if (matchedProduct && matchedProduct.colorImages && matchedProduct.colorImages[currentColor]) {
+                  currentImage = matchedProduct.colorImages[currentColor];
+                }
 
                 return (
                 <div key={idx} className="flex items-center gap-6">

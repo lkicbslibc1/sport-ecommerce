@@ -17,6 +17,7 @@ import {
     ChevronDown
 } from "lucide-react";
 import { ProductContext } from "../data/products.jsx";
+import { useAlert } from "../contexts/AlertContext.jsx";
 
 const STATUS_STYLES = {
     Published: "bg-green-500/10 text-green-400 border border-green-500/20",
@@ -102,6 +103,7 @@ const COLOR_NAMES = [
 ];
 
 export default function GogoAthleticProducts({ onNavigate, onViewChange, user, setUser }) {
+    const { showAlert } = useAlert();
     const { products, addProduct, updateProduct, deleteProduct } = useContext(ProductContext);
     const [searchFocused, setSearchFocused] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
@@ -190,7 +192,7 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange, user, s
         if (!selectedItem) return;
         const qtyNum = parseInt(newQty);
         if (isNaN(qtyNum) || qtyNum < 0) {
-            alert("Please enter a valid stock quantity.");
+            showAlert("Please enter a valid stock quantity.", "warning");
             return;
         }
 
@@ -229,7 +231,7 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange, user, s
     const handleFormSubmit = (e) => {
         e.preventDefault();
         if (!formFields.image) {
-            alert("Please upload an image file or enter an image URL.");
+            showAlert("Please upload an image file or enter an image URL.", "warning");
             return;
         }
         const priceNum = parseFloat(formFields.price) || 0;

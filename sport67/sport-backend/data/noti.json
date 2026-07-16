@@ -1,0 +1,32 @@
+{
+  "mook3": [
+    {
+      "id": "#GOGO-411992",
+      "date": "JUL 17, 2026",
+      "title": "Order status updated",
+      "status": "Delivered",
+      "read": false
+    },
+    {
+      "id": "#GOGO-411992",
+      "date": "JUL 17, 2026",
+      "title": "Order status updated",
+      "status": "Shipped",
+      "read": true
+    },
+    {
+      "id": "#GOGO-411992",
+      "date": "JUL 17, 2026",
+      "title": "Purchase successful!",
+      "status": "Preparing",
+      "read": true
+    },
+    {
+      "id": "#GOGO-453449",
+      "date": "JUL 17, 2026",
+      "title": "Purchase successful!",
+      "status": "Preparing",
+      "read": true
+    }
+  ]
+}

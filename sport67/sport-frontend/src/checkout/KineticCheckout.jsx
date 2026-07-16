@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { ShoppingBag, User, CreditCard, Wallet, ShieldCheck, CheckCircle2 } from "lucide-react";
 import Navbar from "../navbar.jsx";
 import { useProducts } from "../data/products.jsx";
+import { useAlert } from "../contexts/AlertContext.jsx";
 
 const C = {
     bg: "#050505",
@@ -77,6 +78,7 @@ function InputField({ label, placeholder, span, type = "text", value, onChange, 
 }
 
 export default function KineticCheckout({ onViewChange, cart = [], setCart, user, setUser }) {
+    const { showAlert } = useAlert();
     useEffect(() => {
         window.scrollTo(0, 0);
     }, []);
@@ -98,54 +100,72 @@ export default function KineticCheckout({ onViewChange, cart = [], setCart, user
         firstName: '', lastName: '', phone: '', streetAddress: '', city: '', zipCode: '', isDefault: false
     });
 
-    const handleSaveAddress = (e) => {
+    const handleSaveAddress = async (e) => {
         e.preventDefault();
-        const allAddresses = JSON.parse(localStorage.getItem('gogo_addresses') || '{}');
-        let userAddrs = allAddresses[currentUserUsername] || [];
+        try {
+            const res = await fetch('http://localhost:5000/api/addresses');
+            const allAddresses = res.ok ? await res.json() : {};
+            let userAddrs = allAddresses[currentUserUsername] || [];
 
-        let newAddr = { ...addressForm, id: Date.now().toString() };
-        if (newAddr.isDefault || userAddrs.length === 0) {
-            newAddr.isDefault = true;
-            userAddrs = userAddrs.map(a => ({ ...a, isDefault: false }));
+            let newAddr = { ...addressForm, id: Date.now().toString() };
+            if (newAddr.isDefault || userAddrs.length === 0) {
+                newAddr.isDefault = true;
+                userAddrs = userAddrs.map(a => ({ ...a, isDefault: false }));
+            }
+
+            userAddrs.push(newAddr);
+            allAddresses[currentUserUsername] = userAddrs;
+            
+            await fetch('http://localhost:5000/api/addresses', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(allAddresses)
+            });
+
+            setAddresses(userAddrs);
+            setShowAddNewAddressModal(false);
+            setSelectedAddress(newAddr);
+            setFormData(prev => ({
+                ...prev,
+                firstName: newAddr.firstName,
+                lastName: newAddr.lastName,
+                address: newAddr.streetAddress,
+                city: newAddr.city,
+                zipCode: newAddr.zipCode
+            }));
+            setAddressForm({ firstName: '', lastName: '', phone: '', streetAddress: '', city: '', zipCode: '', isDefault: false });
+        } catch (error) {
+            console.error("Failed to save address:", error);
         }
-
-        userAddrs.push(newAddr);
-        allAddresses[currentUserUsername] = userAddrs;
-        localStorage.setItem('gogo_addresses', JSON.stringify(allAddresses));
-
-        setAddresses(userAddrs);
-        setShowAddNewAddressModal(false);
-        setSelectedAddress(newAddr);
-        setFormData(prev => ({
-            ...prev,
-            firstName: newAddr.firstName,
-            lastName: newAddr.lastName,
-            address: newAddr.streetAddress,
-            city: newAddr.city,
-            zipCode: newAddr.zipCode
-        }));
-        setAddressForm({ firstName: '', lastName: '', phone: '', streetAddress: '', city: '', zipCode: '', isDefault: false });
     };
 
     useEffect(() => {
-        if (currentUserUsername !== 'Guest') {
-            const allAddresses = JSON.parse(localStorage.getItem('gogo_addresses') || '{}');
-            const userAddrs = allAddresses[currentUserUsername] || [];
-            setAddresses(userAddrs);
+        async function fetchAddresses() {
+            if (currentUserUsername !== 'Guest') {
+                try {
+                    const res = await fetch('http://localhost:5000/api/addresses');
+                    const allAddresses = res.ok ? await res.json() : {};
+                    const userAddrs = allAddresses[currentUserUsername] || [];
+                    setAddresses(userAddrs);
 
-            const defaultAddr = userAddrs.find(a => a.isDefault) || userAddrs[0];
-            if (defaultAddr) {
-                setSelectedAddress(defaultAddr);
-                setFormData(prev => ({
-                    ...prev,
-                    firstName: defaultAddr.firstName,
-                    lastName: defaultAddr.lastName,
-                    address: defaultAddr.streetAddress,
-                    city: defaultAddr.city,
-                    zipCode: defaultAddr.zipCode
-                }));
+                    const defaultAddr = userAddrs.find(a => a.isDefault) || userAddrs[0];
+                    if (defaultAddr) {
+                        setSelectedAddress(defaultAddr);
+                        setFormData(prev => ({
+                            ...prev,
+                            firstName: defaultAddr.firstName,
+                            lastName: defaultAddr.lastName,
+                            address: defaultAddr.streetAddress,
+                            city: defaultAddr.city,
+                            zipCode: defaultAddr.zipCode
+                        }));
+                    }
+                } catch (error) {
+                    console.error("Failed to fetch addresses:", error);
+                }
             }
         }
+        fetchAddresses();
     }, [currentUserUsername]);
 
     const [formData, setFormData] = useState({
@@ -188,21 +208,21 @@ export default function KineticCheckout({ onViewChange, cart = [], setCart, user
     const tax = subtotal * 0.07;
     const total = subtotal + shippingCost + tax;
 
-    const handlePlaceOrder = (e) => {
+    const handlePlaceOrder = async (e) => {
         e.preventDefault();
 
         if (!selectedAddress) {
-            alert("กรุณาระบุที่อยู่สำหรับจัดส่งสินค้าก่อนทำการสั่งซื้อ");
+            showAlert("กรุณาระบุที่อยู่สำหรับจัดส่งสินค้าก่อนทำการสั่งซื้อ", "warning");
             return;
         }
 
         if (payMethod === "card") {
             if (formData.cardNumber.length < 19) {
-                alert("กรุณากรอกหมายเลขบัตรเครดิตให้ครบ 16 หลัก");
+                showAlert("กรุณากรอกหมายเลขบัตรเครดิตให้ครบ 16 หลัก", "warning");
                 return;
             }
             if (formData.expiry.length < 5) {
-                alert("กรุณากรอกวันหมดอายุบัตรให้ครบ (MM/YY)");
+                showAlert("กรุณากรอกวันหมดอายุบัตรให้ครบ (MM/YY)", "warning");
                 return;
             } else {
                 const [monthStr, yearStr] = formData.expiry.split('/');
@@ -214,69 +234,78 @@ export default function KineticCheckout({ onViewChange, cart = [], setCart, user
                 const currentMonth = now.getMonth() + 1;
                 
                 if (year < currentYear || (year === currentYear && month < currentMonth)) {
-                    alert("บัตรเครดิตนี้หมดอายุแล้ว ไม่สามารถใช้ทำรายการได้");
+                    showAlert("บัตรเครดิตนี้หมดอายุแล้ว ไม่สามารถใช้ทำรายการได้", "error");
                     return;
                 }
             }
             if (formData.cvv.length < 3) {
-                alert("กรุณากรอกรหัส CVC ให้ครบ 3 หลัก");
+                showAlert("กรุณากรอกรหัส CVC ให้ครบ 3 หลัก", "warning");
                 return;
             }
         }
 
         setIsSubmitting(true);
 
-        setTimeout(() => {
+        try {
             const randomId = "GOGO-" + Math.floor(100000 + Math.random() * 900000);
 
             // Construct and save order
-            try {
-                const existingOrders = JSON.parse(localStorage.getItem('gogo_orders') || '[]');
-                const currentUsername = user ? (user.username || user.name) : 'Guest';
-                const newOrder = {
-                    id: "#" + randomId,
-                    username: currentUsername,
-                    customer: `${selectedAddress.firstName} ${selectedAddress.lastName}`.trim(),
-                    shippingAddress: selectedAddress,
-                    date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).toUpperCase(),
-                    total: total.toLocaleString("th-TH") + " ฿",
-                    status: "Pending",
-                    items: cart.map(i => ({
-                        id: i.id,
-                        color: i.selectedColor,
-                        size: i.selectedSize,
-                        name: i.name,
-                        sku: i.sku || `GA-${i.brand.slice(0, 2).toUpperCase()}-${i.id}`,
-                        qty: i.quantity,
-                        price: i.price.toLocaleString("th-TH") + " ฿",
-                        image: i.image
-                    })),
-                    actions: ["Update Status", "Mark Shipped", "Mark Preparing", "Cancel Order"]
-                };
-                localStorage.setItem('gogo_orders', JSON.stringify([newOrder, ...existingOrders]));
+            const ordRes = await fetch('http://localhost:5000/api/orders');
+            const existingOrders = ordRes.ok ? await ordRes.json() : [];
+            const currentUsername = user ? (user.username || user.name) : 'Guest';
+            
+            const newOrder = {
+                id: "#" + randomId,
+                username: currentUsername,
+                customer: `${selectedAddress.firstName} ${selectedAddress.lastName}`.trim(),
+                shippingAddress: selectedAddress,
+                date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).toUpperCase(),
+                total: total.toLocaleString("th-TH") + " ฿",
+                status: "Preparing",
+                items: cart.map(i => ({
+                    id: i.id,
+                    color: i.selectedColor,
+                    size: i.selectedSize,
+                    name: i.name,
+                    sku: i.sku || `GA-${i.brand.slice(0, 2).toUpperCase()}-${i.id}`,
+                    qty: i.quantity,
+                    price: i.price.toLocaleString("th-TH") + " ฿",
+                    image: i.image
+                })),
+                actions: ["Update Status", "Mark Shipped", "Mark Preparing", "Cancel Order"]
+            };
+            
+            await fetch('http://localhost:5000/api/orders', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify([newOrder, ...existingOrders])
+            });
 
-                if (currentUsername !== 'Guest') {
-                    const allNotis = JSON.parse(localStorage.getItem('gogo_noti') || '{}');
-                    const userNotis = allNotis[currentUsername] || [];
-                    const newNoti = {
-                        id: newOrder.id,
-                        date: newOrder.date,
-                        title: "Purchase successful!",
-                        status: newOrder.status,
-                        read: false
-                    };
-                    allNotis[currentUsername] = [newNoti, ...userNotis];
-                    localStorage.setItem('gogo_noti', JSON.stringify(allNotis));
-                }
-            } catch (err) {
-                console.error("Failed to save order to localStorage", err);
+            if (currentUsername !== 'Guest') {
+                const notiRes = await fetch('http://localhost:5000/api/noti');
+                const allNotis = notiRes.ok ? await notiRes.json() : {};
+                const userNotis = allNotis[currentUsername] || [];
+                const newNoti = {
+                    id: newOrder.id,
+                    date: newOrder.date,
+                    title: "Purchase successful!",
+                    status: newOrder.status,
+                    read: false
+                };
+                allNotis[currentUsername] = [newNoti, ...userNotis];
+                
+                await fetch('http://localhost:5000/api/noti', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(allNotis)
+                });
             }
 
             setOrderId(randomId);
             setIsSubmitting(false);
             setIsSubmitted(true);
 
-            // Decrease product amount in local storage
+            // Decrease product amount in local storage -> now managed via context
             cart.forEach(item => {
                 const productInStore = products.find(p => p.id === item.id);
                 if (productInStore) {
@@ -285,7 +314,11 @@ export default function KineticCheckout({ onViewChange, cart = [], setCart, user
             });
 
             setCart([]); // Clear cart
-        }, 1500);
+        } catch (err) {
+            console.error("Failed to save order to API", err);
+            setIsSubmitting(false);
+            showAlert("Error placing order. Please try again.", "error");
+        }
     };
 
     if (isSubmitted) {

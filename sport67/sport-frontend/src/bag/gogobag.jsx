@@ -9,6 +9,7 @@ import {
     ShieldCheck,
 } from "lucide-react";
 import Navbar from "../navbar.jsx";
+import { useAlert } from "../contexts/AlertContext.jsx";
 
 const C = {
     bg: "#050505",
@@ -201,6 +202,7 @@ function BagItem({ item, updateQuantity, removeItem, updateItemAttribute, onView
 }
 
 export default function GoGoBag({ onViewChange, cart = [], setCart, user, setUser, setSelectedProduct }) {
+    const { showAlert } = useAlert();
     useEffect(() => {
         window.scrollTo(0, 0);
     }, []);
@@ -316,7 +318,7 @@ export default function GoGoBag({ onViewChange, cart = [], setCart, user, setUse
                                     <button
                                         onClick={() => {
                                             if (!user) {
-                                                alert("กรุณาเข้าสู่ระบบก่อนทำการสั่งซื้อสินค้า (Please login before checking out)");
+                                                showAlert("กรุณาเข้าสู่ระบบก่อนทำการสั่งซื้อสินค้า (Please login before checking out)", "warning");
                                                 onViewChange('login');
                                             } else {
                                                 onViewChange('checkout');
