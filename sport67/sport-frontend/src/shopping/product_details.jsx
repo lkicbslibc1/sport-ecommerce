@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '../navbar.jsx';
+import { getStoredReviews } from '../data/products.jsx';
+import { Star, UserCircle } from 'lucide-react';
 
 function formatPrice(n) {
   return n.toLocaleString("th-TH", { minimumFractionDigits: 2 }) + " ฿";
@@ -16,6 +18,19 @@ export default function ProductDetails({ onViewChange, product, user, setUser, c
   const [showLoginPopup, setShowLoginPopup] = useState(false);
 
   if (!product) return null;
+
+  const productReviews = getStoredReviews()[product.id] || [];
+  
+  let averageRating;
+  let reviewCountText;
+  if (productReviews.length > 0) {
+    const totalUserRating = productReviews.reduce((sum, r) => sum + r.rating, 0);
+    averageRating = (totalUserRating / productReviews.length).toFixed(1);
+    reviewCountText = `${productReviews.length} Review${productReviews.length > 1 ? 's' : ''}`;
+  } else {
+    averageRating = "0.0";
+    reviewCountText = "0 Reviews";
+  }
 
   const currentImage = product.colorImages && product.colorImages[selectedColor]
     ? product.colorImages[selectedColor]
@@ -69,9 +84,14 @@ export default function ProductDetails({ onViewChange, product, user, setUser, c
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-display-lg font-black italic uppercase tracking-tighter text-on-background mb-4 leading-tight">
                 {product.name}
               </h1>
-              <p className="text-lg md:text-xl text-on-surface-variant font-light mb-6 tracking-wide">{product.series}</p>
+              <p className="text-lg md:text-xl text-on-surface-variant font-light mb-4 tracking-wide">{product.series}</p>
+              <div className="flex items-center gap-2 mb-6 text-sm">
+                <Star size={16} className="fill-primary text-primary" />
+                <span className="font-bold">{averageRating}</span>
+                <span className="text-on-surface-variant">({reviewCountText})</span>
+              </div>
               <div className="flex items-end gap-6">
-                <p className="text-3xl font-anybody font-black italic text-primary">{formatPrice(product.price)}</p>
+                <p className="text-3xl font-anybody font-black italic text-primary">{formatPrice(product.price * quantity)}</p>
                 <p className="text-sm text-on-surface-variant uppercase tracking-widest font-bold mb-1">
                   {product.amount > 0 ? `${product.amount} items in stock` : <span className="text-[#ffb4ab]">Out of Stock</span>}
                 </p>
@@ -132,12 +152,28 @@ export default function ProductDetails({ onViewChange, product, user, setUser, c
                  >
                    -
                  </button>
-                 <div className="w-16 h-12 flex items-center justify-center font-bold text-lg border-x border-white/20">
-                   {quantity}
-                 </div>
+                 <input 
+                   type="text"
+                   value={quantity}
+                   onChange={(e) => {
+                     let val = e.target.value.replace(/\D/g, '');
+                     if (val !== '') {
+                       let num = parseInt(val, 10);
+                       if (num > product.amount) num = product.amount;
+                       setQuantity(num);
+                     } else {
+                       setQuantity('');
+                     }
+                   }}
+                   onBlur={() => {
+                     if (quantity === '' || quantity < 1) setQuantity(1);
+                   }}
+                   className="w-16 h-12 text-center font-bold text-lg border-x border-white/20 bg-transparent outline-none focus:bg-white/5 transition-colors"
+                 />
                  <button 
-                   onClick={() => setQuantity(quantity + 1)}
-                   className="w-12 h-12 flex items-center justify-center hover:bg-white/5 transition-colors text-xl"
+                   onClick={() => setQuantity(Math.min(product.amount, quantity + 1))}
+                   disabled={quantity >= product.amount}
+                   className={`w-12 h-12 flex items-center justify-center transition-colors text-xl ${quantity >= product.amount ? 'opacity-30 cursor-not-allowed' : 'hover:bg-white/5'}`}
                  >
                    +
                  </button>
@@ -170,6 +206,45 @@ export default function ProductDetails({ onViewChange, product, user, setUser, c
                 {product.sku && <li><strong className="text-on-background font-medium mr-2">SKU:</strong> {product.sku}</li>}
               </ul>
             </div>
+            
+            {/* User Reviews Section */}
+            <div className="mt-12 border-t border-white/10 pt-8">
+              <h3 className="font-anybody font-black text-sm uppercase tracking-widest text-on-background mb-6 flex items-center gap-2">
+                <Star size={18} />
+                Customer Reviews
+              </h3>
+              
+              <div className="space-y-6">
+                {productReviews.length === 0 ? (
+                  <p className="text-sm text-on-surface-variant italic">No user reviews yet. Buy this product to be the first to review!</p>
+                ) : (
+                  productReviews.map((rev, idx) => (
+                    <div key={idx} className="bg-white/5 p-6 border border-white/10 flex flex-col gap-3">
+                      <div className="flex justify-between items-start">
+                        <div className="flex items-center gap-3">
+                          <UserCircle size={24} className="text-on-surface-variant" />
+                          <div>
+                            <p className="font-bold text-sm uppercase">{rev.user}</p>
+                            <p className="text-[10px] text-on-surface-variant">{rev.date}</p>
+                          </div>
+                        </div>
+                        <div className="flex gap-1">
+                          {[1, 2, 3, 4, 5].map(star => (
+                            <Star 
+                              key={star} 
+                              size={14} 
+                              className={star <= rev.rating ? "fill-primary text-primary" : "text-white/20"} 
+                            />
+                          ))}
+                        </div>
+                      </div>
+                      <p className="text-sm text-white/80 leading-relaxed mt-2">{rev.comment}</p>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
           </div>
         </div>
       </main>

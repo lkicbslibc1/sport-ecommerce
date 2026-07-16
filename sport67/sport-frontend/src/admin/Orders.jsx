@@ -21,11 +21,6 @@ const STATUS_STYLES = {
   Cancelled: "bg-red-500/10 text-red-400 border border-red-500/20"
 };
 
-const TIER_STYLES = {
-  ELITE: "text-orange-400 border border-orange-400",
-  PRO: "text-indigo-300 border border-indigo-300",
-  MEMBER: "text-neutral-400 border border-neutral-600",
-};
 
 function GlassPanel({ className = "", children }) {
   return (
@@ -104,17 +99,17 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange, user, set
     saveOrders(updated);
 
     if (orderUsername && orderUsername !== 'Guest') {
-        const allNotis = JSON.parse(localStorage.getItem('gogo_noti') || '{}');
-        const userNotis = allNotis[orderUsername] || [];
-        const newNoti = {
-            id: orderId,
-            date: orderDate,
-            title: "Order status updated",
-            status: newStatus,
-            read: false
-        };
-        allNotis[orderUsername] = [newNoti, ...userNotis];
-        localStorage.setItem('gogo_noti', JSON.stringify(allNotis));
+      const allNotis = JSON.parse(localStorage.getItem('gogo_noti') || '{}');
+      const userNotis = allNotis[orderUsername] || [];
+      const newNoti = {
+        id: orderId,
+        date: orderDate,
+        title: "Order status updated",
+        status: newStatus,
+        read: false
+      };
+      allNotis[orderUsername] = [newNoti, ...userNotis];
+      localStorage.setItem('gogo_noti', JSON.stringify(allNotis));
     }
   };
 
@@ -137,7 +132,7 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange, user, set
   };
 
   const handleSelectOrder = (id) => {
-    setSelectedOrderIds(prev => 
+    setSelectedOrderIds(prev =>
       prev.includes(id) ? prev.filter(orderId => orderId !== id) : [...prev, id]
     );
   };
@@ -149,16 +144,16 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange, user, set
     const updated = ordersList.map(o => {
       if (selectedOrderIds.includes(o.id)) {
         if (o.username && o.username !== 'Guest') {
-            const userNotis = allNotis[o.username] || [];
-            const newNoti = {
-                id: o.id,
-                date: o.date,
-                title: "Order status updated",
-                status: bulkStatus,
-                read: false
-            };
-            allNotis[o.username] = [newNoti, ...userNotis];
-            hasNotisChanged = true;
+          const userNotis = allNotis[o.username] || [];
+          const newNoti = {
+            id: o.id,
+            date: o.date,
+            title: "Order status updated",
+            status: bulkStatus,
+            read: false
+          };
+          allNotis[o.username] = [newNoti, ...userNotis];
+          hasNotisChanged = true;
         }
         return { ...o, status: bulkStatus };
       }
@@ -169,7 +164,7 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange, user, set
     setSelectedOrderIds([]);
 
     if (hasNotisChanged) {
-        localStorage.setItem('gogo_noti', JSON.stringify(allNotis));
+      localStorage.setItem('gogo_noti', JSON.stringify(allNotis));
     }
   };
 
@@ -309,8 +304,8 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange, user, set
                 <thead className="bg-neutral-900 border-b border-white/10">
                   <tr>
                     <th className="p-6 w-12">
-                      <input 
-                        type="checkbox" 
+                      <input
+                        type="checkbox"
                         checked={filteredOrders.length > 0 && selectedOrderIds.length === filteredOrders.length}
                         onChange={handleSelectAll}
                         className="w-4 h-4 accent-orange-500 cursor-pointer"
@@ -338,8 +333,8 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange, user, set
                       className={`hover:bg-orange-600/5 hover:border-l-2 hover:border-orange-400 transition-colors ${selectedOrderIds.includes(order.id) ? 'bg-orange-600/10 border-l-2 border-orange-400' : ''}`}
                     >
                       <td className="p-6">
-                        <input 
-                          type="checkbox" 
+                        <input
+                          type="checkbox"
                           checked={selectedOrderIds.includes(order.id)}
                           onChange={() => handleSelectOrder(order.id)}
                           className="w-4 h-4 accent-orange-500 cursor-pointer"
@@ -356,14 +351,7 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange, user, set
                           <span className="font-bold uppercase tracking-tight text-sm">
                             {order.customer}
                           </span>
-                          <span
-                            className={
-                              "px-2 py-0.5 text-[8px] font-black uppercase tracking-tighter " +
-                              TIER_STYLES[order.tier || "MEMBER"]
-                            }
-                          >
-                            {order.tier || "MEMBER"}
-                          </span>
+
                         </div>
                       </td>
                       <td className="p-6 text-neutral-400 text-xs">{order.date}</td>
@@ -452,6 +440,23 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange, user, set
             </div>
 
             <div className="flex-1 overflow-y-auto p-8 space-y-8">
+              {/* Shipping Address */}
+              {selectedOrder.shippingAddress && (
+                <section>
+                  <h4 className="text-[10px] uppercase tracking-[0.2em] mb-4 text-orange-300">
+                    Shipping Address
+                  </h4>
+                  <div className="p-4 bg-neutral-950 border border-white/10">
+                    <p className="font-bold text-sm text-neutral-100">{selectedOrder.shippingAddress.firstName} {selectedOrder.shippingAddress.lastName}</p>
+                    <p className="text-xs text-neutral-400 mt-2 leading-relaxed">
+                      {selectedOrder.shippingAddress.streetAddress}<br />
+                      {selectedOrder.shippingAddress.city}, {selectedOrder.shippingAddress.zipCode}<br />
+                      Phone: {selectedOrder.shippingAddress.phone}
+                    </p>
+                  </div>
+                </section>
+              )}
+
               {/* Items */}
               <section>
                 <h4 className="text-[10px] uppercase tracking-[0.2em] mb-4">

@@ -21,7 +21,7 @@ const SPORTS = ["Running", "Football", "Swimming"];
 const CLOTHES_TYPES = ["top", "bottom", "shoes", "hat", "sock"];
 const PRODUCT_TYPES = ["clothes", "equipment"];
 
-import { useProducts } from '../data/products.jsx';
+import { useProducts, getStoredReviews } from '../data/products.jsx';
 
 function formatPrice(n) {
   return n.toLocaleString("th-TH", { minimumFractionDigits: 2 }) + " ฿";
@@ -57,7 +57,19 @@ function FilterDropdown({ name, label, openFilter, setOpenFilter, activeCount, c
 
 export default function AllProducts({ onViewChange, setSelectedProduct, user, setUser, cart, addToCart, initialCategory, initialSubCategory }) {
   const { products } = useProducts();
-  useEffect(() => { window.scrollTo(0, 0); }, [initialCategory]);
+  const [reviews, setReviews] = useState({});
+
+  useEffect(() => {
+    setReviews(getStoredReviews());
+    window.scrollTo(0, 0);
+  }, [initialCategory]);
+
+  const getProductRating = (productId) => {
+    const productReviews = reviews[productId];
+    if (!productReviews || productReviews.length === 0) return { avg: 0, count: 0 };
+    const avg = productReviews.reduce((sum, r) => sum + r.rating, 0) / productReviews.length;
+    return { avg, count: productReviews.length };
+  };
 
   const [openFilter, setOpenFilter] = useState(null);
   const [priceRange, setPriceRange] = useState(5000);
@@ -368,7 +380,14 @@ export default function AllProducts({ onViewChange, setSelectedProduct, user, se
                   ))}
                 </div>
                 <h3 className="font-bold text-xs uppercase tracking-widest text-on-background mb-1">{product.name}</h3>
-                <p className="font-body-md text-on-surface-variant text-sm mb-4 font-light">{product.series}</p>
+                <p className="font-body-md text-on-surface-variant text-sm mb-2 font-light">{product.series}</p>
+                
+                <div className="flex items-center gap-1 mb-4">
+                  <span className="material-symbols-outlined text-[14px] text-orange-400" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+                  <span className="text-xs font-bold text-on-background">{getProductRating(product.id).avg.toFixed(1)}</span>
+                  <span className="text-[10px] text-on-surface-variant ml-1">({getProductRating(product.id).count})</span>
+                </div>
+
                 <div className="mt-auto flex justify-between items-end">
                   <p className="font-anybody font-black italic text-primary text-lg mb-4">{formatPrice(product.price)}</p>
                   <p className="text-[10px] text-on-surface-variant uppercase tracking-widest font-bold mb-4">

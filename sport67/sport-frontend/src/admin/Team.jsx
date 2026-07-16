@@ -60,7 +60,7 @@ export default function GogoAthleticTeam({ onNavigate, onViewChange, user, setUs
   const [searchFocused, setSearchFocused] = useState(false);
   const itemsPerPage = 10;
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newMember, setNewMember] = useState({ username: "", email: "", role: "employee", status: "Active" });
+  const [newMember, setNewMember] = useState({ username: "", email: "", password: "", role: "employee", status: "Active" });
   const [orders, setOrders] = useState([]);
   const [selectedCustomerOrders, setSelectedCustomerOrders] = useState(null);
 
@@ -99,7 +99,7 @@ export default function GogoAthleticTeam({ onNavigate, onViewChange, user, setUs
       id: Date.now(),
       username: newMember.username,
       email: newMember.email || newMember.username,
-      password: "password123", // default password
+      password: newMember.password || "password123",
       role: newMember.role,
       isActive: newMember.status !== "Banned",
       joined: date,
@@ -109,7 +109,7 @@ export default function GogoAthleticTeam({ onNavigate, onViewChange, user, setUs
     setUsers(updatedUsers);
     localStorage.setItem("gogo_users", JSON.stringify(updatedUsers));
 
-    setNewMember({ username: "", email: "", role: "employee", status: "Active" });
+    setNewMember({ username: "", email: "", password: "", role: "employee", status: "Active" });
     setIsModalOpen(false);
   };
 
@@ -269,6 +269,15 @@ export default function GogoAthleticTeam({ onNavigate, onViewChange, user, setUs
             </div>
             <div className="flex flex-col sm:flex-row gap-6 items-start sm:items-center w-full sm:w-auto mt-4 sm:mt-0">
               <div className="flex flex-wrap items-center gap-4 w-full sm:w-auto">
+                {isManagerOrAdmin && (
+                  <button
+                    onClick={() => setIsModalOpen(true)}
+                    className="bg-orange-600 text-white px-4 py-1.5 text-xs uppercase tracking-widest font-black hover:bg-orange-700 transition-colors flex items-center gap-2 h-full"
+                  >
+                    <Plus size={14} />
+                    Add Staff
+                  </button>
+                )}
                 <div className="flex border border-white/10 p-1 bg-neutral-900/50">
                   <button
                     onClick={() => setActiveTab("staff")}
@@ -498,34 +507,31 @@ export default function GogoAthleticTeam({ onNavigate, onViewChange, user, setUs
                   className="w-full bg-neutral-900 border border-white/10 text-neutral-100 text-sm px-4 py-3 focus:ring-1 focus:ring-orange-300"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-[10px] uppercase tracking-wider text-neutral-400 mb-2 font-bold">
-                    Role
-                  </label>
-                  <select
-                    value={newMember.role}
-                    onChange={(e) => setNewMember({ ...newMember, role: e.target.value })}
-                    className="w-full bg-neutral-900 border border-white/10 text-neutral-300 text-xs px-4 py-3 focus:ring-1 focus:ring-orange-300"
-                  >
-                    <option value="manager">Manager</option>
-                    <option value="employee">Employee</option>
-                    <option value="customer">Customer</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-[10px] uppercase tracking-wider text-neutral-400 mb-2 font-bold">
-                    Status
-                  </label>
-                  <select
-                    value={newMember.status}
-                    onChange={(e) => setNewMember({ ...newMember, status: e.target.value })}
-                    className="w-full bg-neutral-900 border border-white/10 text-neutral-300 text-xs px-4 py-3 focus:ring-1 focus:ring-orange-300"
-                  >
-                    <option value="Active">Active</option>
-                    <option value="Banned">Banned</option>
-                  </select>
-                </div>
+              <div>
+                <label className="block text-[10px] uppercase tracking-wider text-neutral-400 mb-2 font-bold">
+                  Password
+                </label>
+                <input
+                  type="password"
+                  required
+                  placeholder="Enter temporary password"
+                  value={newMember.password}
+                  onChange={(e) => setNewMember({ ...newMember, password: e.target.value })}
+                  className="w-full bg-neutral-900 border border-white/10 text-neutral-100 text-sm px-4 py-3 focus:ring-1 focus:ring-orange-300"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] uppercase tracking-wider text-neutral-400 mb-2 font-bold">
+                  Role
+                </label>
+                <select
+                  value={newMember.role}
+                  onChange={(e) => setNewMember({ ...newMember, role: e.target.value })}
+                  className="w-full bg-neutral-900 border border-white/10 text-neutral-300 text-xs px-4 py-3 focus:ring-1 focus:ring-orange-300"
+                >
+                  <option value="manager">Manager</option>
+                  <option value="employee">Employee</option>
+                </select>
               </div>
               <button
                 type="submit"

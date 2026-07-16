@@ -175,3 +175,25 @@ export { INITIAL_PRODUCTS };
 
 // Export orders functions for use in other components
 export { getStoredOrders, saveOrders };
+
+// Get reviews from localStorage
+export function getStoredReviews() {
+  try {
+    const stored = localStorage.getItem('gogo_reviews');
+    if (stored) {
+      return JSON.parse(stored);
+    }
+  } catch (e) {
+    console.error("Failed to parse reviews from localStorage", e);
+  }
+  return {};
+}
+
+// Save reviews to localStorage
+export function saveReviews(reviews) {
+  try {
+    localStorage.setItem('gogo_reviews', JSON.stringify(reviews));
+  } catch (e) {
+    console.error("Failed to save reviews to localStorage", e);
+  }
+}

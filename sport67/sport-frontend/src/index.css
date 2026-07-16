@@ -151,3 +151,17 @@ input:-webkit-autofill:active {
   animation: slideIn 0.3s ease-out;
 }
 
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #050505;
+}
+::-webkit-scrollbar-thumb {
+  background: #5c4037;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #ff5719;
+}

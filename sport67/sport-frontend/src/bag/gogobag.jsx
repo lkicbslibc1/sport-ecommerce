@@ -54,7 +54,12 @@ function Footer() {
     );
 }
 
-function BagItem({ item, updateQuantity, removeItem, onViewChange, setSelectedProduct }) {
+function BagItem({ item, updateQuantity, removeItem, updateItemAttribute, onViewChange, setSelectedProduct }) {
+    const currentColor = item.selectedColor || item.color || (item.colorNames ? item.colorNames[0] : null);
+    const currentImage = (item.colorImages && currentColor && item.colorImages[currentColor]) 
+        ? item.colorImages[currentColor] 
+        : item.image;
+
     return (
         <div
             className="p-6 md:p-8 flex flex-col md:flex-row gap-8 relative overflow-hidden group border"
@@ -64,11 +69,11 @@ function BagItem({ item, updateQuantity, removeItem, onViewChange, setSelectedPr
                 backdropFilter: "blur(12px)",
             }}
         >
-            <div 
-                className="w-full md:w-48 h-48 overflow-hidden cursor-pointer" 
+            <div
+                className="w-full md:w-48 h-48 overflow-hidden cursor-pointer"
                 style={{ backgroundColor: C.surfaceContainer }}
                 onClick={() => {
-                    if(setSelectedProduct && onViewChange) {
+                    if (setSelectedProduct && onViewChange) {
                         setSelectedProduct(item);
                         onViewChange('product_details');
                     }
@@ -76,18 +81,18 @@ function BagItem({ item, updateQuantity, removeItem, onViewChange, setSelectedPr
             >
                 <img
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                    src={item.image}
+                    src={currentImage}
                     alt={item.name}
                 />
             </div>
             <div className="flex-grow flex flex-col justify-between">
                 <div className="flex justify-between items-start">
                     <div>
-                        <h3 
-                            className="text-2xl md:text-3xl uppercase italic font-black mb-1 cursor-pointer hover:opacity-80 transition-opacity" 
+                        <h3
+                            className="text-2xl md:text-3xl uppercase italic font-black mb-1 cursor-pointer hover:opacity-80 transition-opacity"
                             style={{ color: C.onSurface }}
                             onClick={() => {
-                                if(setSelectedProduct && onViewChange) {
+                                if (setSelectedProduct && onViewChange) {
                                     setSelectedProduct(item);
                                     onViewChange('product_details');
                                 }
@@ -108,17 +113,49 @@ function BagItem({ item, updateQuantity, removeItem, onViewChange, setSelectedPr
                         <p className="text-[10px] uppercase mb-1" style={{ color: C.onSurfaceVariant }}>
                             SIZE
                         </p>
-                        <p className="font-black italic" style={{ color: C.onSurface }}>
-                            {item.selectedSize || item.size || "M"}
-                        </p>
+                        {item.sizes && item.sizes.length > 0 ? (
+                            <div className="relative w-fit group">
+                                <select
+                                    value={item.selectedSize || item.size || item.sizes[0]}
+                                    onChange={(e) => updateItemAttribute(item.cartId || item.id, 'selectedSize', e.target.value)}
+                                    className="font-black italic px-3 py-1 border outline-none cursor-pointer appearance-none pr-8 transition-colors hover:border-primary focus:border-primary"
+                                    style={{ backgroundColor: C.surfaceContainerHigh, borderColor: C.outlineVariant, color: C.onSurface }}
+                                >
+                                    {item.sizes.map(size => (
+                                        <option key={size} value={size} className="bg-[#1c1b1b] text-white not-italic">{size}</option>
+                                    ))}
+                                </select>
+                                <span className="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-[16px] text-white/50 group-hover:text-primary transition-colors">expand_more</span>
+                            </div>
+                        ) : (
+                            <p className="font-black italic mt-1" style={{ color: C.onSurface }}>
+                                {item.selectedSize || item.size || "M"}
+                            </p>
+                        )}
                     </div>
                     <div>
                         <p className="text-[10px] uppercase mb-1" style={{ color: C.onSurfaceVariant }}>
                             COLOR
                         </p>
-                        <p className="font-black italic" style={{ color: C.onSurface }}>
-                            {item.selectedColor || item.color || "DEFAULT"}
-                        </p>
+                        {item.colorNames && item.colorNames.length > 0 ? (
+                            <div className="relative w-fit group">
+                                <select
+                                    value={item.selectedColor || item.color || item.colorNames[0]}
+                                    onChange={(e) => updateItemAttribute(item.cartId || item.id, 'selectedColor', e.target.value)}
+                                    className="font-black italic px-3 py-1 border outline-none cursor-pointer appearance-none pr-8 transition-colors hover:border-primary focus:border-primary "
+                                    style={{ backgroundColor: C.surfaceContainerHigh, borderColor: C.outlineVariant, color: C.onSurface }}
+                                >
+                                    {item.colorNames.map(color => (
+                                        <option key={color} value={color} className="bg-[#1c1b1b] text-white not-italic">{color}</option>
+                                    ))}
+                                </select>
+                                <span className="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-[16px] text-white/50 group-hover:text-primary transition-colors">expand_more</span>
+                            </div>
+                        ) : (
+                            <p className="font-black italic mt-1" style={{ color: C.onSurface }}>
+                                {item.selectedColor || item.color || "DEFAULT"}
+                            </p>
+                        )}
                     </div>
                     <div className="col-span-2 md:col-span-1">
                         <p className="text-[10px] uppercase mb-2" style={{ color: C.onSurfaceVariant }}>
@@ -180,6 +217,10 @@ export default function GoGoBag({ onViewChange, cart = [], setCart, user, setUse
         setCart(prev => prev.filter(i => (i.cartId || i.id) !== cartId));
     };
 
+    const updateItemAttribute = (cartId, attribute, value) => {
+        setCart(prev => prev.map(i => (i.cartId || i.id) === cartId ? { ...i, [attribute]: value } : i));
+    };
+
     const subtotal = cart.reduce((sum, i) => sum + i.price * i.quantity, 0);
     const tax = subtotal * 0.08;
     const total = subtotal + tax;
@@ -221,6 +262,7 @@ export default function GoGoBag({ onViewChange, cart = [], setCart, user, setUse
                                     item={item}
                                     updateQuantity={updateQuantity}
                                     removeItem={removeItem}
+                                    updateItemAttribute={updateItemAttribute}
                                     onViewChange={onViewChange}
                                     setSelectedProduct={setSelectedProduct}
                                 />
@@ -253,7 +295,7 @@ export default function GoGoBag({ onViewChange, cart = [], setCart, user, setUse
                                         <div className="flex justify-between items-center" style={{ color: C.onSurfaceVariant }}>
                                             <span className="text-[10px] uppercase tracking-widest">SHIPPING</span>
                                             <span className="font-black" style={{ color: C.primary }}>
-                                                FREE
+                                                NOT CHOOSE YET
                                             </span>
                                         </div>
                                         <div className="flex justify-between items-center" style={{ color: C.onSurfaceVariant }}>

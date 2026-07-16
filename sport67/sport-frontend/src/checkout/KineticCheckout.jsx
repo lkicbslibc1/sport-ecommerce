@@ -102,17 +102,17 @@ export default function KineticCheckout({ onViewChange, cart = [], setCart, user
         e.preventDefault();
         const allAddresses = JSON.parse(localStorage.getItem('gogo_addresses') || '{}');
         let userAddrs = allAddresses[currentUserUsername] || [];
-        
+
         let newAddr = { ...addressForm, id: Date.now().toString() };
         if (newAddr.isDefault || userAddrs.length === 0) {
-          newAddr.isDefault = true;
-          userAddrs = userAddrs.map(a => ({...a, isDefault: false}));
+            newAddr.isDefault = true;
+            userAddrs = userAddrs.map(a => ({ ...a, isDefault: false }));
         }
-        
+
         userAddrs.push(newAddr);
         allAddresses[currentUserUsername] = userAddrs;
         localStorage.setItem('gogo_addresses', JSON.stringify(allAddresses));
-        
+
         setAddresses(userAddrs);
         setShowAddNewAddressModal(false);
         setSelectedAddress(newAddr);
@@ -132,7 +132,7 @@ export default function KineticCheckout({ onViewChange, cart = [], setCart, user
             const allAddresses = JSON.parse(localStorage.getItem('gogo_addresses') || '{}');
             const userAddrs = allAddresses[currentUserUsername] || [];
             setAddresses(userAddrs);
-            
+
             const defaultAddr = userAddrs.find(a => a.isDefault) || userAddrs[0];
             if (defaultAddr) {
                 setSelectedAddress(defaultAddr);
@@ -190,6 +190,40 @@ export default function KineticCheckout({ onViewChange, cart = [], setCart, user
 
     const handlePlaceOrder = (e) => {
         e.preventDefault();
+
+        if (!selectedAddress) {
+            alert("กรุณาระบุที่อยู่สำหรับจัดส่งสินค้าก่อนทำการสั่งซื้อ");
+            return;
+        }
+
+        if (payMethod === "card") {
+            if (formData.cardNumber.length < 19) {
+                alert("กรุณากรอกหมายเลขบัตรเครดิตให้ครบ 16 หลัก");
+                return;
+            }
+            if (formData.expiry.length < 5) {
+                alert("กรุณากรอกวันหมดอายุบัตรให้ครบ (MM/YY)");
+                return;
+            } else {
+                const [monthStr, yearStr] = formData.expiry.split('/');
+                const month = parseInt(monthStr, 10);
+                const year = parseInt(`20${yearStr}`, 10);
+                
+                const now = new Date();
+                const currentYear = now.getFullYear();
+                const currentMonth = now.getMonth() + 1;
+                
+                if (year < currentYear || (year === currentYear && month < currentMonth)) {
+                    alert("บัตรเครดิตนี้หมดอายุแล้ว ไม่สามารถใช้ทำรายการได้");
+                    return;
+                }
+            }
+            if (formData.cvv.length < 3) {
+                alert("กรุณากรอกรหัส CVC ให้ครบ 3 หลัก");
+                return;
+            }
+        }
+
         setIsSubmitting(true);
 
         setTimeout(() => {
@@ -202,12 +236,15 @@ export default function KineticCheckout({ onViewChange, cart = [], setCart, user
                 const newOrder = {
                     id: "#" + randomId,
                     username: currentUsername,
-                    customer: `${formData.firstName} ${formData.lastName}`.trim(),
-                    tier: user ? 'MEMBER' : 'PRO',
+                    customer: `${selectedAddress.firstName} ${selectedAddress.lastName}`.trim(),
+                    shippingAddress: selectedAddress,
                     date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).toUpperCase(),
                     total: total.toLocaleString("th-TH") + " ฿",
                     status: "Pending",
                     items: cart.map(i => ({
+                        id: i.id,
+                        color: i.selectedColor,
+                        size: i.selectedSize,
                         name: i.name,
                         sku: i.sku || `GA-${i.brand.slice(0, 2).toUpperCase()}-${i.id}`,
                         qty: i.quantity,
@@ -339,8 +376,8 @@ export default function KineticCheckout({ onViewChange, cart = [], setCart, user
                                             SHIPPING ADDRESS
                                         </h2>
                                         {addresses.length > 0 && (
-                                            <button 
-                                                type="button" 
+                                            <button
+                                                type="button"
                                                 onClick={() => setShowAddressModal(true)}
                                                 className="text-[10px] uppercase tracking-widest border border-white/20 px-4 py-2 hover:bg-white/10 transition-colors cursor-pointer bg-transparent"
                                                 style={{ color: C.primary }}
@@ -350,19 +387,19 @@ export default function KineticCheckout({ onViewChange, cart = [], setCart, user
                                         )}
                                     </div>
                                 </div>
-                                
+
                                 {addresses.length > 0 && selectedAddress ? (
                                     <div className="p-6 border border-white/10 bg-[#1c1b1b] relative">
                                         <p className="font-bold text-sm text-white">{selectedAddress.firstName} {selectedAddress.lastName} | <span className="text-on-surface-variant font-light">{selectedAddress.phone}</span></p>
-                                        <p className="text-xs text-on-surface-variant mt-2 leading-relaxed">{selectedAddress.streetAddress}<br/>{selectedAddress.city}, {selectedAddress.zipCode}</p>
+                                        <p className="text-xs text-on-surface-variant mt-2 leading-relaxed">{selectedAddress.streetAddress}<br />{selectedAddress.city}, {selectedAddress.zipCode}</p>
                                     </div>
                                 ) : (
                                     <button
-                                      type="button"
-                                      onClick={() => setShowAddNewAddressModal(true)}
-                                      className="w-full border border-primary text-primary hover:bg-primary hover:text-black py-4 font-anybody font-black text-xs uppercase tracking-widest transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer bg-transparent"
+                                        type="button"
+                                        onClick={() => setShowAddNewAddressModal(true)}
+                                        className="w-full border border-primary text-primary hover:bg-primary hover:text-black py-4 font-anybody font-black text-xs uppercase tracking-widest transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer bg-transparent"
                                     >
-                                      + เพิ่มที่อยู่ใหม่
+                                        + เพิ่มที่อยู่ใหม่
                                     </button>
                                 )}
                             </section>
@@ -454,9 +491,9 @@ export default function KineticCheckout({ onViewChange, cart = [], setCart, user
                                     </div>
                                     {payMethod === "card" ? (
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                                            <InputField label="Card Number" placeholder="0000 0000 0000 0000" span name="cardNumber" value={formData.cardNumber} onChange={handleInputChange} required maxLength={19} />
-                                            <InputField label="Expiration (MM/YY)" placeholder="12/28" name="expiry" value={formData.expiry} onChange={handleInputChange} required maxLength={5} />
-                                            <InputField label="CVC" placeholder="***" type="password" name="cvv" value={formData.cvv} onChange={handleInputChange} required maxLength={3} />
+                                            <InputField label="Card Number" placeholder="0000 0000 0000 0000" span name="cardNumber" value={formData.cardNumber} onChange={handleInputChange} required minLength={19} maxLength={19} pattern="^(\d{4}\s?){4}$" title="กรุณากรอกเลขบัตรเครดิตให้ครบ 16 หลัก" />
+                                            <InputField label="Expiration (MM/YY)" placeholder="12/28" name="expiry" value={formData.expiry} onChange={handleInputChange} required minLength={5} maxLength={5} pattern="^(0[1-9]|1[0-2])\/?([0-9]{2})$" title="กรุณากรอกเดือน 01-12 และปี 2 หลัก" />
+                                            <InputField label="CVC" placeholder="***" type="password" name="cvv" value={formData.cvv} onChange={handleInputChange} required minLength={3} maxLength={3} pattern="^\d{3}$" title="กรุณากรอกตัวเลข CVC 3 หลัก" />
                                         </div>
                                     ) : (
                                         <div className="p-6 border flex flex-col items-center justify-center gap-4" style={{ backgroundColor: C.surfaceContainer, borderColor: "rgba(255,255,255,0.05)" }}>
@@ -481,15 +518,21 @@ export default function KineticCheckout({ onViewChange, cart = [], setCart, user
                                     ORDER SUMMARY
                                 </h2>
                                 <div className="space-y-6 mb-10 relative z-10 max-h-[320px] overflow-y-auto pr-2">
-                                    {cart.map((item) => (
-                                        <div className="flex gap-4" key={item.id}>
+                                    {cart.map((item) => {
+                                        const currentColor = item.selectedColor || item.color || (item.colorNames ? item.colorNames[0] : null);
+                                        const currentImage = (item.colorImages && currentColor && item.colorImages[currentColor]) 
+                                            ? item.colorImages[currentColor] 
+                                            : item.image;
+                                        
+                                        return (
+                                        <div className="flex gap-4" key={item.cartId || item.id}>
                                             <div
                                                 className="w-24 h-24 border overflow-hidden flex-shrink-0"
                                                 style={{ backgroundColor: C.surfaceLowest, borderColor: "rgba(255,255,255,0.05)" }}
                                             >
                                                 <img
                                                     className="w-full h-full object-cover"
-                                                    src={item.image}
+                                                    src={currentImage}
                                                     alt={item.name}
                                                 />
                                             </div>
@@ -498,8 +541,8 @@ export default function KineticCheckout({ onViewChange, cart = [], setCart, user
                                                     <h4 className="font-bold uppercase text-sm" style={{ color: C.onSurface }}>
                                                         {item.name}
                                                     </h4>
-                                                    <p className="text-[10px] mt-1" style={{ color: C.onSurfaceVariant }}>
-                                                        QTY: {item.quantity} | SIZE: {item.size || "M"}
+                                                    <p className="text-[10px] mt-1 uppercase" style={{ color: C.onSurfaceVariant }}>
+                                                        QTY: {item.quantity} | SIZE: {item.selectedSize || item.size || "M"} | COLOR: {currentColor || "DEFAULT"}
                                                     </p>
                                                 </div>
                                                 <div className="font-black italic" style={{ color: C.primary }}>
@@ -507,7 +550,7 @@ export default function KineticCheckout({ onViewChange, cart = [], setCart, user
                                                 </div>
                                             </div>
                                         </div>
-                                    ))}
+                                    )})}
                                 </div>
                                 <div className="space-y-4 border-t pt-8 relative z-10" style={{ borderColor: "rgba(255,255,255,0.1)" }}>
                                     <div className="flex justify-between text-[10px]" style={{ color: C.onSurfaceVariant }}>
@@ -556,8 +599,8 @@ export default function KineticCheckout({ onViewChange, cart = [], setCart, user
                             <h3 className="text-2xl font-anybody font-black italic uppercase mb-6 text-white">เลือกที่อยู่จัดส่ง</h3>
                             <div className="space-y-4">
                                 {addresses.map((addr, idx) => (
-                                    <div 
-                                        key={idx} 
+                                    <div
+                                        key={idx}
                                         onClick={() => {
                                             setSelectedAddress(addr);
                                             setFormData(prev => ({
@@ -574,7 +617,7 @@ export default function KineticCheckout({ onViewChange, cart = [], setCart, user
                                     >
                                         {addr.isDefault && <span className="absolute top-2 right-2 text-[10px] text-primary border border-primary px-2 py-0.5">ค่าเริ่มต้น</span>}
                                         <p className="font-bold text-sm text-white">{addr.firstName} {addr.lastName} | <span className="text-on-surface-variant font-light">{addr.phone}</span></p>
-                                        <p className="text-xs text-on-surface-variant mt-2 leading-relaxed">{addr.streetAddress}<br/>{addr.city}, {addr.zipCode}</p>
+                                        <p className="text-xs text-on-surface-variant mt-2 leading-relaxed">{addr.streetAddress}<br />{addr.city}, {addr.zipCode}</p>
                                     </div>
                                 ))}
                             </div>
@@ -592,42 +635,42 @@ export default function KineticCheckout({ onViewChange, cart = [], setCart, user
                         <div className="bg-[#131313] border border-white/10 p-8 w-full max-w-lg max-h-[90vh] overflow-y-auto">
                             <h3 className="text-2xl font-anybody font-black italic uppercase mb-6 text-white">เพิ่มที่อยู่ใหม่</h3>
                             <form onSubmit={handleSaveAddress} className="space-y-4">
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                <label className="text-[10px] uppercase text-on-surface-variant mb-1 block">First Name</label>
-                                <input required type="text" className="w-full bg-[#1c1b1b] border-b-2 border-white/10 p-3 text-white outline-none focus:border-primary" value={addressForm.firstName} onChange={e => setAddressForm({...addressForm, firstName: e.target.value})} />
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="text-[10px] uppercase text-on-surface-variant mb-1 block">First Name</label>
+                                        <input required type="text" className="w-full bg-[#1c1b1b] border-b-2 border-white/10 p-3 text-white outline-none focus:border-primary" value={addressForm.firstName} onChange={e => { const v = e.target.value; if (/^[A-Za-zก-๙\s]*$/.test(v)) setAddressForm({ ...addressForm, firstName: v }) }} pattern="^[A-Za-zก-๙\s]+$" title="กรุณากรอกเฉพาะตัวอักษร" />
+                                    </div>
+                                    <div>
+                                        <label className="text-[10px] uppercase text-on-surface-variant mb-1 block">Last Name</label>
+                                        <input required type="text" className="w-full bg-[#1c1b1b] border-b-2 border-white/10 p-3 text-white outline-none focus:border-primary" value={addressForm.lastName} onChange={e => { const v = e.target.value; if (/^[A-Za-zก-๙\s]*$/.test(v)) setAddressForm({ ...addressForm, lastName: v }) }} pattern="^[A-Za-zก-๙\s]+$" title="กรุณากรอกเฉพาะตัวอักษร" />
+                                    </div>
                                 </div>
                                 <div>
-                                <label className="text-[10px] uppercase text-on-surface-variant mb-1 block">Last Name</label>
-                                <input required type="text" className="w-full bg-[#1c1b1b] border-b-2 border-white/10 p-3 text-white outline-none focus:border-primary" value={addressForm.lastName} onChange={e => setAddressForm({...addressForm, lastName: e.target.value})} />
-                                </div>
-                            </div>
-                            <div>
-                                <label className="text-[10px] uppercase text-on-surface-variant mb-1 block">Phone Number</label>
-                                <input required type="tel" className="w-full bg-[#1c1b1b] border-b-2 border-white/10 p-3 text-white outline-none focus:border-primary" value={addressForm.phone} onChange={e => setAddressForm({...addressForm, phone: e.target.value})} />
-                            </div>
-                            <div>
-                                <label className="text-[10px] uppercase text-on-surface-variant mb-1 block">Street Address</label>
-                                <textarea required className="w-full bg-[#1c1b1b] border-b-2 border-white/10 p-3 text-white outline-none focus:border-primary resize-none h-20" value={addressForm.streetAddress} onChange={e => setAddressForm({...addressForm, streetAddress: e.target.value})}></textarea>
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                <label className="text-[10px] uppercase text-on-surface-variant mb-1 block">City</label>
-                                <input required type="text" className="w-full bg-[#1c1b1b] border-b-2 border-white/10 p-3 text-white outline-none focus:border-primary" value={addressForm.city} onChange={e => setAddressForm({...addressForm, city: e.target.value})} />
+                                    <label className="text-[10px] uppercase text-on-surface-variant mb-1 block">Phone Number</label>
+                                    <input required type="tel" className="w-full bg-[#1c1b1b] border-b-2 border-white/10 p-3 text-white outline-none focus:border-primary" value={addressForm.phone} onChange={e => { const v = e.target.value; if (/^\d*$/.test(v)) setAddressForm({ ...addressForm, phone: v }) }} minLength={10} maxLength={10} pattern="\d{10}" title="กรุณากรอกเบอร์โทรศัพท์ตัวเลข 10 หลัก" />
                                 </div>
                                 <div>
-                                <label className="text-[10px] uppercase text-on-surface-variant mb-1 block">Zip Code</label>
-                                <input required type="text" className="w-full bg-[#1c1b1b] border-b-2 border-white/10 p-3 text-white outline-none focus:border-primary" value={addressForm.zipCode} onChange={e => setAddressForm({...addressForm, zipCode: e.target.value})} />
+                                    <label className="text-[10px] uppercase text-on-surface-variant mb-1 block">Street Address</label>
+                                    <textarea required className="w-full bg-[#1c1b1b] border-b-2 border-white/10 p-3 text-white outline-none focus:border-primary resize-none h-20" value={addressForm.streetAddress} onChange={e => setAddressForm({ ...addressForm, streetAddress: e.target.value })}></textarea>
                                 </div>
-                            </div>
-                            <div className="flex items-center gap-3 pt-4">
-                                <input type="checkbox" id="isDefault" className="w-4 h-4 accent-primary" checked={addressForm.isDefault} onChange={e => setAddressForm({...addressForm, isDefault: e.target.checked})} />
-                                <label htmlFor="isDefault" className="text-sm text-white cursor-pointer">ตั้งเป็นที่อยู่หลัก (Set as default)</label>
-                            </div>
-                            <div className="flex gap-4 pt-6">
-                                <button type="button" onClick={() => { setShowAddNewAddressModal(false); if(addresses.length > 0) setShowAddressModal(true); }} className="flex-1 py-4 border border-white/20 text-white uppercase text-xs font-bold hover:bg-white/5 transition-colors cursor-pointer">ยกเลิก</button>
-                                <button type="submit" className="flex-1 py-4 bg-primary text-black uppercase text-xs font-bold hover:bg-orange-500 transition-colors border-none cursor-pointer">บันทึก</button>
-                            </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="text-[10px] uppercase text-on-surface-variant mb-1 block">City</label>
+                                        <input required type="text" className="w-full bg-[#1c1b1b] border-b-2 border-white/10 p-3 text-white outline-none focus:border-primary" value={addressForm.city} onChange={e => { const v = e.target.value; if (/^[A-Za-zก-๙\s]*$/.test(v)) setAddressForm({ ...addressForm, city: v }) }} pattern="^[A-Za-zก-๙\s]+$" title="กรุณากรอกเฉพาะตัวอักษร" />
+                                    </div>
+                                    <div>
+                                        <label className="text-[10px] uppercase text-on-surface-variant mb-1 block">Zip Code</label>
+                                        <input required type="text" className="w-full bg-[#1c1b1b] border-b-2 border-white/10 p-3 text-white outline-none focus:border-primary" value={addressForm.zipCode} onChange={e => { const v = e.target.value; if (/^\d*$/.test(v)) setAddressForm({ ...addressForm, zipCode: v }) }} minLength={5} maxLength={5} pattern="\d{5}" title="กรุณากรอกรหัสไปรษณีย์ตัวเลข 5 หลัก" />
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-3 pt-4">
+                                    <input type="checkbox" id="isDefault" className="w-4 h-4 accent-primary" checked={addressForm.isDefault} onChange={e => setAddressForm({ ...addressForm, isDefault: e.target.checked })} />
+                                    <label htmlFor="isDefault" className="text-sm text-white cursor-pointer">ตั้งเป็นที่อยู่หลัก (Set as default)</label>
+                                </div>
+                                <div className="flex gap-4 pt-6">
+                                    <button type="button" onClick={() => { setShowAddNewAddressModal(false); if (addresses.length > 0) setShowAddressModal(true); }} className="flex-1 py-4 border border-white/20 text-white uppercase text-xs font-bold hover:bg-white/5 transition-colors cursor-pointer">ยกเลิก</button>
+                                    <button type="submit" className="flex-1 py-4 bg-primary text-black uppercase text-xs font-bold hover:bg-orange-500 transition-colors border-none cursor-pointer">บันทึก</button>
+                                </div>
                             </form>
                         </div>
                     </div>

@@ -83,38 +83,74 @@ export default function GogoAthleticDashboard({ onViewChange, user, setUser }) {
     })).slice(0, 5);
   }, [criticalProducts]);
 
-  // Compute last 7 days of revenue from real orders
-  const weekData = useMemo(() => {
+  // Compute last 7 days or 7 weeks of revenue from real orders
+  const chartData = useMemo(() => {
     const today = new Date();
-    const days = Array.from({ length: 7 }, (_, i) => {
-      const d = new Date(today);
-      d.setDate(today.getDate() - (6 - i));
-      return d;
-    });
+    
+    if (range === "daily") {
+      const days = Array.from({ length: 7 }, (_, i) => {
+        const d = new Date(today);
+        d.setDate(today.getDate() - (6 - i));
+        return d;
+      });
 
-    const results = days.map((d, i) => {
-      const dayName = d.toLocaleDateString("en-US", { weekday: "short" });
-      // Match orders by formatted date string
-      const dateKey = d.toLocaleDateString("en-US", {
-        month: "short", day: "2-digit", year: "numeric"
-      }).toUpperCase();
-      const dayOrders = ordersList.filter(
-        o => o.date && o.date.toUpperCase() === dateKey && o.status !== "Cancelled"
-      );
-      const total = dayOrders.reduce((sum, o) => {
-        return sum + (parseFloat((o.total || "0").replace(/,/g, "").replace(/[^\d.]/g, "")) || 0);
-      }, 0);
-      return { day: dayName, total, isToday: i === 6 };
-    });
+      const results = days.map((d, i) => {
+        const dayName = d.toLocaleDateString("en-US", { weekday: "short" });
+        const dateKey = d.toLocaleDateString("en-US", {
+          month: "short", day: "2-digit", year: "numeric"
+        }).toUpperCase();
+        const dayOrders = ordersList.filter(
+          o => o.date && o.date.toUpperCase() === dateKey && o.status !== "Cancelled"
+        );
+        const total = dayOrders.reduce((sum, o) => {
+          return sum + (parseFloat((o.total || "0").replace(/,/g, "").replace(/[^\d.]/g, "")) || 0);
+        }, 0);
+        return { label: dayName, total, isCurrent: i === 6 };
+      });
+      return results;
+    } else {
+      // weekly
+      const weeks = Array.from({ length: 7 }, (_, i) => {
+        const d = new Date(today);
+        d.setDate(today.getDate() - ((6 - i) * 7));
+        return d;
+      });
 
-    const maxTotal = Math.max(...results.map(r => r.total), 1);
-    return results.map(r => ({
-      day: r.day,
+      const results = weeks.map((weekEnd, i) => {
+        const weekStart = new Date(weekEnd);
+        weekStart.setDate(weekEnd.getDate() - 6);
+        
+        let label = "";
+        if (i === 6) label = "THIS WK";
+        else if (i === 5) label = "LAST WK";
+        else label = `W-${6 - i}`;
+        
+        const weekOrders = ordersList.filter(o => {
+            if (o.status === "Cancelled" || !o.date) return false;
+            const orderDate = new Date(o.date);
+            const orderTime = new Date(orderDate.getFullYear(), orderDate.getMonth(), orderDate.getDate()).getTime();
+            const startTime = new Date(weekStart.getFullYear(), weekStart.getMonth(), weekStart.getDate()).getTime();
+            const endTime = new Date(weekEnd.getFullYear(), weekEnd.getMonth(), weekEnd.getDate()).getTime();
+            
+            return orderTime >= startTime && orderTime <= endTime;
+        });
+
+        const total = weekOrders.reduce((sum, o) => sum + (parseFloat((o.total || "0").replace(/,/g, "").replace(/[^\d.]/g, "")) || 0), 0);
+        return { label, total, isCurrent: i === 6 };
+      });
+      return results;
+    }
+  }, [ordersList, range]);
+
+  const displayData = useMemo(() => {
+    const maxTotal = Math.max(...chartData.map(r => r.total), 1);
+    return chartData.map(r => ({
+      label: r.label,
       amount: r.total > 0 ? r.total.toLocaleString("th-TH") + " ฿" : "0 ฿",
       heightPct: Math.max(5, Math.round((r.total / maxTotal) * 100)),
-      today: r.isToday
+      isCurrent: r.isCurrent
     }));
-  }, [ordersList]);
+  }, [chartData]);
 
   // Best Sellers - now using products from context (real-time updates)
   const bestSellers = useMemo(() => {
@@ -313,7 +349,7 @@ if (currentPage === "orders") {
                       Velocity Matrix
                     </h5>
                     <p className="text-neutral-500 text-[10px] uppercase tracking-widest mt-1">
-                      7-Day Transaction Volume
+                      {range === 'daily' ? '7-Day Transaction Volume' : '7-Week Transaction Volume'}
                     </p>
                   </div>
                   <div className="flex gap-2">
@@ -343,12 +379,12 @@ if (currentPage === "orders") {
                 </div>
 
                 <div className="h-64 w-full flex items-end gap-2 px-2">
-                  {weekData.map(({ day, heightPct, amount, today }) => (
+                  {displayData.map(({ label, heightPct, amount, isCurrent }) => (
                     <div
-                      key={day}
+                      key={label}
                       className={
                         "flex-1 relative group cursor-pointer transition-colors border-t-2 " +
-                        (today
+                        (isCurrent
                           ? "bg-orange-300 border-white"
                           : "bg-orange-300/20 hover:bg-orange-300/40 border-orange-300")
                       }
@@ -356,20 +392,20 @@ if (currentPage === "orders") {
                     >
                       <div
                         className={
-                          "absolute -top-8 left-1/2 -translate-x-1/2 transition-opacity text-[10px] px-2 py-1 font-bold whitespace-nowrap " +
-                          (today
+                          "absolute -top-8 left-1/2 -translate-x-1/2 transition-opacity text-[10px] px-2 py-1 font-bold whitespace-nowrap z-10 " +
+                          (isCurrent
                             ? "opacity-100 bg-white text-neutral-950 italic"
                             : "opacity-0 group-hover:opacity-100 bg-orange-300 text-neutral-950")
                         }
                       >
-                        {today ? `TODAY: ${amount}` : `${day.toUpperCase()}: ${amount}`}
+                        {isCurrent ? `${range === 'daily' ? 'TODAY' : 'THIS WK'}: ${amount}` : `${label.toUpperCase()}: ${amount}`}
                       </div>
                     </div>
                   ))}
                 </div>
                 <div className="flex justify-between mt-4 text-[10px] font-bold text-neutral-500 uppercase tracking-widest opacity-70">
-                  {weekData.map(({ day }) => (
-                    <span key={day}>{day}</span>
+                  {displayData.map(({ label }) => (
+                    <span key={label}>{label}</span>
                   ))}
                 </div>
               </GlassPanel>

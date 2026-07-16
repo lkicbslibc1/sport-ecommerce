@@ -155,24 +155,7 @@ export default function Login({ onViewChange, user, setUser }) {
                     />
                   </div>
                 </div>
-                <div className="flex items-center gap-4">
-                  <label className="flex items-center cursor-pointer group">
-                    <div className="relative flex items-center">
-                      <input
-                        className="peer hidden"
-                        type="checkbox"
-                        name="newsletter"
-                        checked={formData.newsletter}
-                        onChange={handleChange}
-                      />
-                      <div className="w-6 h-6 border-2 border-[#353534] group-hover:border-[#ffb59e] peer-checked:bg-[#ff4e00] peer-checked:border-[#ff4e00] transition-all duration-200"></div>
-                      <span className="material-symbols-outlined absolute text-[#5e1700] text-[16px] left-1 opacity-0 peer-checked:opacity-100 transition-opacity">check</span>
-                    </div>
-                    <span className="ml-3 font-label-xs text-label-xs text-[#a1a1a1] group-hover:text-[#e5e2e1] transition-colors select-none">
-                      SIGN UP FOR THE GOGO ATHLETIC NEWSLETTER
-                    </span>
-                  </label>
-                </div>
+
                 <div className="pt-4">
                   <button
                     type="submit"
