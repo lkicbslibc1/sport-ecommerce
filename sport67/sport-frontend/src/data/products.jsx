@@ -16,6 +16,7 @@ function getStoredProducts() {
           return {
             ...p,
             image: initial.image,
+            sizes: initial.sizes || p.sizes,
             colorImages: initial.colorImages || p.colorImages,
             colors: initial.colors || p.colors,
             colorNames: initial.colorNames || p.colorNames
