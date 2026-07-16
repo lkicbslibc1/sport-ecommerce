@@ -13,7 +13,7 @@ import GoGoBag from './bag/gogobag.jsx';
 import KineticCheckout from './checkout/KineticCheckout.jsx';
 import Profile from './profile/profile.jsx';
 import OrderStatus from './profile/OrderStatus.jsx';
-import { ProductProvider } from './data/products.jsx';
+import { ProductProvider, useProducts } from './data/products.jsx';
 import ProductDetails from './shopping/product_details.jsx';
 import { useAlert } from './contexts/AlertContext.jsx';
 
@@ -32,6 +32,7 @@ const getUsername = (u) => {
 
 function MainPageContent() {
   const { showAlert } = useAlert();
+  const { products } = useProducts();
   const [activeCategory, setActiveCategory] = useState('men');
   const [currentView, setCurrentView] = useState(() => {
     const hash = window.location.hash.replace('#', '');
@@ -196,6 +197,14 @@ function MainPageContent() {
     const finalOrderId = orderId === 'order_status' ? null : orderId;
     return <OrderStatus onViewChange={setCurrentView} user={user} setUser={setUser} cart={cart} orderId={finalOrderId} />;
   }
+  const filteredTrendingProducts = (products || [])
+    .filter(product => {
+      if (activeCategory === 'men') return product.targetGroup === 'men';
+      if (activeCategory === 'women') return product.targetGroup === 'women';
+      if (activeCategory === 'kids') return product.targetGroup === 'kid';
+      return false;
+    })
+    .slice(0, 4);
 
   return (
     <div className="selection:bg-primary selection:text-white min-h-screen bg-background text-on-background">
@@ -330,82 +339,46 @@ function MainPageContent() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-              {/* Product 1 */}
-              <div className="group">
-                <div className="aspect-[4/5] bg-[#111] mb-6 relative overflow-hidden flex items-center justify-center p-8 border border-white/5">
-                  <img
-                    alt="Salomon XT-6"
-                    className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-110"
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuDUvCVnJTx-gEfawY8-FNPOPr00pKOBMvmflTb-xYd8__gKctCW26c1LaYIcCaq16LWFoTHmQpesUOqaqwlpBvKGxnXS2r3WPxFr_SNDjGnYvMXsP7cTh7ubn8ov9wu8eZQM_Cx4TobM4_TmamPyteS3DI3t4NT82KjajcGOYAlOHvaZRixRLMRGNFcI1yr6nghM7n3yF-4XVNs4NZeFiXNPVCZtgbksZCXySqnAF2FS_FNABYcR1gkp_F57g8IsnunmENM-V82bhg"
-                  />
-                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
-                    <button className="w-12 h-12 bg-white text-black flex items-center justify-center hover:bg-primary hover:text-white transition-colors">
-                      <span className="material-symbols-outlined text-[20px]">add_shopping_cart</span>
-                    </button>
-                    <button className="w-12 h-12 glass text-white flex items-center justify-center hover:bg-white hover:text-black transition-colors">
-                      <span className="material-symbols-outlined text-[20px]">favorite</span>
-                    </button>
+              {filteredTrendingProducts.map((product) => (
+                <div
+                  key={product.id}
+                  onClick={() => {
+                    setSelectedProduct(product);
+                    setCurrentView('product_details');
+                  }}
+                  className="group cursor-pointer"
+                >
+                  <div className="aspect-[4/5] bg-[#111] mb-6 relative overflow-hidden flex items-center justify-center p-8 border border-white/5">
+                    <img
+                      alt={product.name}
+                      className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-110"
+                      src={product.image}
+                    />
+                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          addToCart(product);
+                        }}
+                        className="px-8 py-3 bg-white text-black font-black text-[10px] uppercase tracking-widest hover:bg-primary hover:text-white transition-all"
+                      >
+                        Quick Add
+                      </button>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <h5 className="text-xs font-bold uppercase tracking-widest">{product.name}</h5>
+                    <p className="text-sm font-anybody font-black text-primary italic">
+                      {product.price.toLocaleString("th-TH", { minimumFractionDigits: 2 })} ฿ THB
+                    </p>
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <h5 className="text-xs font-bold uppercase tracking-widest">XT-6 GORE-TEX (ALL COLORWAYS)</h5>
-                  <p className="text-sm font-anybody font-black text-primary italic">8,690.00 ฿ THB</p>
-                </div>
-              </div>
-
-              {/* Product 2 */}
-              <div className="group">
-                <div className="aspect-[4/5] bg-[#111] mb-6 relative overflow-hidden flex items-center justify-center p-8 border border-white/5">
-                  <img
-                    alt="Salomon XA PRO"
-                    className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-110"
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuDvDlfDKJ6M6AvtB8Wjm5TXBYFTejSvC00Mi7xXb-OUwDa-UcgKHj7oSV9zwsF3qbH_XWY4VyD4BRAhk9tejEjV89PiRb6sXZqWA_zWYY2QV-5V3EMwQ7E1IpDtfakV3Q888sH4iyzmC0I0yUdG0fIDz9czCAsdlE5GuFLBtK7zggqqLthgO9Q6u-hCrmuhokAEM9LIj9K-69k7bhZTi8y8T9CHvZ8xUEaiVhPmtcMpaPTUQD84jD_fH7RMVqa-PzS9oOyFwfI6q3Y"
-                  />
-                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <button className="px-8 py-3 bg-white text-black font-black text-[10px] uppercase tracking-widest hover:bg-primary hover:text-white transition-all">Quick Add</button>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <h5 className="text-xs font-bold uppercase tracking-widest">SALOMON XA PRO 3D</h5>
-                  <p className="text-sm font-anybody font-black text-primary italic">6,090.00 ฿ THB</p>
-                </div>
-              </div>
-
-              {/* Product 3 */}
-              <div className="group">
-                <div className="aspect-[4/5] bg-[#111] mb-6 relative overflow-hidden flex items-center justify-center p-8 border border-white/5">
-                  <img
-                    alt="Solamphibian"
-                    className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-110"
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuCYC0irg4q1tFBSf5CRVa9CNPvXLRkb34BE5N0qBpo0U5KHttTas2tpwBr4QBoCntDuOVL78tkJDf6Y_nO0Vj86T0_B1L1-I0rIVOmvbBNsUxonKn-JC4x9ImrmcC5_VSgrvnX8cn3KwWUjOWFOKnYc7uZr0yqJjZ0p-iWTyx6dsUz50UahnY-5DFE9bD4KIrquc44L3EcOr8Lo_0aMERQTBsNuRVgVeGao_KYw1k8T-QGI8mu6OKPvKxI-UXQqKrNXu0kuu9BKPjo"
-                  />
-                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <button className="px-8 py-3 bg-white text-black font-black text-[10px] uppercase tracking-widest hover:bg-primary hover:text-white transition-all">Quick Add</button>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <h5 className="text-xs font-bold uppercase tracking-widest">SALOMON SOLAMPHIBIAN</h5>
-                  <p className="text-sm font-anybody font-black text-primary italic">5,290.00 ฿ THB</p>
-                </div>
-              </div>
-
-              {/* Product 4 */}
-              <div className="group">
-                <div className="aspect-[4/5] bg-[#111] mb-6 relative overflow-hidden flex items-center justify-center p-8 border border-white/5">
-                  <img
-                    alt="XT-6 White"
-                    className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-110"
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuBPkmZVK4JCzWO1WtwoD85bsMpwvTPU2P4godiD-X2aDw6oj9A5NX8aIHfikh3YW9QTBrTQaXkYCs7CcEfBm_UHQ-PUFmDQcrMMqOSz7TCK57ILOAGNPi62HfXMpjJ07AWtaAG2eLvuQbBRgz4Dm4ZKyE2TOWG6SJif8kmCvTrmlcPor5tuDMHG8dqXW41wSFig-DpBZaUwscOvwwWLCTiKMOK6V8zUM9A_jxVfL5DWS2E6vruJBnhxmBDPyk-oyWdIx9-3LW2Fzk8"
-                  />
-                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <button className="px-8 py-3 bg-white text-black font-black text-[10px] uppercase tracking-widest hover:bg-primary hover:text-white transition-all">Quick Add</button>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <h5 className="text-xs font-bold uppercase tracking-widest">SALOMON XT-6</h5>
-                  <p className="text-sm font-anybody font-black text-primary italic">7,790.00 ฿ THB</p>
-                </div>
-              </div>
+              ))}
+              {filteredTrendingProducts.length === 0 && (
+                <p className="col-span-full text-center text-on-surface-variant py-12">
+                  ไม่มีสินค้าในหมวดหมู่นี้ (No products in this category)
+                </p>
+              )}
             </div>
           </div>
         </section>
@@ -420,7 +393,7 @@ function MainPageContent() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4 h-[600px]">
             {/* Gravel */}
-            <div className="relative group cursor-pointer overflow-hidden border border-white/5">
+            <div onClick={() => setCurrentView('sport-equipment')} className="relative group cursor-pointer overflow-hidden border border-white/5">
               <img
                 alt="Gravel"
                 className="w-full h-full object-cover transition duration-1000 group-hover:scale-110"
@@ -433,7 +406,7 @@ function MainPageContent() {
             </div>
 
             {/* Trail Running */}
-            <div className="relative group cursor-pointer overflow-hidden border border-white/5">
+            <div onClick={() => setCurrentView('running-shoes')} className="relative group cursor-pointer overflow-hidden border border-white/5">
               <img
                 alt="Trail Running"
                 className="w-full h-full object-cover transition duration-1000 group-hover:scale-110"
@@ -446,7 +419,7 @@ function MainPageContent() {
             </div>
 
             {/* Road Running */}
-            <div className="relative group cursor-pointer overflow-hidden border border-white/5 md:col-span-1">
+            <div onClick={() => setCurrentView('running')} className="relative group cursor-pointer overflow-hidden border border-white/5 md:col-span-1">
               <img
                 alt="Road Running"
                 className="w-full h-full object-cover transition duration-1000 group-hover:scale-110"
@@ -459,7 +432,7 @@ function MainPageContent() {
             </div>
 
             {/* Sportstyle */}
-            <div className="relative group cursor-pointer overflow-hidden border border-white/5">
+            <div onClick={() => setCurrentView('sport')} className="relative group cursor-pointer overflow-hidden border border-white/5">
               <img
                 alt="Sportstyle"
                 className="w-full h-full object-cover transition duration-1000 group-hover:scale-110"
@@ -472,7 +445,7 @@ function MainPageContent() {
             </div>
 
             {/* Outdoor */}
-            <div className="relative group cursor-pointer overflow-hidden border border-white/5">
+            <div onClick={() => setCurrentView('running-bottom')} className="relative group cursor-pointer overflow-hidden border border-white/5">
               <img
                 alt="Outdoor"
                 className="w-full h-full object-cover transition duration-1000 group-hover:scale-110"

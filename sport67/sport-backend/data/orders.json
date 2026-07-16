@@ -1,0 +1,36 @@
+[
+  {
+    "id": "#GOGO-355418",
+    "username": "guest",
+    "customer": "Nawarood Inmeesri",
+    "shippingAddress": {
+      "firstName": "Nawarood",
+      "lastName": "Inmeesri",
+      "phone": "0900705081",
+      "streetAddress": "ซอยเจริญรัถ17\nห้องเช่า",
+      "city": "กรุงเทพ",
+      "zipCode": "10600",
+      "isDefault": true,
+      "id": "1784234078701"
+    },
+    "date": "JUL 17, 2026",
+    "total": 4333.5,
+    "status": "Preparing",
+    "items": [
+      {
+        "id": 7,
+        "name": "Strike Elite Football",
+        "sku": "GA-FB-2024-007",
+        "qty": 3,
+        "price": "1,350 ฿",
+        "image": "image/nikeB07.png"
+      }
+    ],
+    "actions": [
+      "Update Status",
+      "Mark Shipped",
+      "Mark Preparing",
+      "Cancel Order"
+    ]
+  }
+]

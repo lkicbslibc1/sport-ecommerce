@@ -222,7 +222,7 @@
     "productType": "equipment",
     "sportType": "Football",
     "targetGroup": "kid",
-    "amount": 150,
+    "amount": 147,
     "review": 4.8,
     "description": "Professional grade soccer ball with molded grooves for consistent flight.",
     "sku": "GA-FB-2024-007",
@@ -471,6 +471,117 @@
     "review": 4.6,
     "description": "Agile, lightweight shoes designed for quick footwork.",
     "sku": "AD-BX-2024-014",
+    "status": "Published"
+  },
+  {
+    "id": 15,
+    "name": "Women's Power Training Tee",
+    "series": "Athletic Compression / Breathable Fit",
+    "price": 1400,
+    "brand": "Adidas",
+    "sizes": [
+      "S",
+      "M",
+      "L"
+    ],
+    "colorNames": [
+      "Blue"
+    ],
+    "colors": [
+      "bg-[#1e88e5]"
+    ],
+    "image": "image/adidasBl02.png",
+    "productType": "clothes",
+    "clothesType": "top",
+    "sportType": "Running",
+    "targetGroup": "women",
+    "fabricMaterial": "polyester",
+    "amount": 80,
+    "review": 4.7,
+    "description": "High-performance women's athletic tee designed for running and training.",
+    "sku": "AD-WT-2026-015",
+    "status": "Published"
+  },
+  {
+    "id": 16,
+    "name": "Elite Run Shorts",
+    "series": "Lightweight Endurance / Active Comfort",
+    "price": 1750,
+    "brand": "Puma",
+    "sizes": [
+      "S",
+      "M",
+      "L"
+    ],
+    "colorNames": [
+      "Orange"
+    ],
+    "colors": [
+      "bg-primary"
+    ],
+    "image": "image/pumaOr03.webp",
+    "productType": "clothes",
+    "clothesType": "bottom",
+    "sportType": "Running",
+    "targetGroup": "women",
+    "fabricMaterial": "polyester",
+    "amount": 65,
+    "review": 4.6,
+    "description": "Premium lightweight running shorts for maximum endurance and movement.",
+    "sku": "PM-WS-2026-016",
+    "status": "Published"
+  },
+  {
+    "id": 17,
+    "name": "Kid's Breathable Socks",
+    "series": "Anatomical Fit / Zero Friction",
+    "price": 450,
+    "brand": "Puma",
+    "sizes": [
+      "S",
+      "M"
+    ],
+    "colorNames": [
+      "White"
+    ],
+    "colors": [
+      "bg-[#ffffff]"
+    ],
+    "image": "image/pumaW05.png",
+    "productType": "clothes",
+    "clothesType": "sock",
+    "sportType": "Running",
+    "targetGroup": "kid",
+    "fabricMaterial": "cotton",
+    "amount": 150,
+    "review": 4.5,
+    "description": "Comfortable, blister-free athletic socks designed specifically for active kids.",
+    "sku": "PM-KS-2026-017",
+    "status": "Published"
+  },
+  {
+    "id": 18,
+    "name": "Junior Hydro-Fast Goggles",
+    "series": "Anti-Fog UV Protection / Soft Seal",
+    "price": 850,
+    "brand": "Adidas",
+    "sizes": [
+      "S"
+    ],
+    "colorNames": [
+      "Black"
+    ],
+    "colors": [
+      "bg-[#111111]"
+    ],
+    "image": "image/adidasB08.png",
+    "productType": "equipment",
+    "sportType": "Swimming",
+    "targetGroup": "kid",
+    "amount": 90,
+    "review": 4.8,
+    "description": "High-durability hydrodynamic swimming goggles designed for children's training.",
+    "sku": "AD-KG-2026-018",
     "status": "Published"
   }
 ]

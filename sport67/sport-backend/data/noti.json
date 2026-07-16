@@ -28,5 +28,14 @@
       "status": "Preparing",
       "read": true
     }
+  ],
+  "guest": [
+    {
+      "id": "#GOGO-355418",
+      "date": "JUL 17, 2026",
+      "title": "Purchase successful!",
+      "status": "Preparing",
+      "read": true
+    }
   ]
 }
