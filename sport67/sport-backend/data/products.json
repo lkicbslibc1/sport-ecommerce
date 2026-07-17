@@ -6,38 +6,86 @@
     "price": 4500,
     "brand": "Nike",
     "sizes": [
+      "38",
       "39",
       "40",
       "41",
       "42",
       "43",
-      "44"
+      "44",
+      "45"
     ],
     "colorNames": [
       "Orange",
-      "Black"
+      "Black",
+      "Green"
     ],
     "badge": "Best Seller",
     "badgeType": "primary",
     "colors": [
       "bg-primary",
-      "bg-surface-container-highest"
+      "bg-black border border-white/20",
+      "bg-green-500"
     ],
     "image": "image/nikeOr01.png",
     "colorImages": {
-      "Orange": "image/nikeOr01.png",
-      "Black": "image/nikeB01.png"
+      "orange": "image/nikeOr01.png",
+      "black": "image/nikeOr01.png",
+      "green": "image/1784285570957.png"
     },
     "productType": "clothes",
     "clothesType": "shoes",
     "sportType": "Running",
     "targetGroup": "men",
     "fabricMaterial": "polyester",
-    "amount": 120,
+    "amount": 117,
     "review": 4.9,
     "description": "Premium carbon-plated road racing shoe built for speed.",
     "sku": "GA-FW-2024-001",
-    "status": "Published"
+    "status": "Published",
+    "colorVariants": [
+      {
+        "color": "orange",
+        "colorClass": "bg-primary",
+        "image": "image/nikeOr01.png",
+        "amount": 0,
+        "stock": {
+          "38": 7,
+          "39": 7,
+          "40": 7,
+          "41": 8,
+          "42": 10,
+          "43": 7,
+          "44": 7,
+          "45": 7
+        }
+      },
+      {
+        "color": "black",
+        "colorClass": "bg-black border border-white/20",
+        "image": "image/nikeOr01.png",
+        "amount": 0,
+        "stock": {
+          "38": 7,
+          "39": 7,
+          "40": 7,
+          "41": 7,
+          "42": 7,
+          "43": 7,
+          "44": 7,
+          "45": 7
+        }
+      },
+      {
+        "color": "green",
+        "colorClass": "bg-green-500",
+        "image": "image/1784285570957.png",
+        "amount": 0,
+        "stock": {
+          "40": 5
+        }
+      }
+    ]
   },
   {
     "id": 2,
@@ -142,7 +190,7 @@
     "sportType": "Running",
     "targetGroup": "women",
     "fabricMaterial": "polyester",
-    "amount": 137,
+    "amount": 134,
     "review": 4.8,
     "description": "Maximum cushioning daily trainer for plush recovery runs.",
     "sku": "GA-FW-2024-004",
@@ -578,10 +626,46 @@
     "productType": "equipment",
     "sportType": "Swimming",
     "targetGroup": "kid",
-    "amount": 90,
+    "amount": 86,
     "review": 4.8,
     "description": "High-durability hydrodynamic swimming goggles designed for children's training.",
     "sku": "AD-KG-2026-018",
     "status": "Published"
+  },
+  {
+    "id": 19,
+    "name": "roblox guy",
+    "sku": "GA-FW-2024-0010",
+    "price": 90000,
+    "brand": "Adidas",
+    "sportType": "Swimming",
+    "targetGroup": "men",
+    "amount": 20,
+    "image": "image/1784286746252.png",
+    "colorNames": [
+      "Orange"
+    ],
+    "colors": [
+      "bg-primary"
+    ],
+    "colorImages": {
+      "orange": "image/1784286746252.png"
+    },
+    "sizes": [
+      "One Size"
+    ],
+    "description": "iluuuuuuuuuuuuuuuuuuuuuuuuuu",
+    "status": "Published",
+    "productType": "equipment",
+    "clothesType": "",
+    "colorVariants": [
+      {
+        "color": "orange",
+        "colorClass": "bg-primary",
+        "image": "image/1784286746252.png",
+        "amount": 20,
+        "stock": {}
+      }
+    ]
   }
 ]

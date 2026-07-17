@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '../navbar.jsx';
-import { getStoredReviews } from '../data/products.jsx';
+import { getStoredReviews, getVariantImage, getVariantStock, getSizeOptions } from '../data/products.jsx';
 import { Star, UserCircle } from 'lucide-react';
 
 function formatPrice(n) {
@@ -12,15 +12,42 @@ export default function ProductDetails({ onViewChange, product, user, setUser, c
     window.scrollTo(0, 0);
   }, []);
 
-  const [selectedColor, setSelectedColor] = useState(product?.colorNames?.[0] || '');
-  const [selectedSize, setSelectedSize] = useState(product?.sizes?.[0] || '');
+  // Use colorVariants if present, fall back to legacy colorNames
+  const colorVariants = product?.colorVariants || [];
+  const hasVariants = colorVariants.length > 0;
+  const firstColor = hasVariants ? colorVariants[0].color : (product?.colorNames?.[0] || '');
+  const [selectedColor, setSelectedColor] = useState(firstColor);
+
+  // Compute sizes based on productType/clothesType
+  const sizes = getSizeOptions(product?.productType, product?.clothesType);
+  const [selectedSize, setSelectedSize] = useState(sizes[0] || '');
   const [quantity, setQuantity] = useState(1);
   const [showLoginPopup, setShowLoginPopup] = useState(false);
 
   if (!product) return null;
 
-  const productReviews = getStoredReviews()[product.id] || [];
-  
+  // Get image for currently selected color
+  const currentImage = hasVariants
+    ? getVariantImage(product, selectedColor)
+    : (product.colorImages && product.colorImages[selectedColor] ? product.colorImages[selectedColor] : product.image);
+
+  // Get stock for selected color + size
+  const currentStock = hasVariants
+    ? getVariantStock(product, selectedColor, selectedSize)
+    : product.amount;
+
+  const [reviews, setReviews] = useState({});
+
+  useEffect(() => {
+    async function fetchReviews() {
+      const data = await getStoredReviews();
+      if (data) setReviews(data);
+    }
+    fetchReviews();
+  }, []);
+
+  const productReviews = reviews[product?.id] || [];
+
   let averageRating;
   let reviewCountText;
   if (productReviews.length > 0) {
@@ -32,15 +59,13 @@ export default function ProductDetails({ onViewChange, product, user, setUser, c
     reviewCountText = "0 Reviews";
   }
 
-  const currentImage = product.colorImages && product.colorImages[selectedColor]
-    ? product.colorImages[selectedColor]
-    : product.image;
 
   const handleAddToCart = () => {
     if (!user) {
       setShowLoginPopup(true);
       return;
     }
+    if (currentStock <= 0) return;
     const productToAdd = {
       ...product,
       cartId: `${product.id}-${selectedColor}-${selectedSize}`,
@@ -94,7 +119,7 @@ export default function ProductDetails({ onViewChange, product, user, setUser, c
               <div className="flex items-end gap-6">
                 <p className="text-3xl font-anybody font-black italic text-primary">{formatPrice(product.price * quantity)}</p>
                 <p className="text-sm text-on-surface-variant uppercase tracking-widest font-bold mb-1">
-                  {product.amount > 0 ? `${product.amount} items in stock` : <span className="text-[#ffb4ab]">Out of Stock</span>}
+                  {currentStock > 0 ? `${currentStock} in stock` : <span className="text-[#ffb4ab]">Out of Stock</span>}
                 </p>
               </div>
             </div>
@@ -102,7 +127,33 @@ export default function ProductDetails({ onViewChange, product, user, setUser, c
             <div className="w-full h-[1px] bg-white/10 mb-8"></div>
 
             {/* Colors */}
-            {product.colorNames && product.colorNames.length > 0 && (
+            {hasVariants ? (
+              <div className="mb-8">
+                <h3 className="font-anybody font-black text-sm uppercase tracking-widest mb-4">
+                  Select Color: <span className="text-on-surface-variant font-medium normal-case tracking-normal capitalize">{selectedColor}</span>
+                </h3>
+                <div className="flex flex-wrap gap-4">
+                  {colorVariants.map((v) => (
+                    <button
+                      key={v.color}
+                      onClick={() => {
+                        setSelectedColor(v.color);
+                        // Reset size selection to first available size for this color
+                        const firstAvailSize = sizes.find(s => (v.stock?.[s] || 0) > 0) || sizes[0] || '';
+                        setSelectedSize(firstAvailSize);
+                        setQuantity(1);
+                      }}
+                      className={`w-12 h-12 rounded-full border-2 ${selectedColor === v.color ? 'border-primary' : 'border-transparent'} p-1 transition-all flex items-center justify-center group`}
+                    >
+                      <div
+                        className={`w-full h-full rounded-full ${v.colorClass || 'bg-white/20'} border border-white/10`}
+                        title={v.color}
+                      />
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : product.colorNames && product.colorNames.length > 0 && (
               <div className="mb-8">
                 <h3 className="font-anybody font-black text-sm uppercase tracking-widest mb-4">Select Color: <span className="text-on-surface-variant font-medium normal-case tracking-normal">{selectedColor}</span></h3>
                 <div className="flex flex-wrap gap-4">
@@ -123,22 +174,37 @@ export default function ProductDetails({ onViewChange, product, user, setUser, c
             )}
 
             {/* Sizes */}
-            {product.sizes && product.sizes.length > 0 && (
+            {sizes.length > 0 && (
               <div className="mb-8">
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="font-anybody font-black text-sm uppercase tracking-widest">Select Size</h3>
                   <a href="#" className="text-xs text-on-surface-variant underline hover:text-primary transition-colors">Size Guide</a>
                 </div>
                 <div className="grid grid-cols-4 sm:grid-cols-5 gap-3">
-                  {product.sizes.map((size) => (
-                    <button
-                      key={size}
-                      onClick={() => setSelectedSize(size)}
-                      className={`py-4 border font-bold uppercase transition-all ${selectedSize === size ? 'bg-primary text-white border-primary' : 'border-white/20 text-on-surface-variant hover:border-primary hover:text-primary'}`}
-                    >
-                      {size}
-                    </button>
-                  ))}
+                  {sizes.map((size) => {
+                    const sizeStock = hasVariants ? getVariantStock(product, selectedColor, size) : (product.amount || 0);
+                    const outOfStock = sizeStock <= 0;
+                    return (
+                      <button
+                        key={size}
+                        onClick={() => { if (!outOfStock) { setSelectedSize(size); setQuantity(1); } }}
+                        disabled={outOfStock}
+                        title={outOfStock ? 'Out of Stock' : `${sizeStock} left`}
+                        className={`py-4 border font-bold uppercase transition-all relative ${
+                          outOfStock
+                            ? 'border-white/10 text-white/20 cursor-not-allowed line-through'
+                            : selectedSize === size
+                              ? 'bg-primary text-white border-primary'
+                              : 'border-white/20 text-on-surface-variant hover:border-primary hover:text-primary'
+                        }`}
+                      >
+                        {size}
+                        {!outOfStock && hasVariants && (
+                          <span className="absolute top-0.5 right-1 text-[8px] text-on-surface-variant font-normal">{sizeStock}</span>
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -147,20 +213,20 @@ export default function ProductDetails({ onViewChange, product, user, setUser, c
             <div className="mb-10">
                <h3 className="font-anybody font-black text-sm uppercase tracking-widest mb-4">Quantity</h3>
                <div className="flex items-center border border-white/20 w-max">
-                 <button 
+                 <button
                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
                    className="w-12 h-12 flex items-center justify-center hover:bg-white/5 transition-colors text-xl"
                  >
                    -
                  </button>
-                 <input 
+                 <input
                    type="text"
                    value={quantity}
                    onChange={(e) => {
                      let val = e.target.value.replace(/\D/g, '');
                      if (val !== '') {
                        let num = parseInt(val, 10);
-                       if (num > product.amount) num = product.amount;
+                       if (num > currentStock) num = currentStock;
                        setQuantity(num);
                      } else {
                        setQuantity('');
@@ -171,10 +237,10 @@ export default function ProductDetails({ onViewChange, product, user, setUser, c
                    }}
                    className="w-16 h-12 text-center font-bold text-lg border-x border-white/20 bg-transparent outline-none focus:bg-white/5 transition-colors"
                  />
-                 <button 
-                   onClick={() => setQuantity(Math.min(product.amount, quantity + 1))}
-                   disabled={quantity >= product.amount}
-                   className={`w-12 h-12 flex items-center justify-center transition-colors text-xl ${quantity >= product.amount ? 'opacity-30 cursor-not-allowed' : 'hover:bg-white/5'}`}
+                 <button
+                   onClick={() => setQuantity(Math.min(currentStock, quantity + 1))}
+                   disabled={quantity >= currentStock}
+                   className={`w-12 h-12 flex items-center justify-center transition-colors text-xl ${quantity >= currentStock ? 'opacity-30 cursor-not-allowed' : 'hover:bg-white/5'}`}
                  >
                    +
                  </button>
@@ -184,11 +250,11 @@ export default function ProductDetails({ onViewChange, product, user, setUser, c
             {/* Add to Cart */}
             <button
               onClick={handleAddToCart}
-              disabled={product.amount === 0}
-              className={`w-full py-6 font-anybody font-black text-lg uppercase tracking-widest transition-all duration-300 transform flex items-center justify-center gap-4 mb-12 ${product.amount > 0 ? 'bg-primary hover:bg-orange-600 text-white hover:scale-[1.02] shadow-[0_0_20px_rgba(255,107,0,0.3)] hover:shadow-[0_0_30px_rgba(255,107,0,0.5)]' : 'bg-surface-container-high text-on-surface-variant cursor-not-allowed border border-white/10'}`}
+              disabled={currentStock === 0}
+              className={`w-full py-6 font-anybody font-black text-lg uppercase tracking-widest transition-all duration-300 transform flex items-center justify-center gap-4 mb-12 ${currentStock > 0 ? 'bg-primary hover:bg-orange-600 text-white hover:scale-[1.02] shadow-[0_0_20px_rgba(255,107,0,0.3)] hover:shadow-[0_0_30px_rgba(255,107,0,0.5)]' : 'bg-surface-container-high text-on-surface-variant cursor-not-allowed border border-white/10'}`}
             >
-              <span className="material-symbols-outlined">{!user ? 'lock' : (product.amount > 0 ? 'shopping_bag' : 'remove_shopping_cart')}</span>
-              {!user ? 'Login Required' : (product.amount > 0 ? 'Add to Bag' : 'Out of Stock')}
+              <span className="material-symbols-outlined">{!user ? 'lock' : (currentStock > 0 ? 'shopping_bag' : 'remove_shopping_cart')}</span>
+              {!user ? 'Login Required' : (currentStock > 0 ? 'Add to Bag' : 'Out of Stock')}
             </button>
 
             {/* Product Details Section */}

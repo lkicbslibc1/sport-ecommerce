@@ -1,7 +1,6 @@
 import React, { useState, useMemo, useContext } from "react";
 import Sidebar from "./Sidebar.jsx";
 import {
-    Boxes,
     Search,
     Bell,
     UserCircle,
@@ -14,9 +13,11 @@ import {
     Package,
     ArrowUpDown,
     ChevronUp,
-    ChevronDown
+    ChevronDown,
+    Upload,
+    ImageIcon
 } from "lucide-react";
-import { ProductContext } from "../data/products.jsx";
+import { ProductContext, getSizeOptions, getTotalStock } from "../data/products.jsx";
 import { useAlert } from "../contexts/AlertContext.jsx";
 
 const STATUS_STYLES = {
@@ -102,6 +103,15 @@ const COLOR_NAMES = [
     "green", "orange", "pink", "beige", "brown", "grey", "mixed"
 ];
 
+// Default empty color variant
+const makeEmptyVariant = (color = "") => ({
+    color,
+    colorClass: COLOR_CLASSES[color] || "bg-white",
+    image: "",
+    amount: 0,       // used when no sizes (equipment)
+    stock: {}        // { "S": 10, "M": 5, ... } or { "38": 3, ... }
+});
+
 export default function GogoAthleticProducts({ onNavigate, onViewChange, user, setUser }) {
     const { showAlert } = useAlert();
     const { products, addProduct, updateProduct, deleteProduct } = useContext(ProductContext);
@@ -119,9 +129,13 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange, user, s
     const [stockModalOpen, setStockModalOpen] = useState(false);
     const [currentProduct, setCurrentProduct] = useState(null);
     const [selectedItem, setSelectedItem] = useState(null);
+    const [adjustQtyColor, setAdjustQtyColor] = useState("");
+    const [adjustQtySize, setAdjustQtySize] = useState("");
     const [newQty, setNewQty] = useState("");
     const [adjustmentReason, setAdjustmentReason] = useState("Restock Received");
-    const [selectedColors, setSelectedColors] = useState([]);
+
+    // Color variants: array of { color, colorClass, image, amount, stock: {size: qty} }
+    const [colorVariants, setColorVariants] = useState([makeEmptyVariant()]);
 
     const [formFields, setFormFields] = useState({
         name: "",
@@ -130,13 +144,14 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange, user, s
         brand: "Nike",
         sportType: "Running",
         targetGroup: "men",
-        amount: "100",
-        image: "",
         description: "",
         status: "Published",
         productType: "clothes",
         clothesType: "shoes"
     });
+
+    // Compute sizes for current form selection
+    const currentSizes = useMemo(() => getSizeOptions(formFields.productType, formFields.clothesType), [formFields.productType, formFields.clothesType]);
 
     const handleOpenAdd = () => {
         setCurrentProduct(null);
@@ -154,7 +169,7 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange, user, s
             productType: "clothes",
             clothesType: "shoes"
         });
-        setSelectedColors(["orange", "black"]);
+        setColorVariants([makeEmptyVariant("orange")]);
         setModalOpen(true);
     };
 
@@ -167,24 +182,99 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange, user, s
             brand: product.brand || "Nike",
             sportType: product.sportType || "Running",
             targetGroup: product.targetGroup || "men",
-            amount: product.amount ? product.amount.toString() : "100",
-            image: product.image || "",
             description: product.description || "",
             status: product.status || "Published",
             productType: product.productType || "clothes",
-            clothesType: product.clothesType || ""
+            clothesType: product.clothesType || "shoes"
         });
-        const initialColors = product.colorNames 
-            ? product.colorNames.map(c => c.toLowerCase()) 
-            : [];
-        setSelectedColors(initialColors);
+        // Restore colorVariants from product data
+        if (product.colorVariants && product.colorVariants.length > 0) {
+            setColorVariants(product.colorVariants.map(v => ({ ...v, stock: v.stock || {}, amount: v.amount || 0 })));
+        } else {
+            // Fallback: build from old colorNames
+            const oldColors = product.colorNames ? product.colorNames.map(c => c.toLowerCase()) : ["black"];
+            const sizes = getSizeOptions(product.productType, product.clothesType);
+            setColorVariants(oldColors.map(color => {
+                const variant = makeEmptyVariant(color);
+                variant.image = product.colorImages?.[color] || product.image || "";
+                if (sizes.length > 0) {
+                    variant.stock = Object.fromEntries(sizes.map(s => [s, Math.floor((product.amount || 0) / (oldColors.length * sizes.length))])); 
+                } else {
+                    variant.amount = Math.floor((product.amount || 0) / oldColors.length);
+                }
+                return variant;
+            }));
+        }
         setModalOpen(true);
     };
 
     const handleOpenAdjust = (item) => {
         setSelectedItem(item);
-        setNewQty(item.amount.toString());
+        const firstVariant = item.colorVariants?.[0];
+        const initColor = firstVariant?.color || item.colorNames?.[0]?.toLowerCase() || "";
+        setAdjustQtyColor(initColor);
+        const sizes = getSizeOptions(item.productType, item.clothesType);
+        setAdjustQtySize(sizes[0] || "");
+        const initStock = firstVariant?.stock?.[sizes[0]] ?? firstVariant?.amount ?? item.amount;
+        setNewQty(String(initStock));
         setStockModalOpen(true);
+    };
+
+    // ---- Variant helpers ----
+    const handleVariantColorChange = (idx, color) => {
+        setColorVariants(prev => prev.map((v, i) => i === idx ? { ...v, color, colorClass: COLOR_CLASSES[color] || "bg-white" } : v));
+    };
+
+    const handleVariantImageFile = (idx, e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onloadend = async () => {
+            const base64Data = reader.result;
+            // Show local preview immediately
+            setColorVariants(prev => prev.map((v, i) => i === idx ? { ...v, image: base64Data } : v));
+            try {
+                const res = await fetch('http://localhost:5000/api/upload', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ image: base64Data })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    // Update variant image with server URL
+                    setColorVariants(prev => prev.map((v, i) => i === idx ? { ...v, image: data.url } : v));
+                } else {
+                    showAlert(data.message || 'Image upload failed', 'error');
+                }
+            } catch (err) {
+                console.error("Upload error:", err);
+                showAlert('Failed to upload image', 'error');
+            }
+        };
+        reader.readAsDataURL(file);
+    };
+
+    const handleVariantImageUrl = (idx, url) => {
+        setColorVariants(prev => prev.map((v, i) => i === idx ? { ...v, image: url } : v));
+    };
+
+    const handleVariantStockChange = (idx, size, value) => {
+        setColorVariants(prev => prev.map((v, i) => {
+            if (i !== idx) return v;
+            if (size === "__amount") return { ...v, amount: parseInt(value) || 0 };
+            return { ...v, stock: { ...v.stock, [size]: parseInt(value) || 0 } };
+        }));
+    };
+
+    const handleAddVariant = () => {
+        const usedColors = colorVariants.map(v => v.color);
+        const nextColor = COLOR_NAMES.find(c => !usedColors.includes(c)) || "";
+        setColorVariants(prev => [...prev, makeEmptyVariant(nextColor)]);
+    };
+
+    const handleRemoveVariant = (idx) => {
+        if (colorVariants.length <= 1) { showAlert("At least one color variant is required.", "warning"); return; }
+        setColorVariants(prev => prev.filter((_, i) => i !== idx));
     };
 
     const handleStockFormSubmit = (e) => {
@@ -195,13 +285,27 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange, user, s
             showAlert("Please enter a valid stock quantity.", "warning");
             return;
         }
-
-        updateProduct({
-            id: selectedItem.id,
-            amount: qtyNum
+        const sizes = getSizeOptions(selectedItem.productType, selectedItem.clothesType);
+        let updatedVariants = (selectedItem.colorVariants || []).map(v => ({ ...v, stock: { ...v.stock } }));
+        const variantIdx = updatedVariants.findIndex(v => v.color === adjustQtyColor);
+        if (variantIdx === -1) {
+            showAlert("Color variant not found.", "warning");
+            return;
+        }
+        if (sizes.length === 0) {
+            updatedVariants[variantIdx].amount = qtyNum;
+        } else {
+            updatedVariants[variantIdx].stock[adjustQtySize] = qtyNum;
+        }
+        // Recalculate total amount
+        let total = 0;
+        updatedVariants.forEach(v => {
+            if (sizes.length === 0) { total += v.amount || 0; }
+            else { Object.values(v.stock || {}).forEach(q => { total += parseInt(q) || 0; }); }
         });
-
+        updateProduct({ id: selectedItem.id, colorVariants: updatedVariants, amount: total });
         setStockModalOpen(false);
+        showAlert("Stock updated successfully.", "success");
     };
 
     const handleInputChange = (e) => {
@@ -209,33 +313,35 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange, user, s
         setFormFields(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleToggleColor = (color) => {
-        if (selectedColors.includes(color)) {
-            setSelectedColors(selectedColors.filter(c => c !== color));
-        } else {
-            setSelectedColors([...selectedColors, color]);
-        }
-    };
-
-    const handleFileChange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setFormFields(prev => ({ ...prev, image: reader.result }));
-            };
-            reader.readAsDataURL(file);
-        }
-    };
-
     const handleFormSubmit = (e) => {
         e.preventDefault();
-        if (!formFields.image) {
-            showAlert("Please upload an image file or enter an image URL.", "warning");
+        // Validate: every variant must have an image
+        const missingImage = colorVariants.some(v => !v.image);
+        if (missingImage) {
+            showAlert("Please upload or enter an image for every color variant.", "warning");
             return;
         }
+        if (colorVariants.length === 0) {
+            showAlert("Please add at least one color variant.", "warning");
+            return;
+        }
+
+        // Validate duplicate name
+        const isDuplicateName = products.some(p => p.name.toLowerCase().trim() === formFields.name.toLowerCase().trim() && p.id !== currentProduct?.id);
+        if (isDuplicateName) {
+            showAlert("A product with this name already exists.", "error");
+            return;
+        }
+
         const priceNum = parseFloat(formFields.price) || 0;
-        const amountNum = parseInt(formFields.amount) || 0;
+        const sizes = getSizeOptions(formFields.productType, formFields.clothesType);
+
+        // Compute total amount from variants
+        let totalAmount = 0;
+        colorVariants.forEach(v => {
+            if (sizes.length === 0) { totalAmount += v.amount || 0; }
+            else { Object.values(v.stock || {}).forEach(q => { totalAmount += parseInt(q) || 0; }); }
+        });
 
         let generatedSku = formFields.sku;
         if (!generatedSku) {
@@ -256,6 +362,13 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange, user, s
             generatedSku = `GA-${catCode}-${currentYear}-${seqStr}`;
         }
 
+        // Validate duplicate SKU
+        const isDuplicateSku = products.some(p => p.sku.toLowerCase().trim() === generatedSku.toLowerCase().trim() && p.id !== currentProduct?.id);
+        if (isDuplicateSku) {
+            showAlert("A product with this SKU already exists.", "error");
+            return;
+        }
+
         const productData = {
             name: formFields.name,
             sku: generatedSku,
@@ -263,17 +376,25 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange, user, s
             brand: formFields.brand,
             sportType: formFields.sportType,
             targetGroup: formFields.targetGroup,
-            amount: amountNum,
-            image: formFields.image,
+            amount: totalAmount,
+            // Legacy fields for backward-compat with old shopping pages
+            image: colorVariants[0]?.image || "",
+            colorNames: colorVariants.map(v => v.color.charAt(0).toUpperCase() + v.color.slice(1)),
+            colors: colorVariants.map(v => v.colorClass || COLOR_CLASSES[v.color] || "bg-white"),
+            colorImages: Object.fromEntries(colorVariants.map(v => [v.color, v.image])),
+            sizes: sizes.length > 0 ? sizes : ["One Size"],
             description: formFields.description,
             status: formFields.status,
             productType: formFields.productType,
             clothesType: formFields.productType === "clothes" ? formFields.clothesType : "",
-            colorNames: selectedColors.map(c => c.charAt(0).toUpperCase() + c.slice(1)),
-            colors: selectedColors.map(c => COLOR_CLASSES[c] || "bg-white"),
-            sizes: formFields.productType === "clothes" && formFields.clothesType !== "hat" 
-                ? ["S", "M", "L", "XL"] 
-                : ["M"]
+            // New variant model
+            colorVariants: colorVariants.map(v => ({
+                color: v.color,
+                colorClass: v.colorClass || COLOR_CLASSES[v.color] || "bg-white",
+                image: v.image,
+                amount: v.amount || 0,
+                stock: v.stock || {}
+            }))
         };
 
         if (currentProduct) {
@@ -284,7 +405,7 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange, user, s
                 ...productData
             });
         }
-
+        showAlert(currentProduct ? "Product updated!" : "Product added!", "success");
         setModalOpen(false);
     };
 
@@ -685,7 +806,7 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange, user, s
             {/* ADD / EDIT PRODUCT MODAL */}
             {modalOpen && (
                 <div className="fixed inset-0 bg-neutral-950/95 backdrop-blur-2xl z-[100] flex items-center justify-center p-4">
-                    <div className="w-full max-w-2xl bg-neutral-900 border border-orange-300/20 relative flex flex-col max-h-[90vh] my-auto">
+                    <div className="w-full max-w-3xl bg-neutral-900 border border-orange-300/20 relative flex flex-col max-h-[90vh] my-auto">
                         <div className="p-8 sm:px-12 sm:pt-10 pb-4 border-b border-white/5 flex justify-between items-center shrink-0">
                             <h3 className="text-2xl sm:text-3xl uppercase italic font-black border-b-4 border-orange-300 inline-block pb-2">
                                 {currentProduct ? "Edit Product" : "Add Product"}
@@ -807,93 +928,122 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange, user, s
                                         </select>
                                     </div>
                                 </div>
-                                <div className="grid grid-cols-2 gap-6">
-                                    <div className="flex flex-col gap-2">
-                                        <label className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold">Stock Amount</label>
-                                        <input 
-                                            type="number" 
-                                            name="amount"
-                                            value={formFields.amount}
-                                            onChange={handleInputChange}
-                                            required
-                                            placeholder="100" 
-                                            className="bg-white/5 border border-white/10 focus:border-orange-300 focus:ring-0 py-4 px-6 text-sm w-full outline-none" 
-                                        />
-                                    </div>
-                                    <div className="flex flex-col gap-2">
-                                        <label className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold">Status</label>
-                                        <select 
-                                            name="status"
-                                            value={formFields.status}
-                                            onChange={handleInputChange}
-                                            className="bg-white/5 border border-white/10 focus:border-orange-300 focus:ring-0 py-4 px-6 uppercase text-sm w-full bg-neutral-900 text-neutral-100"
-                                        >
-                                            <option value="Published" className="bg-neutral-950 text-neutral-100">Published</option>
-                                            <option value="Draft" className="bg-neutral-950 text-neutral-100">Draft</option>
-                                        </select>
-                                    </div>
-                                </div>
                                 <div className="flex flex-col gap-2">
-                                    <label className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold">Available Colors (Select multiple)</label>
-                                    <div className="flex flex-wrap gap-3 bg-white/5 p-6 border border-white/5">
-                                        {COLOR_NAMES.map(color => {
-                                            const isSelected = selectedColors.includes(color);
-                                            const bgClass = COLOR_CLASSES[color];
-                                            return (
-                                                <button
-                                                    key={color}
-                                                    type="button"
-                                                    onClick={() => handleToggleColor(color)}
-                                                    className={`px-3 py-1.5 flex items-center gap-2 text-xs uppercase font-black transition-all border ${
-                                                        isSelected 
-                                                            ? "border-orange-300 text-orange-300 bg-white/5" 
-                                                            : "border-white/10 text-neutral-400 hover:border-white/30"
-                                                    }`}
-                                                >
-                                                    <span className={`w-3.5 h-3.5 rounded-full ${bgClass}`} />
-                                                    {color}
-                                                </button>
-                                            );
-                                        })}
-                                    </div>
+                                    <label className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold">Status</label>
+                                    <select 
+                                        name="status"
+                                        value={formFields.status}
+                                        onChange={handleInputChange}
+                                        className="bg-white/5 border border-white/10 focus:border-orange-300 focus:ring-0 py-4 px-6 uppercase text-sm w-full bg-neutral-900 text-neutral-100"
+                                    >
+                                        <option value="Published" className="bg-neutral-950 text-neutral-100">Published</option>
+                                        <option value="Draft" className="bg-neutral-950 text-neutral-100">Draft</option>
+                                    </select>
                                 </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div className="flex flex-col gap-2">
-                                        <label className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold">Upload Image File</label>
-                                        <input 
-                                            type="file" 
-                                            accept="image/*"
-                                            onChange={handleFileChange}
-                                            className="bg-white/5 border border-white/10 focus:border-orange-300 focus:ring-0 py-3.5 px-6 text-xs w-full outline-none file:mr-4 file:py-1 file:px-3 file:border-0 file:text-[10px] file:font-black file:bg-orange-300 file:text-neutral-950 hover:file:bg-orange-400 cursor-pointer" 
-                                        />
-                                    </div>
-                                    <div className="flex flex-col gap-2">
-                                        <label className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold">Or Image URL</label>
-                                        <input 
-                                            type="text" 
-                                            name="image"
-                                            value={formFields.image}
-                                            onChange={handleInputChange}
-                                            placeholder="HTTPS://..." 
-                                            className="bg-white/5 border border-white/10 focus:border-orange-300 focus:ring-0 py-4 px-6 text-sm w-full outline-none" 
-                                        />
-                                    </div>
-                                </div>
-                                {formFields.image && (
-                                    <div className="flex items-center gap-4 bg-white/5 border border-white/5 p-4">
-                                        <span className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold">Image Preview:</span>
-                                        <div className="w-16 h-16 bg-neutral-950 border border-white/10 overflow-hidden flex items-center justify-center">
-                                            <img src={formFields.image} className="w-full h-full object-cover" alt="Preview" />
-                                        </div>
-                                        <button 
-                                            type="button"
-                                            onClick={() => setFormFields(prev => ({ ...prev, image: "" }))}
-                                            className="text-red-400 text-[10px] uppercase tracking-widest font-black underline ml-auto"
-                                        >
-                                            Clear Image
+
+                                {/* Color Variants & Stock */}
+                                <div className="flex flex-col gap-4 mt-6 border-t border-white/10 pt-6">
+                                    <div className="flex items-center justify-between">
+                                        <label className="text-sm uppercase tracking-widest text-neutral-100 font-black italic">
+                                            Color Variants & Stock
+                                        </label>
+                                        <button type="button" onClick={handleAddVariant} className="flex items-center gap-2 text-xs uppercase font-black text-orange-300 hover:text-orange-400">
+                                            <Plus size={14} /> Add Color
                                         </button>
                                     </div>
-                                )}
+                                    
+                                    <div className="space-y-4">
+                                        {colorVariants.map((variant, index) => (
+                                            <div key={index} className="bg-white/5 border border-white/10 p-6 flex flex-col gap-6 relative">
+                                                <button type="button" onClick={() => handleRemoveVariant(index)} className="absolute top-4 right-4 text-neutral-500 hover:text-red-400">
+                                                    <Trash2 size={16} />
+                                                </button>
+                                                
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                    {/* Color Select */}
+                                                    <div className="flex flex-col gap-2">
+                                                        <label className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold">Color</label>
+                                                        <select 
+                                                            value={variant.color}
+                                                            onChange={(e) => handleVariantColorChange(index, e.target.value)}
+                                                            className="bg-neutral-900 border border-white/10 py-3 px-4 uppercase text-sm"
+                                                        >
+                                                            <option value="">Select Color</option>
+                                                            {COLOR_NAMES.map(c => <option key={c} value={c}>{c}</option>)}
+                                                        </select>
+                                                    </div>
+                                                    
+                                                    {/* Image Upload */}
+                                                    <div className="flex flex-col gap-2">
+                                                        <label className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold">Image (Required)</label>
+                                                        <div className="flex gap-2">
+                                                            <label className="flex-1 bg-neutral-900 border border-white/10 py-3 px-4 flex items-center justify-center gap-2 cursor-pointer hover:border-orange-300 transition-colors">
+                                                                <Upload size={14} className="text-neutral-400" />
+                                                                <span className="text-xs uppercase text-neutral-400 font-bold">Upload</span>
+                                                                <input type="file" accept="image/*" className="hidden" onChange={(e) => handleVariantImageFile(index, e)} />
+                                                            </label>
+                                                            <button 
+                                                                type="button" 
+                                                                onClick={() => {
+                                                                    const url = prompt("Enter Image URL:", variant.image);
+                                                                    if (url !== null) handleVariantImageUrl(index, url);
+                                                                }}
+                                                                className="flex-1 bg-neutral-900 border border-white/10 py-3 px-4 flex items-center justify-center gap-2 hover:border-orange-300 transition-colors"
+                                                            >
+                                                                <ImageIcon size={14} className="text-neutral-400" />
+                                                                <span className="text-xs uppercase text-neutral-400 font-bold">URL</span>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {/* Image Preview */}
+                                                {variant.image && (
+                                                    <div className="flex items-center gap-4">
+                                                        <div className="w-16 h-16 bg-neutral-950 border border-white/10 p-1">
+                                                            <img src={variant.image} className="w-full h-full object-cover" alt="Variant" />
+                                                        </div>
+                                                        <span className="text-[10px] text-green-400 uppercase font-bold">Image Ready</span>
+                                                    </div>
+                                                )}
+
+                                                {/* Stock Input */}
+                                                <div className="flex flex-col gap-2 pt-4 border-t border-white/5">
+                                                    <label className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold">
+                                                        {currentSizes.length > 0 ? "Stock per Size" : "Total Stock"}
+                                                    </label>
+                                                    
+                                                    {currentSizes.length > 0 ? (
+                                                        <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
+                                                            {currentSizes.map(size => (
+                                                                <div key={size} className="flex flex-col gap-1">
+                                                                    <span className="text-[10px] text-center text-neutral-500 font-black">{size}</span>
+                                                                    <input 
+                                                                        type="number"
+                                                                        min="0"
+                                                                        value={variant.stock[size] || ""}
+                                                                        onChange={(e) => handleVariantStockChange(index, size, e.target.value)}
+                                                                        className="bg-neutral-900 border border-white/10 py-2 px-2 text-center text-sm w-full outline-none focus:border-orange-300"
+                                                                        placeholder="0"
+                                                                    />
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    ) : (
+                                                        <input 
+                                                            type="number"
+                                                            min="0"
+                                                            value={variant.amount || ""}
+                                                            onChange={(e) => handleVariantStockChange(index, "__amount", e.target.value)}
+                                                            className="bg-neutral-900 border border-white/10 py-3 px-4 text-sm w-full md:w-1/3 outline-none focus:border-orange-300"
+                                                            placeholder="0"
+                                                        />
+                                                    )}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
                                 <div className="flex flex-col gap-2">
                                     <label className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold">Description / Series</label>
                                     <textarea 

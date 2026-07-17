@@ -60,7 +60,11 @@ export default function AllProducts({ onViewChange, setSelectedProduct, user, se
   const [reviews, setReviews] = useState({});
 
   useEffect(() => {
-    setReviews(getStoredReviews());
+    async function fetchReviews() {
+      const data = await getStoredReviews();
+      if (data) setReviews(data);
+    }
+    fetchReviews();
     window.scrollTo(0, 0);
   }, [initialCategory]);
 
@@ -72,7 +76,7 @@ export default function AllProducts({ onViewChange, setSelectedProduct, user, se
   };
 
   const [openFilter, setOpenFilter] = useState(null);
-  const [priceRange, setPriceRange] = useState(5000);
+  const [priceRange, setPriceRange] = useState(100000);
   const [selectedCollections, setSelectedCollections] = useState([]);
   const [selectedSizes, setSelectedSizes] = useState([]);
   const [selectedColors, setSelectedColors] = useState([]);
@@ -88,7 +92,7 @@ export default function AllProducts({ onViewChange, setSelectedProduct, user, se
   };
 
   const clearAll = () => {
-    setPriceRange(5000);
+    setPriceRange(100000);
     setSelectedCollections([]);
     setSelectedSizes([]);
     setSelectedColors([]);
@@ -158,15 +162,15 @@ export default function AllProducts({ onViewChange, setSelectedProduct, user, se
       const matchClothesType = p.productType !== 'clothes' || selectedClothesTypes.includes(p.clothesType);
       const searchLower = searchQuery.toLowerCase();
       const matchSearch = searchQuery === '' ||
-        p.name.toLowerCase().includes(searchLower) ||
-        p.series.toLowerCase().includes(searchLower) ||
-        p.brand.toLowerCase().includes(searchLower);
+        (p.name || '').toLowerCase().includes(searchLower) ||
+        (p.series || '').toLowerCase().includes(searchLower) ||
+        (p.brand || '').toLowerCase().includes(searchLower);
       return matchPrice && matchCollection && matchSize && matchColor && matchTargetGroup && matchSport && matchProductType && matchClothesType && matchSearch;
     });
   }, [categoryProducts, priceRange, selectedCollections, selectedSizes, selectedColors, selectedTargetGroups, selectedSports, selectedProductTypes, selectedClothesTypes, searchQuery]);
 
   const activeFilterCount =
-    (priceRange < 5000 ? 1 : 0) + selectedCollections.length + selectedSizes.length + selectedColors.length + selectedTargetGroups.length + selectedSports.length + (selectedProductTypes.length < PRODUCT_TYPES.length ? 1 : 0) + (selectedClothesTypes.length < CLOTHES_TYPES.length ? 1 : 0) + (searchQuery ? 1 : 0);
+    (priceRange < 100000 ? 1 : 0) + selectedCollections.length + selectedSizes.length + selectedColors.length + selectedTargetGroups.length + selectedSports.length + (selectedProductTypes.length < PRODUCT_TYPES.length ? 1 : 0) + (selectedClothesTypes.length < CLOTHES_TYPES.length ? 1 : 0) + (searchQuery ? 1 : 0);
 
   const pageTitle = useMemo(() => {
     let titleParts = [];
@@ -242,9 +246,9 @@ export default function AllProducts({ onViewChange, setSelectedProduct, user, se
 
         <div className="flex flex-col md:flex-row justify-between items-center py-6 border-b border-white/5 mb-12 gap-gutter">
           <div className="flex items-center gap-8 font-label-sm uppercase tracking-widest text-on-surface">
-            <FilterDropdown name="price" label="Price" openFilter={openFilter} setOpenFilter={setOpenFilter} activeCount={priceRange < 5000 ? 1 : 0}>
+            <FilterDropdown name="price" label="Price" openFilter={openFilter} setOpenFilter={setOpenFilter} activeCount={priceRange < 100000 ? 1 : 0}>
               <p className="font-anybody font-black text-xs uppercase tracking-widest mb-4 text-on-background">Price range</p>
-              <input type="range" min="0" max="5000" step="50" value={priceRange}
+              <input type="range" min="0" max="100000" step="50" value={priceRange}
                 onChange={(e) => setPriceRange(Number(e.target.value))} className="w-full accent-primary" />
               <div className="flex justify-between text-xs text-on-surface-variant mt-2 font-medium">
                 <span>0 ฿</span>

@@ -47,6 +47,52 @@ export async function saveReviews(reviews) {
   await saveToAPI('reviews', reviews);
 }
 
+// ---- VARIANT HELPERS ----
+
+export function getSizeOptions(productType, clothesType) {
+    if (productType !== "clothes") return [];
+    if (clothesType === "shoes") return ["38", "39", "40", "41", "42", "43", "44", "45"];
+    return ["S", "M", "L", "XL"];
+}
+
+export function getTotalStock(product) {
+    if (!product.colorVariants || product.colorVariants.length === 0) return product.amount || 0;
+    const sizes = getSizeOptions(product.productType, product.clothesType);
+    let total = 0;
+    product.colorVariants.forEach(v => {
+        if (sizes.length === 0) {
+            total += v.amount || 0;
+        } else {
+            Object.values(v.stock || {}).forEach(q => { total += parseInt(q) || 0; });
+        }
+    });
+    return total;
+}
+
+export function getVariantImage(product, color) {
+    if (product.colorVariants && product.colorVariants.length > 0) {
+        const variant = product.colorVariants.find(v => v.color === color);
+        if (variant && variant.image) return variant.image;
+    }
+    if (product.colorImages && product.colorImages[color]) {
+        return product.colorImages[color];
+    }
+    return product.image;
+}
+
+export function getVariantStock(product, color, size) {
+    if (product.colorVariants && product.colorVariants.length > 0) {
+        const variant = product.colorVariants.find(v => v.color === color);
+        if (variant) {
+            if (size) {
+                return variant.stock ? (variant.stock[size] || 0) : (variant.amount || 0);
+            }
+            return variant.stock || {};
+        }
+    }
+    return size ? 0 : {};
+}
+
 // Product Context
 const ProductContext = createContext(null);
 export { ProductContext };

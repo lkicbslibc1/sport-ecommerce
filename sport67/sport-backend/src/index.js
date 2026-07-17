@@ -9,7 +9,8 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 const PORT = process.env.PORT || 5000;
 const DATA_DIR = path.join(__dirname, '..', 'data');
@@ -55,6 +56,42 @@ const writeData = (resource, data) => {
   const filePath = getFilePath(resource);
   fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
 };
+
+// --- Upload API Route ---
+app.post('/api/upload', (req, res) => {
+  const { image } = req.body;
+  if (!image || !image.startsWith('data:image/')) {
+    return res.status(400).json({ success: false, message: 'Invalid image data' });
+  }
+
+  try {
+    // Extract mime type and base64 data
+    const matches = image.match(/^data:image\/([A-Za-z-+\/]+);base64,(.+)$/);
+    if (!matches || matches.length !== 3) {
+      return res.status(400).json({ success: false, message: 'Invalid base64 string' });
+    }
+
+    let extension = matches[1];
+    if (extension === 'jpeg') extension = 'jpg';
+    const base64Data = matches[2];
+    const buffer = Buffer.from(base64Data, 'base64');
+    const filename = `${Date.now()}.${extension}`;
+    const imageDir = path.join(__dirname, '../../sport-frontend/public/image');
+    
+    if (!fs.existsSync(imageDir)) {
+      fs.mkdirSync(imageDir, { recursive: true });
+    }
+    
+    const filePath = path.join(imageDir, filename);
+    fs.writeFileSync(filePath, buffer);
+    
+    // Return relative URL for frontend to use
+    res.json({ success: true, url: `image/${filename}` });
+  } catch (error) {
+    console.error('Error saving image:', error);
+    res.status(500).json({ success: false, message: 'Failed to save image' });
+  }
+});
 
 // --- Generic CRUD API Routes ---
 
