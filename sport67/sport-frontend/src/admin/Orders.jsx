@@ -12,6 +12,8 @@ import {
   Package,
 } from "lucide-react";
 import { getStoredOrders, saveOrders } from "../data/products.jsx";
+import NotificationPanel from "./NotificationPanel.jsx";
+import { useNotifications } from "../contexts/NotificationContext.jsx";
 
 const STATUS_STYLES = {
   Preparing: "bg-indigo-300 text-indigo-950",
@@ -35,6 +37,7 @@ function GlassPanel({ className = "", children }) {
 
 export default function GogoAthleticOrders({ onNavigate, onViewChange, user, setUser }) {
   const [ordersList, setOrdersList] = useState([]);
+  const { unreadCount, setPanelOpen } = useNotifications();
 
   React.useEffect(() => {
     async function loadOrders() {
@@ -197,6 +200,7 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange, user, set
 
   return (
     <div className="min-h-screen w-full bg-neutral-950 text-neutral-100 flex">
+      <NotificationPanel />
       <Sidebar
         user={user}
         setUser={setUser}
@@ -223,8 +227,16 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange, user, set
           </div>
 
           <div className="flex items-center gap-6">
-            <button className="text-neutral-300 hover:scale-110 transition-transform duration-300">
+            <button
+              onClick={() => setPanelOpen(true)}
+              className="text-neutral-300 hover:scale-110 transition-transform duration-300 relative"
+            >
               <Bell size={20} />
+              {unreadCount > 0 && (
+                <span className="absolute -top-2 -right-2 bg-orange-500 text-white text-[9px] font-black rounded-full min-w-[16px] h-4 flex items-center justify-center px-1">
+                  {unreadCount > 99 ? '99+' : unreadCount}
+                </span>
+              )}
             </button>
             <div className="flex items-center gap-3 pl-4 border-l border-white/10">
               <div className="text-right hidden sm:block">
@@ -327,7 +339,17 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange, user, set
                         className="w-4 h-4 accent-orange-500 cursor-pointer"
                       />
                     </th>
-                    {["Order ID", "Username", "Customer Name", "Date", "Total", "Status"].map(
+                    {["Order ID", "Username", "Customer Name"].map(
+                      (h) => (
+                        <th
+                          key={h}
+                          className="p-6 text-[10px] uppercase text-neutral-400 tracking-widest"
+                        >
+                          {h}
+                        </th>
+                      )
+                    )}
+                    {['Date', 'Shipping', 'Total', 'Status'].map(
                       (h) => (
                         <th
                           key={h}
@@ -371,6 +393,15 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange, user, set
                         </div>
                       </td>
                       <td className="p-6 text-neutral-400 text-xs">{order.date}</td>
+                      <td className="p-6">
+                        {order.shippingMethod ? (
+                          <span className={`px-2 py-1 text-[9px] uppercase font-black rounded-sm tracking-widest ${order.shippingMethod === 'express' ? 'bg-orange-500/20 text-orange-400' : 'bg-neutral-800 text-neutral-400'}`}>
+                            {order.shippingMethod === 'express' ? 'Express' : 'Standard'}
+                          </span>
+                        ) : (
+                          <span className="text-[10px] text-neutral-600">-</span>
+                        )}
+                      </td>
                       <td className="p-6 font-bold tracking-tighter">
                         {(order.total || 0).toLocaleString("th-TH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ฿
                       </td>
@@ -462,11 +493,18 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange, user, set
                     Shipping Address
                   </h4>
                   <div className="p-4 bg-neutral-950 border border-white/10">
-                    <p className="font-bold text-sm text-neutral-100">{selectedOrder.shippingAddress.firstName} {selectedOrder.shippingAddress.lastName}</p>
-                    <p className="text-xs text-neutral-400 mt-2 leading-relaxed">
+                    <div className="flex justify-between items-start mb-2">
+                      <p className="font-bold text-sm text-neutral-100">{selectedOrder.shippingAddress.firstName} {selectedOrder.shippingAddress.lastName}</p>
+                      {selectedOrder.shippingMethod && (
+                        <span className={`px-2 py-1 text-[9px] uppercase font-black rounded-sm tracking-widest ${selectedOrder.shippingMethod === 'express' ? 'bg-orange-500/20 text-orange-400' : 'bg-neutral-800 text-neutral-400'}`}>
+                          {selectedOrder.shippingMethod === 'express' ? 'Express (ด่วน)' : 'Standard (ฟรี)'}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-neutral-400 leading-relaxed">
                       {selectedOrder.shippingAddress.streetAddress}<br />
                       {selectedOrder.shippingAddress.city}, {selectedOrder.shippingAddress.zipCode}<br />
-                      Phone: {selectedOrder.shippingAddress.phone}
+                      Tel: {selectedOrder.shippingAddress.phone}
                     </p>
                   </div>
                 </section>

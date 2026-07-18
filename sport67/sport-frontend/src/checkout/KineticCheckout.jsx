@@ -3,6 +3,7 @@ import { ShoppingBag, User, CreditCard, Wallet, ShieldCheck, CheckCircle2 } from
 import Navbar from "../navbar.jsx";
 import { useProducts } from "../data/products.jsx";
 import { useAlert } from "../contexts/AlertContext.jsx";
+import { notifyNewOrder } from "../data/notificationService.js";
 
 const C = {
     bg: "#050505",
@@ -259,6 +260,8 @@ export default function KineticCheckout({ onViewChange, cart = [], setCart, user
                 username: currentUsername,
                 customer: `${selectedAddress.firstName} ${selectedAddress.lastName}`.trim(),
                 shippingAddress: selectedAddress,
+                shippingMethod: shipping,
+                shippingCost: shippingCost,
                 date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).toUpperCase(),
                 total: Number(total.toFixed(2)),
                 status: "Preparing",
@@ -301,15 +304,49 @@ export default function KineticCheckout({ onViewChange, cart = [], setCart, user
                 });
             }
 
+            // Notify staff about new order
+            await notifyNewOrder(newOrder.id, newOrder.customer, newOrder.total);
+
             setOrderId(randomId);
             setIsSubmitting(false);
             setIsSubmitted(true);
 
-            // Decrease product amount in local storage -> now managed via context
+            // Decrease product amount and specific variant stock
             cart.forEach(item => {
                 const productInStore = products.find(p => p.id === item.id);
                 if (productInStore) {
-                    updateProduct({ id: productInStore.id, amount: Math.max(0, productInStore.amount - item.quantity) });
+                    let updatedProduct = { ...productInStore };
+                    const qty = item.quantity;
+                    const currentColor = item.selectedColor || item.color || (item.colorNames ? item.colorNames[0] : null);
+                    const currentSize = item.selectedSize || item.size;
+
+                    // 1. ลด overall amount
+                    updatedProduct.amount = Math.max(0, updatedProduct.amount - qty);
+
+                    // 2. ลดยอดใน colorVariants (ถ้ามี)
+                    if (updatedProduct.colorVariants && updatedProduct.colorVariants.length > 0) {
+                        updatedProduct.colorVariants = updatedProduct.colorVariants.map(variant => {
+                            if (currentColor && variant.color && variant.color.toLowerCase() === currentColor.toLowerCase()) {
+                                let newVariant = { ...variant };
+                                // ลด amount รวมของสีนี้
+                                newVariant.amount = Math.max(0, newVariant.amount - qty);
+                                
+                                // ลด stock แยกตามไซส์
+                                if (currentSize && newVariant.stock && newVariant.stock[currentSize] !== undefined) {
+                                    newVariant.stock = { ...newVariant.stock };
+                                    newVariant.stock[currentSize] = Math.max(0, newVariant.stock[currentSize] - qty);
+                                }
+                                return newVariant;
+                            }
+                            return variant;
+                        });
+                    } else if (currentSize && updatedProduct.stock && updatedProduct.stock[currentSize] !== undefined) {
+                        // กรณีไม่มี colorVariants แต่มี stock แยกไซส์ที่ตัว product เลย
+                        updatedProduct.stock = { ...updatedProduct.stock };
+                        updatedProduct.stock[currentSize] = Math.max(0, updatedProduct.stock[currentSize] - qty);
+                    }
+
+                    updateProduct(updatedProduct);
                 }
             });
 

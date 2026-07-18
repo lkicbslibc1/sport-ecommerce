@@ -19,6 +19,8 @@ import {
 } from "lucide-react";
 import { ProductContext, getSizeOptions, getTotalStock } from "../data/products.jsx";
 import { useAlert } from "../contexts/AlertContext.jsx";
+import { useNotifications } from "../contexts/NotificationContext.jsx";
+import { notifyProductChange } from "../data/notificationService.js";
 
 const STATUS_STYLES = {
     Published: "bg-green-500/10 text-green-400 border border-green-500/20",
@@ -114,6 +116,7 @@ const makeEmptyVariant = (color = "") => ({
 
 export default function GogoAthleticProducts({ onNavigate, onViewChange, user, setUser }) {
     const { showAlert } = useAlert();
+    const { unreadCount, setPanelOpen } = useNotifications();
     const { products, addProduct, updateProduct, deleteProduct } = useContext(ProductContext);
     const [searchFocused, setSearchFocused] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
@@ -399,20 +402,24 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange, user, s
 
         if (currentProduct) {
             updateProduct({ ...currentProduct, ...productData });
+            notifyProductChange('updated', formFields.name);
         } else {
             addProduct({
                 id: products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1,
                 ...productData
             });
+            notifyProductChange('added', formFields.name);
         }
         showAlert(currentProduct ? "Product updated!" : "Product added!", "success");
         setModalOpen(false);
     };
 
     const handleDelete = (id) => {
+        const productToDelete = products.find(p => p.id === id);
         if (window.confirm("Are you sure you want to delete this product?")) {
             deleteProduct(id);
             setModalOpen(false);
+            if (productToDelete) notifyProductChange('deleted', productToDelete.name);
         }
     };
 
@@ -520,8 +527,16 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange, user, s
                     <div></div>
 
                     <div className="flex items-center gap-6">
-                        <button className="text-neutral-300 hover:scale-110 transition-transform">
+                        <button
+                            onClick={() => setPanelOpen(true)}
+                            className="text-neutral-300 hover:scale-110 transition-transform relative"
+                        >
                             <Bell size={20} />
+                            {unreadCount > 0 && (
+                                <span className="absolute -top-2 -right-2 bg-orange-500 text-white text-[9px] font-black rounded-full min-w-[16px] h-4 flex items-center justify-center px-1">
+                                    {unreadCount > 99 ? '99+' : unreadCount}
+                                </span>
+                            )}
                         </button>
                         <div className="flex items-center gap-2">
                             <span className="text-right hidden sm:block">

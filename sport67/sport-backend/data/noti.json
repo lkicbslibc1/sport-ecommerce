@@ -5,7 +5,7 @@
       "date": "JUL 17, 2026",
       "title": "Order status updated",
       "status": "Delivered",
-      "read": false
+      "read": true
     },
     {
       "id": "#GOGO-411992",
@@ -80,6 +80,94 @@
       "title": "Purchase successful!",
       "status": "Preparing",
       "read": true
+    }
+  ],
+  "abc": [
+    {
+      "id": "#GOGO-771417",
+      "date": "JUL 18, 2026",
+      "title": "Purchase successful!",
+      "status": "Preparing",
+      "read": false
+    },
+    {
+      "id": "#GOGO-708136",
+      "date": "JUL 18, 2026",
+      "title": "Purchase successful!",
+      "status": "Preparing",
+      "read": false
+    },
+    {
+      "id": "#GOGO-499219",
+      "date": "JUL 18, 2026",
+      "title": "Order status updated",
+      "status": "Shipped",
+      "read": false
+    },
+    {
+      "id": "#GOGO-499219",
+      "date": "JUL 18, 2026",
+      "title": "Purchase successful!",
+      "status": "Preparing",
+      "read": true
+    }
+  ],
+  "__employee__": [
+    {
+      "id": "noti_1784370024855_4iaq9",
+      "timestamp": "2026-07-18T10:20:24.855Z",
+      "read": false,
+      "type": "new_order",
+      "title": "🛒 ออเดอร์ใหม่เข้ามาแล้ว!",
+      "message": "Order #GOGO-771417 จาก Tongmen JaiSaard — ฿16,942",
+      "orderId": "#GOGO-771417"
+    },
+    {
+      "id": "noti_1784369742327_jubsv",
+      "timestamp": "2026-07-18T10:15:42.327Z",
+      "read": false,
+      "type": "new_order",
+      "title": "🛒 ออเดอร์ใหม่เข้ามาแล้ว!",
+      "message": "Order #GOGO-708136 จาก Tongmen JaiSaard — ฿12,020",
+      "orderId": "#GOGO-708136"
+    }
+  ],
+  "__manager__": [
+    {
+      "id": "noti_1784370024880_e5orn",
+      "timestamp": "2026-07-18T10:20:24.880Z",
+      "read": false,
+      "type": "high_value_order",
+      "title": "💰 ออเดอร์มูลค่าสูง!",
+      "message": "Order #GOGO-771417 มูลค่า ฿16,942 — ต้องให้ความสำคัญ",
+      "orderId": "#GOGO-771417"
+    },
+    {
+      "id": "noti_1784370024855_4iaq9",
+      "timestamp": "2026-07-18T10:20:24.855Z",
+      "read": false,
+      "type": "new_order",
+      "title": "🛒 ออเดอร์ใหม่เข้ามาแล้ว!",
+      "message": "Order #GOGO-771417 จาก Tongmen JaiSaard — ฿16,942",
+      "orderId": "#GOGO-771417"
+    },
+    {
+      "id": "noti_1784369742359_i9rlf",
+      "timestamp": "2026-07-18T10:15:42.359Z",
+      "read": false,
+      "type": "high_value_order",
+      "title": "💰 ออเดอร์มูลค่าสูง!",
+      "message": "Order #GOGO-708136 มูลค่า ฿12,020 — ต้องให้ความสำคัญ",
+      "orderId": "#GOGO-708136"
+    },
+    {
+      "id": "noti_1784369742327_jubsv",
+      "timestamp": "2026-07-18T10:15:42.327Z",
+      "read": false,
+      "type": "new_order",
+      "title": "🛒 ออเดอร์ใหม่เข้ามาแล้ว!",
+      "message": "Order #GOGO-708136 จาก Tongmen JaiSaard — ฿12,020",
+      "orderId": "#GOGO-708136"
     }
   ]
 }

@@ -87,10 +87,10 @@ export function getVariantStock(product, color, size) {
             if (size) {
                 return variant.stock ? (variant.stock[size] || 0) : (variant.amount || 0);
             }
-            return variant.stock || {};
+            return variant.amount || 0;
         }
     }
-    return size ? 0 : {};
+    return 0;
 }
 
 export function getColorStyle(colorClass) {

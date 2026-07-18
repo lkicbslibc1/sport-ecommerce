@@ -15,8 +15,10 @@ import GogoAthleticOrders from "./Orders.jsx";
 import GogoAthleticProducts from "./Products.jsx";
 import GogoAthleticTeam from "./Team.jsx";
 import Sidebar from "./Sidebar.jsx";
+import NotificationPanel from "./NotificationPanel.jsx";
 import { ProductContext, getStoredOrders } from "../data/products.jsx";
 import { TeamProvider } from "../data/team.jsx";
+import { NotificationProvider, useNotifications } from "../contexts/NotificationContext.jsx";
 
 
 
@@ -33,6 +35,15 @@ function GlassPanel({ className = "", children }) {
 }
 
 export default function GogoAthleticDashboard({ onViewChange, user, setUser }) {
+  const { products } = useContext(ProductContext);
+  return (
+    <NotificationProvider user={user} products={products}>
+      <DashboardInner onViewChange={onViewChange} user={user} setUser={setUser} />
+    </NotificationProvider>
+  );
+}
+
+function DashboardInner({ onViewChange, user, setUser }) {
   const [range, setRange] = useState("daily");
   const [currentPage, setCurrentPage] = useState(user?.role === 'employee' ? "orders" : "dashboard");
 
@@ -180,7 +191,9 @@ export default function GogoAthleticDashboard({ onViewChange, user, setUser }) {
       }));
   }, [products]);
 
-if (currentPage === "orders") {
+  const { unreadCount, setPanelOpen } = useNotifications();
+
+  if (currentPage === "orders") {
     return <GogoAthleticOrders onNavigate={setCurrentPage} onViewChange={onViewChange} user={user} setUser={setUser} />;
   }
   if (currentPage === "products") {
@@ -196,6 +209,7 @@ if (currentPage === "orders") {
 
   return (
     <div className="min-h-screen w-full bg-neutral-950 text-neutral-100 flex">
+      <NotificationPanel />
       <Sidebar
         user={user}
         setUser={setUser}
@@ -244,8 +258,16 @@ if (currentPage === "orders") {
               />
             </div>
             <div className="flex items-center gap-6">
-              <button className="text-neutral-400 hover:text-orange-300 transition-colors">
+              <button
+                onClick={() => setPanelOpen(true)}
+                className="text-neutral-400 hover:text-orange-300 transition-colors relative"
+              >
                 <Bell size={20} />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-orange-500 text-white text-[9px] font-black rounded-full min-w-[16px] h-4 flex items-center justify-center px-1 animate-pulse">
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </span>
+                )}
               </button>
               <div className="h-10 w-10 bg-neutral-800 border border-white/10 flex items-center justify-center overflow-hidden">
                 <img

@@ -5,10 +5,10 @@ import {
   Package,
   Boxes,
   Users,
-  Settings,
-  HelpCircle,
   LogOut,
+  Bell,
 } from "lucide-react";
+import { useNotifications } from "../contexts/NotificationContext.jsx";
 
 const ADMIN_NAV_ITEMS = [
   { label: "Dashboard", value: "dashboard", icon: LayoutDashboard },
@@ -24,6 +24,8 @@ const EMPLOYEE_NAV_ITEMS = [
 
 export default function Sidebar({ activeItem, onNavigate, onViewChange, actionButton, user, setUser }) {
   const NAV_ITEMS = user?.role === 'employee' ? EMPLOYEE_NAV_ITEMS : ADMIN_NAV_ITEMS;
+  const { unreadCount, setPanelOpen } = useNotifications();
+
   return (
     <aside className="hidden md:flex md:w-64 shrink-0 h-screen sticky top-0 flex-col border-r border-white/5 bg-black py-8">
       {/* BRAND LOGO */}
@@ -59,6 +61,30 @@ export default function Sidebar({ activeItem, onNavigate, onViewChange, actionBu
             </button>
           );
         })}
+
+        {/* NOTIFICATIONS BUTTON */}
+        <button
+          onClick={() => setPanelOpen(true)}
+          className={
+            "w-full flex items-center gap-4 transition-all duration-200 ease-in-out py-3 text-left pl-5 " +
+            "text-neutral-400 font-medium hover:text-orange-300 hover:bg-white/[0.02] relative"
+          }
+        >
+          <div className="relative">
+            <Bell size={20} strokeWidth={2} />
+            {unreadCount > 0 && (
+              <span className="absolute -top-2 -right-2 bg-orange-500 text-white text-[9px] font-black rounded-full min-w-[16px] h-4 flex items-center justify-center px-1 animate-pulse">
+                {unreadCount > 99 ? '99+' : unreadCount}
+              </span>
+            )}
+          </div>
+          <span className="text-sm uppercase tracking-widest">Notifications</span>
+          {unreadCount > 0 && (
+            <span className="ml-auto mr-2 bg-orange-500/20 text-orange-300 text-[10px] font-black px-2 py-0.5 rounded-full">
+              {unreadCount}
+            </span>
+          )}
+        </button>
       </nav>
 
       {/* ACTION BUTTON (Optional) */}
@@ -70,7 +96,6 @@ export default function Sidebar({ activeItem, onNavigate, onViewChange, actionBu
 
       {/* FOOTER CONTROLS */}
       <div className="border-t border-white/5 p-4 space-y-1 mt-auto">
-
         <button
           onClick={() => {
             if (setUser) setUser(null);

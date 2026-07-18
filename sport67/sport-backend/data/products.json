@@ -116,7 +116,7 @@
     "sportType": "Running",
     "targetGroup": "men",
     "fabricMaterial": "polyester",
-    "amount": 85,
+    "amount": 80,
     "review": 4.5,
     "description": "High-performance compression tee engineered to keep you dry.",
     "sku": "GA-CP-2024-089",
@@ -128,7 +128,7 @@
         "image": "image/adidasB02.png",
         "amount": 0,
         "stock": {
-          "S": 15,
+          "S": 10,
           "M": 14,
           "L": 14
         }
@@ -238,7 +238,7 @@
     "sportType": "Running",
     "targetGroup": "women",
     "fabricMaterial": "polyester",
-    "amount": 134,
+    "amount": 129,
     "review": 4.8,
     "description": "Maximum cushioning daily trainer for plush recovery runs.",
     "sku": "GA-FW-2024-004",
@@ -253,7 +253,7 @@
           "36": 14,
           "37": 14,
           "38": 14,
-          "39": 14,
+          "39": 10,
           "40": 13
         }
       },
@@ -335,7 +335,7 @@
     "productType": "equipment",
     "sportType": "Running",
     "targetGroup": "men",
-    "amount": 40,
+    "amount": 35,
     "review": 4.4,
     "description": "Biometric monitoring fitness watch with multi-satellite GPS navigation.",
     "sku": "GA-WR-2024-012",
@@ -404,7 +404,7 @@
     "productType": "equipment",
     "sportType": "Swimming",
     "targetGroup": "women",
-    "amount": 90,
+    "amount": 85,
     "review": 4.5,
     "description": "Hydrodynamic swim goggles for competitive training and racing.",
     "sku": "GA-SW-2024-008",
@@ -414,7 +414,7 @@
         "color": "black",
         "colorClass": "bg-[#111111]",
         "image": "image/adidas08B.png",
-        "amount": 90,
+        "amount": 85,
         "stock": {}
       }
     ]
@@ -934,7 +934,7 @@
     "productType": "equipment",
     "sportType": "Swimming",
     "targetGroup": "kid",
-    "amount": 86,
+    "amount": 83,
     "review": 4.8,
     "description": "High-durability hydrodynamic swimming goggles designed for children's training.",
     "sku": "AD-KG-2026-018",
