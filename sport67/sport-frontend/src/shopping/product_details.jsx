@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '../navbar.jsx';
-import { getStoredReviews, getVariantImage, getVariantStock, getSizeOptions } from '../data/products.jsx';
+import { getStoredReviews, getVariantImage, getVariantStock, getSizeOptions, getColorStyle } from '../data/products.jsx';
 import { Star, UserCircle } from 'lucide-react';
 
 function formatPrice(n) {
@@ -147,6 +147,7 @@ export default function ProductDetails({ onViewChange, product, user, setUser, c
                     >
                       <div
                         className={`w-full h-full rounded-full ${v.colorClass || 'bg-white/20'} border border-white/10`}
+                        style={getColorStyle(v.colorClass)}
                         title={v.color}
                       />
                     </button>
@@ -165,7 +166,7 @@ export default function ProductDetails({ onViewChange, product, user, setUser, c
                         onClick={() => setSelectedColor(color)}
                         className={`w-12 h-12 rounded-full border-2 ${selectedColor === color ? 'border-primary' : 'border-transparent'} p-1 transition-all flex items-center justify-center group`}
                       >
-                        <div className={`w-full h-full rounded-full ${bgClass} border border-white/10`} title={color}></div>
+                        <div className={`w-full h-full rounded-full ${bgClass} border border-white/10`} style={getColorStyle(bgClass)} title={color}></div>
                       </button>
                     );
                   })}

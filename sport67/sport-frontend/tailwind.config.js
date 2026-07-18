@@ -2,6 +2,7 @@ export default {
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
+    "../sport-backend/data/**/*.json",
   ],
   darkMode: "class",
   theme: {

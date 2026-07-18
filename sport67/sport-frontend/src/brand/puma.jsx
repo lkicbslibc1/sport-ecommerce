@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useContext } from 'react';
 import Navbar from '../navbar.jsx';
-import { ProductContext } from '../data/products.jsx';
+import { ProductContext, getColorStyle } from '../data/products.jsx';
 
 const SIZES = ["S", "M", "L", "XL"];
 const COLORS = [
@@ -172,7 +172,7 @@ export default function Puma({ onViewChange, user, setUser, cart, addToCart }) {
               <div className="pt-6 flex flex-col flex-grow">
                 <div className="flex items-center gap-2 mb-2">
                   {product.colors.map((color, idx) => (
-                    <div key={idx} className={`w-3 h-3 rounded-full ${color} border border-white/10`}></div>
+                    <div key={idx} className={`w-3 h-3 rounded-full ${color} border border-white/10`} style={getColorStyle(color)}></div>
                   ))}
                 </div>
                 <h3 className="font-bold text-xs uppercase tracking-widest text-on-background mb-1">{product.name}</h3>

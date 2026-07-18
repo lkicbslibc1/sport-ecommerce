@@ -120,7 +120,31 @@
     "review": 4.5,
     "description": "High-performance compression tee engineered to keep you dry.",
     "sku": "GA-CP-2024-089",
-    "status": "Published"
+    "status": "Published",
+    "colorVariants": [
+      {
+        "color": "black",
+        "colorClass": "bg-[#111111]",
+        "image": "image/adidasB02.png",
+        "amount": 0,
+        "stock": {
+          "S": 15,
+          "M": 14,
+          "L": 14
+        }
+      },
+      {
+        "color": "blue",
+        "colorClass": "bg-[#1e88e5]",
+        "image": "image/adidasBL02.png",
+        "amount": 0,
+        "stock": {
+          "S": 14,
+          "M": 14,
+          "L": 14
+        }
+      }
+    ]
   },
   {
     "id": 3,
@@ -134,19 +158,19 @@
       "XL"
     ],
     "colorNames": [
-      "Orange",
-      "Blue"
+      "Red",
+      "Yellow"
     ],
     "badge": "New Arrival",
     "badgeType": "tertiary",
     "colors": [
-      "bg-primary",
-      "bg-tertiary"
+      "bg-[#e53935]",
+      "bg-[#eeff00ff]"
     ],
-    "image": "image/pumaOr03.webp",
+    "image": "image/puma03R.png",
     "colorImages": {
-      "Orange": "image/pumaOr03.webp",
-      "Blue": "image/pumaBl03.webp"
+      "Red": "image/puma03R.png",
+      "Yellow": "image/puma03Y.png"
     },
     "productType": "clothes",
     "clothesType": "bottom",
@@ -157,7 +181,31 @@
     "review": 4.6,
     "description": "Extremely breathable lightweight shorts for marathon runners.",
     "sku": "GA-RN-2024-003",
-    "status": "Published"
+    "status": "Published",
+    "colorVariants": [
+      {
+        "color": "red",
+        "colorClass": "bg-[#e53935]",
+        "image": "image/puma03R.png",
+        "amount": 0,
+        "stock": {
+          "S": 10,
+          "M": 10,
+          "XL": 9
+        }
+      },
+      {
+        "color": "yellow",
+        "colorClass": "bg-[#eeff00ff]",
+        "image": "image/puma03Y.png",
+        "amount": 0,
+        "stock": {
+          "S": 9,
+          "M": 9,
+          "XL": 9
+        }
+      }
+    ]
   },
   {
     "id": 4,
@@ -194,7 +242,35 @@
     "review": 4.8,
     "description": "Maximum cushioning daily trainer for plush recovery runs.",
     "sku": "GA-FW-2024-004",
-    "status": "Published"
+    "status": "Published",
+    "colorVariants": [
+      {
+        "color": "white",
+        "colorClass": "bg-[#ffffff]",
+        "image": "image/nikeW04.png",
+        "amount": 0,
+        "stock": {
+          "36": 14,
+          "37": 14,
+          "38": 14,
+          "39": 14,
+          "40": 13
+        }
+      },
+      {
+        "color": "blue",
+        "colorClass": "bg-[#1e88e5]",
+        "image": "image/nikeBl04.png",
+        "amount": 0,
+        "stock": {
+          "36": 13,
+          "37": 13,
+          "38": 13,
+          "39": 13,
+          "40": 13
+        }
+      }
+    ]
   },
   {
     "id": 5,
@@ -214,7 +290,7 @@
     "colors": [
       "bg-[#ffffff]"
     ],
-    "image": " image/pumaW05.png",
+    "image": "image/pumaW05.png",
     "productType": "clothes",
     "clothesType": "sock",
     "sportType": "Football",
@@ -224,7 +300,21 @@
     "review": 4.7,
     "description": "Anti-slip athletic grip socks with targeted cushioning.",
     "sku": "GA-RN-2024-005",
-    "status": "Published"
+    "status": "Published",
+    "colorVariants": [
+      {
+        "color": "white",
+        "colorClass": "bg-[#ffffff]",
+        "image": "image/pumaW05.png",
+        "amount": 0,
+        "stock": {
+          "S": 75,
+          "M": 75,
+          "L": 75,
+          "XL": 75
+        }
+      }
+    ]
   },
   {
     "id": 6,
@@ -249,7 +339,16 @@
     "review": 4.4,
     "description": "Biometric monitoring fitness watch with multi-satellite GPS navigation.",
     "sku": "GA-WR-2024-012",
-    "status": "Published"
+    "status": "Published",
+    "colorVariants": [
+      {
+        "color": "black",
+        "colorClass": "bg-[#111111]",
+        "image": "image/pumaB6.png",
+        "amount": 40,
+        "stock": {}
+      }
+    ]
   },
   {
     "id": 7,
@@ -261,12 +360,12 @@
       "M"
     ],
     "colorNames": [
-      "Black"
+      "White"
     ],
     "colors": [
-      "bg-[#111111]"
+      "bg-[#ffffff]"
     ],
-    "image": "image/nikeB07.png",
+    "image": "image/nike07W.png",
     "productType": "equipment",
     "sportType": "Football",
     "targetGroup": "kid",
@@ -274,7 +373,16 @@
     "review": 4.8,
     "description": "Professional grade soccer ball with molded grooves for consistent flight.",
     "sku": "GA-FB-2024-007",
-    "status": "Published"
+    "status": "Published",
+    "colorVariants": [
+      {
+        "color": "white",
+        "colorClass": "bg-[#ffffff]",
+        "image": "image/nike07W.png",
+        "amount": 147,
+        "stock": {}
+      }
+    ]
   },
   {
     "id": 8,
@@ -292,7 +400,7 @@
     "colors": [
       "bg-[#111111]"
     ],
-    "image": "image/adidasB08.png",
+    "image": "image/adidas08B.png",
     "productType": "equipment",
     "sportType": "Swimming",
     "targetGroup": "women",
@@ -300,7 +408,16 @@
     "review": 4.5,
     "description": "Hydrodynamic swim goggles for competitive training and racing.",
     "sku": "GA-SW-2024-008",
-    "status": "Published"
+    "status": "Published",
+    "colorVariants": [
+      {
+        "color": "black",
+        "colorClass": "bg-[#111111]",
+        "image": "image/adidas08B.png",
+        "amount": 90,
+        "stock": {}
+      }
+    ]
   },
   {
     "id": 9,
@@ -313,17 +430,17 @@
       "M"
     ],
     "colorNames": [
-      "Green",
+      "Black",
       "White"
     ],
     "colors": [
-      "bg-[#bbc6bf]",
+      "bg-[#111111]",
       "bg-[#ffffff]"
     ],
-    "image": "image/nikeG09.png",
+    "image": "image/nike09W.png",
     "colorImages": {
-      "Green": "image/nikeG09.png",
-      "White": "image/nikeW09.png"
+      "Black": "image/nike09B.png",
+      "White": "image/nike09W.png"
     },
     "productType": "clothes",
     "clothesType": "hat",
@@ -334,7 +451,29 @@
     "review": 4.6,
     "description": "High-grade silicone swim cap designed to reduce drag.",
     "sku": "GA-SW-2024-009",
-    "status": "Published"
+    "status": "Published",
+    "colorVariants": [
+      {
+        "color": "black",
+        "colorClass": "bg-[#111111]",
+        "image": "image/nike09B.png",
+        "amount": 0,
+        "stock": {
+          "S": 62,
+          "M": 62
+        }
+      },
+      {
+        "color": "white",
+        "colorClass": "bg-[#ffffff]",
+        "image": "image/nike09W.png",
+        "amount": 0,
+        "stock": {
+          "S": 62,
+          "M": 61
+        }
+      }
+    ]
   },
   {
     "id": 10,
@@ -351,18 +490,18 @@
       "44"
     ],
     "colorNames": [
-      "Black",
+      "Purple",
       "White",
-      "Red"
+      "Beige"
     ],
     "colors": [
-      "bg-surface-container-highest",
+      "bg-[#423943]",
       "bg-white",
-      "bg-error"
+      "bg-[#e5ded4]"
     ],
     "badge": "New Arrival",
     "badgeType": "tertiary",
-    "image": "https://lh3.googleusercontent.com/aida-public/AB6AXuBlVYH6ikzf5bxQCYE53SYSRoS5l8txvds81jk9f5Qv3aUhwrb1RQHCwU4nk2NGfVkV0otOrpumXSpPUy_pdwkpSnm6OqCtQexqOFr7RY0-9WxL04JWi9ToIFSRF2BEycoIHT5YQqFgB6Cqzii4O2865S_SHbh-UNtRExTKpxnCcqxGylVP_4NDIKJBVvndJ8PPNA15TQsyqdAZCSq0mRX6_uWICHigPmCIg1rEL1iSn1bMZVwhpZQO5fet7dxOTSmz4Aas8l6VIxY",
+    "image": "image/adidas10P.png",
     "productType": "clothes",
     "clothesType": "shoes",
     "sportType": "Running",
@@ -372,7 +511,51 @@
     "review": 4.8,
     "description": "Lightest Ultraboost ever with epic energy return.",
     "sku": "AD-RN-2024-010",
-    "status": "Published"
+    "status": "Published",
+    "colorVariants": [
+      {
+        "color": "purple",
+        "colorClass": "bg-[#423943]",
+        "image": "image/adidas10P.png",
+        "amount": 0,
+        "stock": {
+          "39": 5,
+          "40": 5,
+          "41": 5,
+          "42": 5,
+          "43": 5,
+          "44": 5
+        }
+      },
+      {
+        "color": "white",
+        "colorClass": "bg-white",
+        "image": "image/adidas10W.png",
+        "amount": 0,
+        "stock": {
+          "39": 5,
+          "40": 5,
+          "41": 4,
+          "42": 4,
+          "43": 4,
+          "44": 4
+        }
+      },
+      {
+        "color": "beige",
+        "colorClass": "bg-[#e5ded4]",
+        "image": "image/adidas10Be.png",
+        "amount": 0,
+        "stock": {
+          "39": 4,
+          "40": 4,
+          "41": 4,
+          "42": 4,
+          "43": 4,
+          "44": 4
+        }
+      }
+    ]
   },
   {
     "id": 11,
@@ -387,17 +570,17 @@
       "XL"
     ],
     "colorNames": [
-      "Brown",
-      "Green"
+      "Teal",
+      "Pink"
     ],
     "colors": [
-      "bg-[#2b2321]",
-      "bg-[#436634]"
+      "bg-[#15b3c4]",
+      "bg-[#e28199]"
     ],
-    "image": "image/nikeBr11.png",
+    "image": "image/nike11T.png",
     "colorImages": {
-      "Brown": "image/nikeBr11.png",
-      "Green": "image/nikeG11.png"
+      "Teal": "image/nike11T.png",
+      "Pink": "image/nike11Pi.png"
     },
     "productType": "clothes",
     "clothesType": "top",
@@ -408,7 +591,33 @@
     "review": 4.7,
     "description": "Sweat-wicking top with UV protection for sunny runs.",
     "sku": "NK-RN-2024-011",
-    "status": "Published"
+    "status": "Published",
+    "colorVariants": [
+      {
+        "color": "teal",
+        "colorClass": "bg-[#15b3c4]",
+        "image": "image/nike11T.png",
+        "amount": 0,
+        "stock": {
+          "S": 19,
+          "M": 19,
+          "L": 19,
+          "XL": 19
+        }
+      },
+      {
+        "color": "pink",
+        "colorClass": "bg-[#e28199]",
+        "image": "image/nike11Pi.png",
+        "amount": 0,
+        "stock": {
+          "S": 19,
+          "M": 19,
+          "L": 18,
+          "XL": 18
+        }
+      }
+    ]
   },
   {
     "id": 12,
@@ -429,10 +638,10 @@
       "bg-[#111111]",
       "bg-[#1e88e5]"
     ],
-    "image": "image/pumaB12.png",
+    "image": "image/puma12B.jpg",
     "colorImages": {
-      "Black": "image/pumaB12.png",
-      "Blue": "image/pumaBl12.png"
+      "black": "image/puma12B.jpg",
+      "blue": "image/puma12Bl.jpg"
     },
     "productType": "clothes",
     "clothesType": "bottom",
@@ -443,7 +652,31 @@
     "review": 4.5,
     "description": "Train like the pros in these moisture-wicking football pants.",
     "sku": "PM-FB-2024-012",
-    "status": "Published"
+    "status": "Published",
+    "colorVariants": [
+      {
+        "color": "black",
+        "colorClass": "bg-[#111111]",
+        "image": "image/puma12B.jpg",
+        "amount": 0,
+        "stock": {
+          "M": 17,
+          "L": 17,
+          "XL": 17
+        }
+      },
+      {
+        "color": "blue",
+        "colorClass": "bg-[#1e88e5]",
+        "image": "image/puma12Bl.jpg",
+        "amount": 0,
+        "stock": {
+          "M": 17,
+          "L": 16,
+          "XL": 16
+        }
+      }
+    ]
   },
   {
     "id": 13,
@@ -457,20 +690,14 @@
       "L"
     ],
     "colorNames": [
-      "Yellow",
-      "Black",
-      "White"
+      "Black"
     ],
     "colors": [
-      "bg-[#fdb416]",
-      "bg-[#111111]",
-      "bg-[#ffffff]"
+      "bg-[#111111]"
     ],
-    "image": "image/nikeY13.png",
+    "image": "image/nike13B.jpg",
     "colorImages": {
-      "Yellow": "image/nikeY13.png",
-      "Black": "image/nikeB13.png",
-      "White": "image/nikeW13.png"
+      "Black": "image/nike13B.jpg "
     },
     "productType": "clothes",
     "clothesType": "bottom",
@@ -481,7 +708,20 @@
     "review": 4.9,
     "description": "Supportive compression leggings ideal for intense workouts.",
     "sku": "NK-RN-2024-013",
-    "status": "Published"
+    "status": "Published",
+    "colorVariants": [
+      {
+        "color": "black",
+        "colorClass": "bg-[#111111]",
+        "image": "image/nike13B.png",
+        "amount": 0,
+        "stock": {
+          "S": 14,
+          "M": 13,
+          "L": 13
+        }
+      }
+    ]
   },
   {
     "id": 14,
@@ -498,17 +738,17 @@
       "44"
     ],
     "colorNames": [
-      "Gray",
-      "Blue"
+      "gray",
+      "blue"
     ],
     "colors": [
-      "bg-gray-600",
-      "bg-blue-900"
+      "bg-[#727677]",
+      "bg-[#2f3a56]"
     ],
     "image": "image/adidasGr14.png",
     "colorImages": {
-      "Gray": "image/adidasGr14.png",
-      "Blue": "image/adidasBl14.png"
+      "gray": "image/adidasGr14.png",
+      "blue": "image/adidasBl14.png"
     },
     "productType": "clothes",
     "clothesType": "shoes",
@@ -519,7 +759,37 @@
     "review": 4.6,
     "description": "Agile, lightweight shoes designed for quick footwork.",
     "sku": "AD-BX-2024-014",
-    "status": "Published"
+    "status": "Published",
+    "colorVariants": [
+      {
+        "color": "gray",
+        "colorClass": "bg-[#727677]",
+        "image": "image/adidasGr14.png",
+        "amount": 0,
+        "stock": {
+          "39": 4,
+          "40": 4,
+          "41": 3,
+          "42": 3,
+          "43": 3,
+          "44": 3
+        }
+      },
+      {
+        "color": "blue",
+        "colorClass": "bg-[#2f3a56]",
+        "image": "image/adidasBl14.png",
+        "amount": 0,
+        "stock": {
+          "39": 4,
+          "40": 4,
+          "41": 3,
+          "42": 3,
+          "43": 3,
+          "44": 3
+        }
+      }
+    ]
   },
   {
     "id": 15,
@@ -548,7 +818,20 @@
     "review": 4.7,
     "description": "High-performance women's athletic tee designed for running and training.",
     "sku": "AD-WT-2026-015",
-    "status": "Published"
+    "status": "Published",
+    "colorVariants": [
+      {
+        "color": "blue",
+        "colorClass": "bg-[#1e88e5]",
+        "image": "image/adidasBl02.png",
+        "amount": 0,
+        "stock": {
+          "S": 27,
+          "M": 27,
+          "L": 26
+        }
+      }
+    ]
   },
   {
     "id": 16,
@@ -562,12 +845,12 @@
       "L"
     ],
     "colorNames": [
-      "Orange"
+      "black"
     ],
     "colors": [
-      "bg-primary"
+      "bg-[#111111]"
     ],
-    "image": "image/pumaOr03.webp",
+    "image": "image/puma16B.png",
     "productType": "clothes",
     "clothesType": "bottom",
     "sportType": "Running",
@@ -577,7 +860,20 @@
     "review": 4.6,
     "description": "Premium lightweight running shorts for maximum endurance and movement.",
     "sku": "PM-WS-2026-016",
-    "status": "Published"
+    "status": "Published",
+    "colorVariants": [
+      {
+        "color": "black",
+        "colorClass": "bg-[#111111]",
+        "image": "image/puma16B.png",
+        "amount": 0,
+        "stock": {
+          "S": 22,
+          "M": 22,
+          "L": 21
+        }
+      }
+    ]
   },
   {
     "id": 17,
@@ -605,7 +901,19 @@
     "review": 4.5,
     "description": "Comfortable, blister-free athletic socks designed specifically for active kids.",
     "sku": "PM-KS-2026-017",
-    "status": "Published"
+    "status": "Published",
+    "colorVariants": [
+      {
+        "color": "white",
+        "colorClass": "bg-[#ffffff]",
+        "image": "image/pumaW05.png",
+        "amount": 0,
+        "stock": {
+          "S": 75,
+          "M": 75
+        }
+      }
+    ]
   },
   {
     "id": 18,
@@ -622,7 +930,7 @@
     "colors": [
       "bg-[#111111]"
     ],
-    "image": "image/adidasB08.png",
+    "image": "image/adidas18B.jpeg",
     "productType": "equipment",
     "sportType": "Swimming",
     "targetGroup": "kid",
@@ -630,7 +938,16 @@
     "review": 4.8,
     "description": "High-durability hydrodynamic swimming goggles designed for children's training.",
     "sku": "AD-KG-2026-018",
-    "status": "Published"
+    "status": "Published",
+    "colorVariants": [
+      {
+        "color": "black",
+        "colorClass": "bg-[#111111]",
+        "image": "image/adidas18B.jpeg",
+        "amount": 86,
+        "stock": {}
+      }
+    ]
   },
   {
     "id": 19,

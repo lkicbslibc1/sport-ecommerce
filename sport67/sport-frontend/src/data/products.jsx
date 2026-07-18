@@ -93,6 +93,19 @@ export function getVariantStock(product, color, size) {
     return size ? 0 : {};
 }
 
+export function getColorStyle(colorClass) {
+    if (!colorClass) return {};
+    const hexMatch = colorClass.match(/bg-\[(#[0-9a-fA-F]{3,8})\]/);
+    if (hexMatch) {
+        return { backgroundColor: hexMatch[1] };
+    }
+    const hexMatchNoBrackets = colorClass.match(/bg-(#[0-9a-fA-F]{3,8})/);
+    if (hexMatchNoBrackets) {
+        return { backgroundColor: hexMatchNoBrackets[1] };
+    }
+    return {};
+}
+
 // Product Context
 const ProductContext = createContext(null);
 export { ProductContext };

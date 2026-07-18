@@ -9,6 +9,7 @@ const COLORS = [
   { name: "Red", hex: "#e53935" },
   { name: "Blue", hex: "#1e88e5" },
   { name: "Orange", hex: "#fb8c00" },
+  { name: "Yellow", hex: "#eeff00ff" },
 ];
 
 const TARGET_GROUPS = [
@@ -21,7 +22,7 @@ const SPORTS = ["Running", "Football", "Swimming"];
 const CLOTHES_TYPES = ["top", "bottom", "shoes", "hat", "sock"];
 const PRODUCT_TYPES = ["clothes", "equipment"];
 
-import { useProducts, getStoredReviews } from '../data/products.jsx';
+import { useProducts, getStoredReviews, getColorStyle } from '../data/products.jsx';
 
 function formatPrice(n) {
   return n.toLocaleString("th-TH", { minimumFractionDigits: 2 }) + " ฿";
@@ -380,7 +381,7 @@ export default function AllProducts({ onViewChange, setSelectedProduct, user, se
               <div className="pt-6 flex flex-col flex-grow">
                 <div className="flex items-center gap-2 mb-2">
                   {product.colors.map((color, idx) => (
-                    <div key={idx} className={`w-3 h-3 rounded-full ${color} border border-white/10`}></div>
+                    <div key={idx} className={`w-3 h-3 rounded-full ${color} border border-white/10`} style={getColorStyle(color)}></div>
                   ))}
                 </div>
                 <h3 className="font-bold text-xs uppercase tracking-widest text-on-background mb-1">{product.name}</h3>
