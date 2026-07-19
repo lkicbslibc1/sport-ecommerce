@@ -66,7 +66,10 @@ function DashboardInner({ onViewChange, user, setUser }) {
       setOrdersList(fetchedOrders || []);
     };
     loadOrders();
-  }, [currentPage]);
+    // Poll for real-time updates every 5 seconds
+    const interval = setInterval(loadOrders, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Dynamic Metrics - now using products from context
   const totalRevenue = useMemo(() => {
@@ -169,27 +172,73 @@ function DashboardInner({ onViewChange, user, setUser }) {
     }));
   }, [chartData]);
 
-  // Best Sellers - now using products from context (real-time updates)
+  // Best Sellers - calculated from real order data
   const bestSellers = useMemo(() => {
-    return products
-      .slice()
-      .sort((a, b) => (b.review || 0) - (a.review || 0))
-      .slice(0, 4)
-      .map((p, idx) => ({
-        rank: idx + 1,
-        name: p.name,
-        series: p.series || p.description || "Core Technical Gear",
-        revenue: (p.price * (15 - idx * 2)).toLocaleString("th-TH") + " ฿",
-        image: p.image,
-        rankBg: idx === 0
-          ? "bg-orange-300 text-neutral-950"
-          : idx === 1
-            ? "bg-neutral-300 text-neutral-950"
-            : idx === 2
-              ? "bg-neutral-500 text-neutral-950"
-              : "bg-neutral-700 text-neutral-100"
-      }));
-  }, [products]);
+    // Calculate revenue from actual orders
+    const productRevenue = {};
+    
+    ordersList.forEach(order => {
+      if (order.status !== 'Cancelled' && order.items) {
+        order.items.forEach(item => {
+          // Match by product id or sku
+          const productId = item.id || item.sku;
+          if (productId) {
+            const price = parseFloat((item.price || "0").replace(/,/g, '').replace(' ฿', '')) || 0;
+            const qty = item.qty || 1;
+            const revenue = price * qty;
+            
+            if (!productRevenue[productId]) {
+              productRevenue[productId] = {
+                totalRevenue: 0,
+                totalQty: 0
+              };
+            }
+            productRevenue[productId].totalRevenue += revenue;
+            productRevenue[productId].totalQty += qty;
+          }
+        });
+      }
+    });
+    
+    // Create product lookup by id and sku
+    const productMap = {};
+    products.forEach(p => {
+      productMap[p.id] = p;
+      if (p.sku) productMap[p.sku] = p;
+    });
+    
+    // Sort products by revenue and get top 4
+    const sortedProducts = Object.entries(productRevenue)
+      .map(([key, data]) => {
+        const product = productMap[key];
+        if (product) {
+          return {
+            product,
+            totalRevenue: data.totalRevenue,
+            totalQty: data.totalQty
+          };
+        }
+        return null;
+      })
+      .filter(Boolean)
+      .sort((a, b) => b.totalRevenue - a.totalRevenue)
+      .slice(0, 4);
+    
+    return sortedProducts.map((item, idx) => ({
+      rank: idx + 1,
+      name: item.product.name,
+      series: item.product.series || item.product.description || "Core Technical Gear",
+      revenue: item.totalRevenue.toLocaleString("th-TH") + " ฿",
+      image: item.product.image,
+      rankBg: idx === 0
+        ? "bg-orange-300 text-neutral-950"
+        : idx === 1
+          ? "bg-neutral-300 text-neutral-950"
+          : idx === 2
+            ? "bg-neutral-500 text-neutral-950"
+            : "bg-neutral-700 text-neutral-100"
+    }));
+  }, [products, ordersList]);
 
   const { unreadCount, setPanelOpen } = useNotifications();
 
