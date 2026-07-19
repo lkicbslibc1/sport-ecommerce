@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import runningBannerImg from './assets/running_banner.png';
-import ballSportsBannerImg from './assets/ball_sports_banner.png';
-import swimmingBannerImg from './assets/swimming_banner.png';
+import runningBannerImg from './assets/running_banner1.png';
+import ballSportsBannerImg from './assets/ball_sports_banner1.png';
+import swimmingBannerImg from './assets/swimming_banner1.png';
 import runningHeroBannerImg from './assets/running_hero_banner.png';
 import AllProducts from './shopping/all_products.jsx';
 import Navbar from './navbar.jsx';
@@ -330,9 +330,8 @@ function MainPageContent() {
                 <button
                   key={idx}
                   onClick={() => setCurrentSlide(idx)}
-                  className={`h-[3px] transition-all duration-500 cursor-pointer ${
-                    idx === currentSlide ? 'w-16 bg-primary' : 'w-8 bg-white/30 hover:bg-white/60'
-                  }`}
+                  className={`h-[3px] transition-all duration-500 cursor-pointer ${idx === currentSlide ? 'w-16 bg-primary' : 'w-8 bg-white/30 hover:bg-white/60'
+                    }`}
                   aria-label={`Go to slide ${idx + 1}`}
                 />
               ))}
@@ -415,25 +414,22 @@ function MainPageContent() {
               <div className="flex flex-wrap gap-2">
                 <button
                   onClick={() => setActiveCategory('men')}
-                  className={`font-bold text-[10px] px-8 py-3.5 uppercase tracking-widest trending-tab-pill ${
-                    activeCategory === 'men' ? 'active text-white' : 'glass text-gray-400 hover:text-white hover:bg-white/5'
-                  }`}
+                  className={`font-bold text-[10px] px-8 py-3.5 uppercase tracking-widest trending-tab-pill ${activeCategory === 'men' ? 'active text-white' : 'glass text-gray-400 hover:text-white hover:bg-white/5'
+                    }`}
                 >
                   Men / ผู้ชาย
                 </button>
                 <button
                   onClick={() => setActiveCategory('women')}
-                  className={`font-bold text-[10px] px-8 py-3.5 uppercase tracking-widest trending-tab-pill ${
-                    activeCategory === 'women' ? 'active text-white' : 'glass text-gray-400 hover:text-white hover:bg-white/5'
-                  }`}
+                  className={`font-bold text-[10px] px-8 py-3.5 uppercase tracking-widest trending-tab-pill ${activeCategory === 'women' ? 'active text-white' : 'glass text-gray-400 hover:text-white hover:bg-white/5'
+                    }`}
                 >
                   Women / ผู้หญิง
                 </button>
                 <button
                   onClick={() => setActiveCategory('kids')}
-                  className={`font-bold text-[10px] px-8 py-3.5 uppercase tracking-widest trending-tab-pill ${
-                    activeCategory === 'kids' ? 'active text-white' : 'glass text-gray-400 hover:text-white hover:bg-white/5'
-                  }`}
+                  className={`font-bold text-[10px] px-8 py-3.5 uppercase tracking-widest trending-tab-pill ${activeCategory === 'kids' ? 'active text-white' : 'glass text-gray-400 hover:text-white hover:bg-white/5'
+                    }`}
                 >
                   Kids / เด็ก
                 </button>
@@ -494,97 +490,217 @@ function MainPageContent() {
         </section>
         {/* END: TrendingSection */}
 
-        {/* BEGIN: ShopByActivity */}
+        {/* BEGIN: ShopByApparel */}
         <section className="max-w-[1440px] mx-auto px-6 lg:px-12 py-32">
-          <div className="flex items-center justify-between mb-16">
-            <h4 className="text-4xl font-anybody font-black italic uppercase tracking-tighter">Shop by Activity</h4>
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-4">
+            <div>
+              <span className="text-primary font-anybody font-black text-xs uppercase tracking-[0.3em] block mb-2">EXPLORE CATEGORIES</span>
+              <h4 className="text-4xl lg:text-5xl font-anybody font-black italic uppercase tracking-tighter text-white">Shop by Apparel</h4>
+            </div>
             <div className="h-[1px] flex-grow mx-12 bg-white/10 hidden md:block"></div>
-            <a className="text-[10px] font-bold uppercase tracking-[0.3em] hover:text-primary" href="#">View All</a>
+            <button 
+              onClick={() => setCurrentView('sport')} 
+              className="text-xs font-anybody font-bold uppercase tracking-[0.3em] text-white/70 hover:text-primary transition-colors flex items-center gap-2"
+            >
+              View All Apparel <span className="material-symbols-outlined text-sm">arrow_forward</span>
+            </button>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4 h-auto md:h-[600px]">
-            {/* Gravel */}
-            <div onClick={() => setCurrentView('sport-equipment')} className="relative h-[250px] md:h-full group cursor-pointer overflow-hidden border border-white/5 activity-grid-card">
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 h-auto md:h-[580px]">
+            {/* Top */}
+            <div 
+              onClick={() => setCurrentView('sport-top')} 
+              className="relative h-[280px] md:h-full group cursor-pointer overflow-hidden rounded-xl border border-white/10 bg-surface-container-low transition-all duration-500 hover:border-primary/50 hover:shadow-[0_0_30px_rgba(255,107,0,0.25)]"
+            >
               <img
-                alt="Gravel"
-                className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuDwI1BJkcmMfFeHFHjL9hGFa114fWssQJ1ZV1k5-QGR7rvpTnzh0FxWHzIWCzvtKUe8g5bj1mKSgQc-_TBVnbwo4UNJKiU7d1zYk7LiEYmY0RhjPqmnaSiqN984BN4umgnHOME544H71UeP6nzDAb1bvQNwnz8IeI0UcEb-B52roEISKJ6_wr-fdG3byAzSsYMEjZuD_xv2d0veukGDMpG_O9UvnJBBlySpdYWfYHXLKZagrNnpUw4af0NOO0tQ5Kkwpnf-hEDrQEw"
+                alt="Top"
+                className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+                src="image/top.png"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent group-hover:from-black/80 transition-all duration-500"></div>
-              <div className="absolute bottom-6 left-6 flex items-center gap-2">
-                <span className="text-white font-anybody font-black text-lg uppercase tracking-tighter italic group-hover:text-primary transition-colors duration-300">Gravel</span>
-                <span className="material-symbols-outlined text-primary text-sm opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">arrow_forward</span>
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent group-hover:from-black/90 group-hover:via-black/50 transition-all duration-500"></div>
+              
+              <div className="absolute top-4 left-4 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded border border-white/10">
+                <span className="text-[10px] font-anybody font-black tracking-widest text-primary uppercase">01 / APPAREL</span>
+              </div>
+
+              <div className="absolute bottom-6 left-6 right-6 flex flex-col justify-end">
+                <h5 className="text-2xl lg:text-3xl font-anybody font-black italic uppercase tracking-tighter text-white mb-1 group-hover:text-primary transition-colors duration-300">
+                  Top
+                </h5>
+                <p className="text-[11px] text-white/60 font-medium mb-3">เสื้อกีฬา / Tops & Tees</p>
+                <div className="flex items-center gap-1.5 text-[10px] font-anybody font-black uppercase tracking-widest text-white group-hover:text-primary transition-colors">
+                  <span>Shop Now</span>
+                  <span className="material-symbols-outlined text-sm transform group-hover:translate-x-1 transition-transform duration-300">arrow_forward</span>
+                </div>
               </div>
             </div>
 
-            {/* Trail Running */}
-            <div onClick={() => setCurrentView('running-shoes')} className="relative h-[250px] md:h-full group cursor-pointer overflow-hidden border border-white/5 activity-grid-card">
+            {/* Bottom */}
+            <div 
+              onClick={() => setCurrentView('sport-bottom')} 
+              className="relative h-[280px] md:h-full group cursor-pointer overflow-hidden rounded-xl border border-white/10 bg-surface-container-low transition-all duration-500 hover:border-primary/50 hover:shadow-[0_0_30px_rgba(255,107,0,0.25)]"
+            >
               <img
-                alt="Trail Running"
-                className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuC--eJwzzF_DIGIN03c_n27fJ28usAuxwfxm9TFLO4XYv0T1x1z92-CjChPdPbyp8RlbsaHFplKVlsOvBMz9FcYpIdTTbPLtC_oE9Ei4rq7ReNJWbpQjFnKUM_3umf3698xYTQrr7hl_tfUum_uxgnmKUiTNFcQm9vqo02KvuR9bqO5XPz3V-XBS3U8tXWVwdk_LLhEau3iC0XB1yEuRAkhhFDSaY3KlZDTOW0KB6VcPYi2hi4jJh0TeAMV6BoxyGegj0l7gIWpp_Y"
+                alt="Bottom"
+                className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+                src="image/bottom.png"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent group-hover:from-black/80 transition-all duration-500"></div>
-              <div className="absolute bottom-6 left-6 flex items-center gap-2">
-                <span className="text-white font-anybody font-black text-lg uppercase tracking-tighter italic group-hover:text-primary transition-colors duration-300">Trail Running</span>
-                <span className="material-symbols-outlined text-primary text-sm opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">arrow_forward</span>
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent group-hover:from-black/90 group-hover:via-black/50 transition-all duration-500"></div>
+              
+              <div className="absolute top-4 left-4 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded border border-white/10">
+                <span className="text-[10px] font-anybody font-black tracking-widest text-primary uppercase">02 / APPAREL</span>
+              </div>
+
+              <div className="absolute bottom-6 left-6 right-6 flex flex-col justify-end">
+                <h5 className="text-2xl lg:text-3xl font-anybody font-black italic uppercase tracking-tighter text-white mb-1 group-hover:text-primary transition-colors duration-300">
+                  Bottom
+                </h5>
+                <p className="text-[11px] text-white/60 font-medium mb-3">กางเกงกีฬา / Shorts & Pants</p>
+                <div className="flex items-center gap-1.5 text-[10px] font-anybody font-black uppercase tracking-widest text-white group-hover:text-primary transition-colors">
+                  <span>Shop Now</span>
+                  <span className="material-symbols-outlined text-sm transform group-hover:translate-x-1 transition-transform duration-300">arrow_forward</span>
+                </div>
               </div>
             </div>
 
-            {/* Road Running */}
-            <div onClick={() => setCurrentView('running')} className="relative h-[250px] md:h-full group cursor-pointer overflow-hidden border border-white/5 activity-grid-card">
+            {/* Shoes */}
+            <div 
+              onClick={() => setCurrentView('sport-shoes')} 
+              className="relative h-[280px] md:h-full group cursor-pointer overflow-hidden rounded-xl border border-white/10 bg-surface-container-low transition-all duration-500 hover:border-primary/50 hover:shadow-[0_0_30px_rgba(255,107,0,0.25)]"
+            >
               <img
-                alt="Road Running"
-                className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBZhb-q_KAYbqBH6599uwZ6hkkqxYG15hXMpjUOSOXUvI3supurXQp37FA-K-qJLGQF6afWoGFQkFtaZT38aOuUbwQ7eDgyfFTxGt1MdzKxagVWszJ8RPeGu7uvVZlZf8C8h-l4UJ3iclI1WJJKwfrCIjkMf6yEsUTbnBb5BzPcd2-pq78BZgNuz1KjVL7ZH7LO4C76VUImcOFjis3kDaf-FsSiW5ed2dHE1-BnRpk6k2pTgf-qeivmRxQfYoFlsx5Em-UGuiTgIl4"
+                alt="Shoes"
+                className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+                src="https://brand.assets.adidas.com/image/upload/f_auto,q_auto:best,fl_lossy/if_w_gt_800,w_800/global_fw26_adizero_evo_sl_running_fw26_sustain_evo_sl_zip_hp_mw_card_teaser_d_35108ec2d0.jpg"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent group-hover:from-black/80 transition-all duration-500"></div>
-              <div className="absolute bottom-6 left-6 flex items-center gap-2">
-                <span className="text-white font-anybody font-black text-lg uppercase tracking-tighter italic group-hover:text-primary transition-colors duration-300">Road Running</span>
-                <span className="material-symbols-outlined text-primary text-sm opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">arrow_forward</span>
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent group-hover:from-black/90 group-hover:via-black/50 transition-all duration-500"></div>
+              
+              <div className="absolute top-4 left-4 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded border border-white/10">
+                <span className="text-[10px] font-anybody font-black tracking-widest text-primary uppercase">03 / APPAREL</span>
+              </div>
+
+              <div className="absolute bottom-6 left-6 right-6 flex flex-col justify-end">
+                <h5 className="text-2xl lg:text-3xl font-anybody font-black italic uppercase tracking-tighter text-white mb-1 group-hover:text-primary transition-colors duration-300">
+                  Shoes
+                </h5>
+                <p className="text-[11px] text-white/60 font-medium mb-3">รองเท้ากีฬา / Footwear</p>
+                <div className="flex items-center gap-1.5 text-[10px] font-anybody font-black uppercase tracking-widest text-white group-hover:text-primary transition-colors">
+                  <span>Shop Now</span>
+                  <span className="material-symbols-outlined text-sm transform group-hover:translate-x-1 transition-transform duration-300">arrow_forward</span>
+                </div>
               </div>
             </div>
 
-            {/* Sportstyle */}
-            <div onClick={() => setCurrentView('sport')} className="relative h-[250px] md:h-full group cursor-pointer overflow-hidden border border-white/5 activity-grid-card">
+            {/* Hat */}
+            <div 
+              onClick={() => setCurrentView('sport-hat')} 
+              className="relative h-[280px] md:h-full group cursor-pointer overflow-hidden rounded-xl border border-white/10 bg-surface-container-low transition-all duration-500 hover:border-primary/50 hover:shadow-[0_0_30px_rgba(255,107,0,0.25)]"
+            >
               <img
-                alt="Sportstyle"
-                className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuAvWxfAp9lr8iEB7K51T_XKXUg2vlac7IHU8HUFuI6XqzF7NCGXOFDqXCrIMpunWzhRPVsTG8jsNq6bhsJdoAXbw_Fqr9jHN8SIpmY_TXYKe4twX5ns8NW9rYUU7YlCcGHeAyao8bURnrNhPPbtmzJijh5Hg77XouU4T3K-AP9SBeUp_Hc3eYVEQGJQPvCcktUUl5dwBKm578ZFIzL49702ZluC3u5q3gmHV9jvuSw1VIFZ6iKhToVYV2ziANQi4055Z0suzycVYxo"
+                alt="Hat"
+                className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS8rfrlpqn4qhvV3faLLDTEIMS5w97qGp7vMQ74qfYnCLWcaah5kmiEUrgv&s=10"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent group-hover:from-black/80 transition-all duration-500"></div>
-              <div className="absolute bottom-6 left-6 flex items-center gap-2">
-                <span className="text-white font-anybody font-black text-lg uppercase tracking-tighter italic group-hover:text-primary transition-colors duration-300">Sportstyle</span>
-                <span className="material-symbols-outlined text-primary text-sm opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">arrow_forward</span>
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent group-hover:from-black/90 group-hover:via-black/50 transition-all duration-500"></div>
+              
+              <div className="absolute top-4 left-4 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded border border-white/10">
+                <span className="text-[10px] font-anybody font-black tracking-widest text-primary uppercase">04 / APPAREL</span>
+              </div>
+
+              <div className="absolute bottom-6 left-6 right-6 flex flex-col justify-end">
+                <h5 className="text-2xl lg:text-3xl font-anybody font-black italic uppercase tracking-tighter text-white mb-1 group-hover:text-primary transition-colors duration-300">
+                  Hat
+                </h5>
+                <p className="text-[11px] text-white/60 font-medium mb-3">หมวกกีฬา / Caps & Headwear</p>
+                <div className="flex items-center gap-1.5 text-[10px] font-anybody font-black uppercase tracking-widest text-white group-hover:text-primary transition-colors">
+                  <span>Shop Now</span>
+                  <span className="material-symbols-outlined text-sm transform group-hover:translate-x-1 transition-transform duration-300">arrow_forward</span>
+                </div>
               </div>
             </div>
 
-            {/* Outdoor */}
-            <div onClick={() => setCurrentView('running-bottom')} className="relative h-[250px] md:h-full group cursor-pointer overflow-hidden border border-white/5 activity-grid-card">
+            {/* Sock */}
+            <div 
+              onClick={() => setCurrentView('sport-sock')} 
+              className="relative h-[280px] md:h-full group cursor-pointer overflow-hidden rounded-xl border border-white/10 bg-surface-container-low transition-all duration-500 hover:border-primary/50 hover:shadow-[0_0_30px_rgba(255,107,0,0.25)]"
+            >
               <img
-                alt="Outdoor"
-                className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuAQBZiEffmZVFsytTv0jaiwLF3NIN33A2fYhx2hemY0InuMgaGNGf6PyuwVk5wCixk0-qo-Tx53yg85R5Wg7P-ozGfj8hAzeHPXQd0_rZUrPDxdjYe2fjd-jaG8wLMACIRmDIBqIkxXwld2HyfNIEJLQxPALBBfz8rwSdEPqL3iMVsubWuET6inMWwtY8o3xEtWiX7f6RURdzQjq_KZyrP1jIk26z010mCoJ2Ht5ldt5ch_dlNdI6jbMC_CMjdlBw81_x0nThij8Qo"
+                alt="Sock"
+                className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+                src="image/sock.png"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent group-hover:from-black/80 transition-all duration-500"></div>
-              <div className="absolute bottom-6 left-6 flex items-center gap-2">
-                <span className="text-white font-anybody font-black text-lg uppercase tracking-tighter italic group-hover:text-primary transition-colors duration-300">Outdoor</span>
-                <span className="material-symbols-outlined text-primary text-sm opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">arrow_forward</span>
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent group-hover:from-black/90 group-hover:via-black/50 transition-all duration-500"></div>
+              
+              <div className="absolute top-4 left-4 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded border border-white/10">
+                <span className="text-[10px] font-anybody font-black tracking-widest text-primary uppercase">05 / APPAREL</span>
+              </div>
+
+              <div className="absolute bottom-6 left-6 right-6 flex flex-col justify-end">
+                <h5 className="text-2xl lg:text-3xl font-anybody font-black italic uppercase tracking-tighter text-white mb-1 group-hover:text-primary transition-colors duration-300">
+                  Sock
+                </h5>
+                <p className="text-[11px] text-white/60 font-medium mb-3">ถุงเท้ากีฬา / Socks & Accessories</p>
+                <div className="flex items-center gap-1.5 text-[10px] font-anybody font-black uppercase tracking-widest text-white group-hover:text-primary transition-colors">
+                  <span>Shop Now</span>
+                  <span className="material-symbols-outlined text-sm transform group-hover:translate-x-1 transition-transform duration-300">arrow_forward</span>
+                </div>
               </div>
             </div>
           </div>
         </section>
-        {/* END: ShopByActivity */}
+        {/* END: ShopByApparel */}
 
         {/* BEGIN: BrandsSection */}
         <section className="max-w-[1440px] mx-auto px-6 lg:px-12 py-32 border-t border-white/5">
-          <div className="flex items-center justify-between mb-16">
-            <h4 className="text-2xl font-anybody font-black italic uppercase tracking-tighter strikethrough-accent">แบรนด์ / BRANDS</h4>
-            <a className="text-[10px] font-bold uppercase underline tracking-[0.3em] hover:text-primary transition" href="#">See All</a>
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-4">
+            <div>
+              <span className="text-primary font-anybody font-black text-xs uppercase tracking-[0.3em] block mb-2">OFFICIAL PARTNERS</span>
+              <h4 className="text-3xl lg:text-4xl font-anybody font-black italic uppercase tracking-tighter text-white">แบรนด์ / BRANDS</h4>
+            </div>
+            <button 
+              onClick={() => setCurrentView('brand')} 
+              className="text-xs font-anybody font-bold uppercase tracking-[0.3em] text-white/70 hover:text-primary transition-colors flex items-center gap-2"
+            >
+              See All Brands <span className="material-symbols-outlined text-sm">arrow_forward</span>
+            </button>
           </div>
-          <div className="flex flex-wrap justify-center items-center gap-12 lg:gap-24 opacity-40 max-w-3xl mx-auto">
-            <div onClick={() => setCurrentView('nike')} className="h-12 w-24 bg-contain bg-center bg-no-repeat grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-500 cursor-pointer" style={{ backgroundImage: "url('/image/nike.png')" }}></div>
-            <div onClick={() => setCurrentView('puma')} className="h-12 w-24 bg-contain bg-center bg-no-repeat grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-500 cursor-pointer" style={{ backgroundImage: "url('/image/puma.png')" }}></div>
-            <div onClick={() => setCurrentView('adidas')} className="h-12 w-24 bg-contain bg-center bg-no-repeat grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-500 cursor-pointer" style={{ backgroundImage: "url('/image/adidas.png')" }}></div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            {/* Nike */}
+            <div 
+              onClick={() => setCurrentView('brand-nike')} 
+              className="group cursor-pointer bg-surface-container-low/60 border border-white/10 hover:border-primary/50 rounded-2xl p-10 flex flex-col items-center justify-center gap-6 transition-all duration-500 hover:scale-105 hover:shadow-[0_0_40px_rgba(255,107,0,0.2)] backdrop-blur-md"
+            >
+              <div 
+                className="h-24 md:h-28 w-40 md:w-48 bg-contain bg-center bg-no-repeat transition-all duration-500 filter invert brightness-200 opacity-90 group-hover:opacity-100 group-hover:scale-110" 
+                style={{ backgroundImage: "url('/image/nike.png')" }}
+              ></div>
+              <span className="font-anybody font-black text-sm uppercase tracking-widest text-white/70 group-hover:text-primary transition-colors">Nike</span>
+            </div>
+
+            {/* Puma */}
+            <div 
+              onClick={() => setCurrentView('brand-puma')} 
+              className="group cursor-pointer bg-surface-container-low/60 border border-white/10 hover:border-primary/50 rounded-2xl p-10 flex flex-col items-center justify-center gap-6 transition-all duration-500 hover:scale-105 hover:shadow-[0_0_40px_rgba(255,107,0,0.2)] backdrop-blur-md"
+            >
+              <div 
+                className="h-24 md:h-28 w-40 md:w-48 bg-contain bg-center bg-no-repeat transition-all duration-500 filter invert brightness-200 opacity-90 group-hover:opacity-100 group-hover:scale-110" 
+                style={{ backgroundImage: "url('/image/puma.png')" }}
+              ></div>
+              <span className="font-anybody font-black text-sm uppercase tracking-widest text-white/70 group-hover:text-primary transition-colors">Puma</span>
+            </div>
+
+            {/* Adidas */}
+            <div 
+              onClick={() => setCurrentView('brand-adidas')} 
+              className="group cursor-pointer bg-surface-container-low/60 border border-white/10 hover:border-primary/50 rounded-2xl p-10 flex flex-col items-center justify-center gap-6 transition-all duration-500 hover:scale-105 hover:shadow-[0_0_40px_rgba(255,107,0,0.2)] backdrop-blur-md"
+            >
+              <div 
+                className="h-24 md:h-28 w-40 md:w-48 bg-contain bg-center bg-no-repeat transition-all duration-500 filter invert brightness-200 opacity-90 group-hover:opacity-100 group-hover:scale-110" 
+                style={{ backgroundImage: "url('/image/adidas.png')" }}
+              ></div>
+              <span className="font-anybody font-black text-sm uppercase tracking-widest text-white/70 group-hover:text-primary transition-colors">Adidas</span>
+            </div>
           </div>
         </section>
         {/* END: BrandsSection */}

@@ -30,7 +30,7 @@
     "image": "image/nikeOr01.png",
     "colorImages": {
       "orange": "image/nikeOr01.png",
-      "black": "image/nikeOr01.png",
+      "black": "image/nikeB01.png",
       "green": "image/1784285570957.png"
     },
     "productType": "clothes",
@@ -63,7 +63,7 @@
       {
         "color": "black",
         "colorClass": "bg-black border border-white/20",
-        "image": "image/nikeOr01.png",
+        "image": "image/nikeB01.png",
         "amount": 0,
         "stock": {
           "38": 7,
@@ -285,27 +285,49 @@
       "XL"
     ],
     "colorNames": [
-      "White"
+      "Black",
+      "Red",
+      "Blue",
+      "Yellow",
+      "White",
+      "Purple",
+      "Green",
+      "Orange",
+      "Pink",
+      "Beige",
+      "Brown",
+      "Grey"
     ],
     "colors": [
-      "bg-[#ffffff]"
+      "bg-[#000000]",
+      "bg-red-500",
+      "bg-blue-500",
+      "bg-yellow-400",
+      "bg-white",
+      "bg-purple-500",
+      "bg-green-500",
+      "bg-primary",
+      "bg-pink-400",
+      "bg-[#f5f5dc]",
+      "bg-[#8b4513]",
+      "bg-gray-500"
     ],
-    "image": "image/pumaW05.png",
+    "image": "https://www.prodirectsport.com/cdn/shop/files/173121_main.jpg?v=1784382886&width=2000",
     "productType": "clothes",
     "clothesType": "sock",
     "sportType": "Football",
     "targetGroup": "men",
     "fabricMaterial": "waffle",
-    "amount": 300,
+    "amount": 874,
     "review": 4.7,
     "description": "Anti-slip athletic grip socks with targeted cushioning.",
     "sku": "GA-RN-2024-005",
     "status": "Published",
     "colorVariants": [
       {
-        "color": "white",
-        "colorClass": "bg-[#ffffff]",
-        "image": "image/pumaW05.png",
+        "color": "black",
+        "colorClass": "bg-[#000000]",
+        "image": "https://www.prodirectsport.com/cdn/shop/files/173121_main.jpg?v=1784382886&width=2000",
         "amount": 0,
         "stock": {
           "S": 75,
@@ -313,8 +335,154 @@
           "L": 75,
           "XL": 75
         }
+      },
+      {
+        "color": "red",
+        "colorClass": "bg-red-500",
+        "image": "https://www.prodirectsport.com/cdn/shop/files/173119_main.jpg?v=1784317386&width=1200",
+        "amount": 0,
+        "stock": {
+          "S": 75,
+          "M": 25,
+          "L": 10,
+          "XL": 5
+        }
+      },
+      {
+        "color": "blue",
+        "colorClass": "bg-blue-500",
+        "image": "https://www.prodirectsport.com/cdn/shop/files/173120_main.jpg?v=1784251153&width=1000",
+        "amount": 0,
+        "stock": {
+          "S": 5,
+          "M": 20,
+          "L": 30,
+          "XL": 25
+        }
+      },
+      {
+        "color": "yellow",
+        "colorClass": "bg-yellow-400",
+        "image": "https://www.prodirectsport.com/cdn/shop/files/245118_main.jpg?v=1784246267&width=1000",
+        "amount": 0,
+        "stock": {
+          "S": 2,
+          "M": 4,
+          "L": 6,
+          "XL": 8
+        }
+      },
+      {
+        "color": "white",
+        "colorClass": "bg-white",
+        "image": "https://www.prodirectsport.com/cdn/shop/files/173122_main.jpg?v=1784462294&width=1000",
+        "amount": 0,
+        "stock": {
+          "S": 8,
+          "M": 12,
+          "L": 20,
+          "XL": 10
+        }
+      },
+      {
+        "color": "purple",
+        "colorClass": "bg-purple-500",
+        "image": "https://www.prodirectsport.com/cdn/shop/files/1032074_main.jpg?v=1784257395&width=1000",
+        "amount": 0,
+        "stock": {
+          "S": 30,
+          "M": 20,
+          "L": 20,
+          "XL": 30
+        }
+      },
+      {
+        "color": "green",
+        "colorClass": "bg-green-500",
+        "image": "https://www.prodirectsport.com/cdn/shop/files/173134_main.jpg?v=1784235704&width=1000",
+        "amount": 0,
+        "stock": {
+          "S": 7,
+          "M": 3,
+          "L": 13,
+          "XL": 7
+        }
+      },
+      {
+        "color": "orange",
+        "colorClass": "bg-primary",
+        "image": "https://www.prodirectsport.com/cdn/shop/files/245120_main.jpg?v=1784246510&width=1000",
+        "amount": 0,
+        "stock": {
+          "S": 10,
+          "M": 15,
+          "L": 20,
+          "XL": 25
+        }
+      },
+      {
+        "color": "pink",
+        "colorClass": "bg-pink-400",
+        "image": "https://www.prodirectsport.com/cdn/shop/files/245117_main.jpg?v=1784415945&width=1000",
+        "amount": 0,
+        "stock": {
+          "S": 4,
+          "M": 6,
+          "L": 6,
+          "XL": 14
+        }
+      },
+      {
+        "color": "beige",
+        "colorClass": "bg-[#f5f5dc]",
+        "image": "https://www.prodirectsport.com/cdn/shop/files/245116_main.jpg?v=1784233814&width=1000",
+        "amount": 0,
+        "stock": {
+          "S": 1,
+          "M": 3,
+          "L": 5,
+          "XL": 10
+        }
+      },
+      {
+        "color": "brown",
+        "colorClass": "bg-[#8b4513]",
+        "image": "https://www.prodirectsport.com/cdn/shop/files/173126_main.jpg?v=1784251786&width=1000",
+        "amount": 0,
+        "stock": {
+          "S": 17,
+          "M": 3,
+          "XL": 3,
+          "L": 17
+        }
+      },
+      {
+        "color": "grey",
+        "colorClass": "bg-gray-500",
+        "image": "https://www.prodirectsport.com/cdn/shop/files/265942_main.jpg?v=1784247915&width=1000",
+        "amount": 0,
+        "stock": {
+          "S": 1,
+          "M": 9,
+          "L": 2,
+          "XL": 8
+        }
       }
-    ]
+    ],
+    "colorImages": {
+      "black": "https://www.prodirectsport.com/cdn/shop/files/173121_main.jpg?v=1784382886&width=2000",
+      "red": "https://www.prodirectsport.com/cdn/shop/files/173119_main.jpg?v=1784317386&width=1200",
+      "blue": "https://www.prodirectsport.com/cdn/shop/files/173120_main.jpg?v=1784251153&width=1000",
+      "yellow": "https://www.prodirectsport.com/cdn/shop/files/245118_main.jpg?v=1784246267&width=1000",
+      "white": "https://www.prodirectsport.com/cdn/shop/files/173122_main.jpg?v=1784462294&width=1000",
+      "purple": "https://www.prodirectsport.com/cdn/shop/files/1032074_main.jpg?v=1784257395&width=1000",
+      "green": "https://www.prodirectsport.com/cdn/shop/files/173134_main.jpg?v=1784235704&width=1000",
+      "orange": "https://www.prodirectsport.com/cdn/shop/files/245120_main.jpg?v=1784246510&width=1000",
+      "pink": "https://www.prodirectsport.com/cdn/shop/files/245117_main.jpg?v=1784415945&width=1000",
+      "beige": "https://www.prodirectsport.com/cdn/shop/files/245116_main.jpg?v=1784233814&width=1000",
+      "brown": "https://www.prodirectsport.com/cdn/shop/files/173126_main.jpg?v=1784251786&width=1000",
+      "grey": "https://www.prodirectsport.com/cdn/shop/files/265942_main.jpg?v=1784247915&width=1000"
+    }
   },
   {
     "id": 6,
@@ -507,7 +675,7 @@
     "sportType": "Running",
     "targetGroup": "men",
     "fabricMaterial": "Primeknit",
-    "amount": 75,
+    "amount": 74,
     "review": 4.8,
     "description": "Lightest Ultraboost ever with epic energy return.",
     "sku": "AD-RN-2024-010",
@@ -548,7 +716,7 @@
         "amount": 0,
         "stock": {
           "39": 4,
-          "40": 4,
+          "40": 3,
           "41": 4,
           "42": 4,
           "43": 4,
@@ -713,7 +881,7 @@
       {
         "color": "black",
         "colorClass": "bg-[#111111]",
-        "image": "image/nike13B.png",
+        "image": "image/nike13B.jpg",
         "amount": 0,
         "stock": {
           "S": 14,
@@ -803,12 +971,12 @@
       "L"
     ],
     "colorNames": [
-      "Blue"
+      "Brown"
     ],
     "colors": [
-      "bg-[#1e88e5]"
+      "bg-[#c2b0a2]"
     ],
-    "image": "image/adidasBl02.png",
+    "image": "image/adidasBr15.png",
     "productType": "clothes",
     "clothesType": "top",
     "sportType": "Running",
@@ -821,9 +989,9 @@
     "status": "Published",
     "colorVariants": [
       {
-        "color": "blue",
-        "colorClass": "bg-[#1e88e5]",
-        "image": "image/adidasBl02.png",
+        "color": "brown",
+        "colorClass": "bg-[#c2b0a2]",
+        "image": "image/adidasBr15.png",
         "amount": 0,
         "stock": {
           "S": 27,

@@ -249,6 +249,33 @@
   ],
   "__employee__": [
     {
+      "id": "noti_1784470078604_phtip",
+      "timestamp": "2026-07-19T14:07:58.604Z",
+      "read": false,
+      "type": "product_update",
+      "action": "updated",
+      "title": "🟡 Manager แก้ไขสินค้า",
+      "message": "\"Elite Grip Socks\" ถูกแก้ไขโดย Manager"
+    },
+    {
+      "id": "noti_1784467918720_gi3sp",
+      "timestamp": "2026-07-19T13:31:58.720Z",
+      "read": false,
+      "type": "out_of_stock",
+      "title": "🚫 สินค้าหมด Stock!",
+      "message": "\"roblox guy\" หมด stock แล้ว — กรุณาเติมสินค้า",
+      "productId": 19
+    },
+    {
+      "id": "noti_1784467886856_ybejx",
+      "timestamp": "2026-07-19T13:31:26.856Z",
+      "read": false,
+      "type": "new_order",
+      "title": "🛒 ออเดอร์ใหม่เข้ามาแล้ว!",
+      "message": "Order #GOGO-435324 จาก jyu Grace — ฿6,955",
+      "orderId": "#GOGO-435324"
+    },
+    {
       "id": "noti_1784463472952_w3ari",
       "timestamp": "2026-07-19T12:17:52.952Z",
       "read": false,
@@ -323,9 +350,66 @@
   ],
   "__manager__": [
     {
+      "id": "noti_1784470092493_e42vr",
+      "timestamp": "2026-07-19T14:08:12.493Z",
+      "read": false,
+      "type": "revenue_summary",
+      "title": "📊 สรุปรายได้วันนี้",
+      "message": "JUL 19, 2026 — รายได้ ฿2,247,678 จาก 5 ออเดอร์",
+      "revenue": 2247678,
+      "orderCount": 5
+    },
+    {
+      "id": "noti_1784469643418_ttw0p",
+      "timestamp": "2026-07-19T14:00:43.418Z",
+      "read": false,
+      "type": "revenue_summary",
+      "title": "📊 สรุปรายได้วันนี้",
+      "message": "JUL 19, 2026 — รายได้ ฿2,247,678 จาก 5 ออเดอร์",
+      "revenue": 2247678,
+      "orderCount": 5
+    },
+    {
+      "id": "noti_1784467918720_0qnfk",
+      "timestamp": "2026-07-19T13:31:58.720Z",
+      "read": true,
+      "type": "out_of_stock",
+      "title": "🚫 สินค้าหมด Stock!",
+      "message": "\"roblox guy\" หมด stock แล้ว — กรุณาเติมสินค้า",
+      "productId": 19
+    },
+    {
+      "id": "noti_1784467913742_ohgpv",
+      "timestamp": "2026-07-19T13:31:53.742Z",
+      "read": true,
+      "type": "revenue_summary",
+      "title": "📊 สรุปรายได้วันนี้",
+      "message": "JUL 19, 2026 — รายได้ ฿2,247,678 จาก 5 ออเดอร์",
+      "revenue": 2247678,
+      "orderCount": 5
+    },
+    {
+      "id": "noti_1784467886874_65ag1",
+      "timestamp": "2026-07-19T13:31:26.874Z",
+      "read": true,
+      "type": "high_value_order",
+      "title": "💰 ออเดอร์มูลค่าสูง!",
+      "message": "Order #GOGO-435324 มูลค่า ฿6,955 — ต้องให้ความสำคัญ",
+      "orderId": "#GOGO-435324"
+    },
+    {
+      "id": "noti_1784467886856_ybejx",
+      "timestamp": "2026-07-19T13:31:26.856Z",
+      "read": true,
+      "type": "new_order",
+      "title": "🛒 ออเดอร์ใหม่เข้ามาแล้ว!",
+      "message": "Order #GOGO-435324 จาก jyu Grace — ฿6,955",
+      "orderId": "#GOGO-435324"
+    },
+    {
       "id": "noti_1784463532752_z7rh5",
       "timestamp": "2026-07-19T12:18:52.752Z",
-      "read": false,
+      "read": true,
       "type": "revenue_summary",
       "title": "📊 สรุปรายได้วันนี้",
       "message": "JUL 19, 2026 — รายได้ ฿2,240,723 จาก 4 ออเดอร์",
@@ -335,7 +419,7 @@
     {
       "id": "noti_1784463194540_uypls",
       "timestamp": "2026-07-19T12:13:14.540Z",
-      "read": false,
+      "read": true,
       "type": "revenue_summary",
       "title": "📊 สรุปรายได้วันนี้",
       "message": "JUL 19, 2026 — รายได้ ฿2,235,908 จาก 3 ออเดอร์",
@@ -345,7 +429,7 @@
     {
       "id": "noti_1784463084359_0pdff",
       "timestamp": "2026-07-19T12:11:24.358Z",
-      "read": false,
+      "read": true,
       "type": "out_of_stock",
       "title": "🚫 สินค้าหมด Stock!",
       "message": "\"roblox guy\" หมด stock แล้ว — กรุณาเติมสินค้า",
@@ -354,7 +438,7 @@
     {
       "id": "noti_1784463079369_ade5w",
       "timestamp": "2026-07-19T12:11:19.369Z",
-      "read": false,
+      "read": true,
       "type": "revenue_summary",
       "title": "📊 สรุปรายได้วันนี้",
       "message": "JUL 19, 2026 — รายได้ ฿2,235,908 จาก 3 ออเดอร์",
@@ -364,7 +448,7 @@
     {
       "id": "noti_1784452518986_yfflp",
       "timestamp": "2026-07-19T09:15:18.986Z",
-      "read": false,
+      "read": true,
       "type": "out_of_stock",
       "title": "🚫 สินค้าหมด Stock!",
       "message": "\"roblox guy\" หมด stock แล้ว — กรุณาเติมสินค้า",
@@ -373,7 +457,7 @@
     {
       "id": "noti_1784452513976_y0h6l",
       "timestamp": "2026-07-19T09:15:13.976Z",
-      "read": false,
+      "read": true,
       "type": "revenue_summary",
       "title": "📊 สรุปรายได้วันนี้",
       "message": "JUL 19, 2026 — รายได้ ฿2,235,908 จาก 3 ออเดอร์",
@@ -383,7 +467,7 @@
     {
       "id": "noti_1784452508223_t3mss",
       "timestamp": "2026-07-19T09:15:08.223Z",
-      "read": false,
+      "read": true,
       "type": "high_value_order",
       "title": "💰 ออเดอร์มูลค่าสูง!",
       "message": "Order #GOGO-764396 มูลค่า ฿1,926,250 — ต้องให้ความสำคัญ",
@@ -392,7 +476,7 @@
     {
       "id": "noti_1784452508216_v19ww",
       "timestamp": "2026-07-19T09:15:08.216Z",
-      "read": false,
+      "read": true,
       "type": "new_order",
       "title": "🛒 ออเดอร์ใหม่เข้ามาแล้ว!",
       "message": "Order #GOGO-764396 จาก วรศักดิ์  นิลห้อย — ฿1,926,250",
@@ -401,7 +485,7 @@
     {
       "id": "noti_1784452424775_c3y07",
       "timestamp": "2026-07-19T09:13:44.775Z",
-      "read": false,
+      "read": true,
       "type": "revenue_summary",
       "title": "📊 สรุปรายได้วันนี้",
       "message": "JUL 19, 2026 — รายได้ ฿309,658 จาก 2 ออเดอร์",
@@ -411,7 +495,7 @@
     {
       "id": "noti_1784452419931_iorv4",
       "timestamp": "2026-07-19T09:13:39.931Z",
-      "read": false,
+      "read": true,
       "type": "high_value_order",
       "title": "💰 ออเดอร์มูลค่าสูง!",
       "message": "Order #GOGO-539929 มูลค่า ฿256,158 — ต้องให้ความสำคัญ",
@@ -420,7 +504,7 @@
     {
       "id": "noti_1784452419923_tky8g",
       "timestamp": "2026-07-19T09:13:39.923Z",
-      "read": false,
+      "read": true,
       "type": "new_order",
       "title": "🛒 ออเดอร์ใหม่เข้ามาแล้ว!",
       "message": "Order #GOGO-539929 จาก วรศักดิ์  นิลห้อย — ฿256,158",
@@ -429,7 +513,7 @@
     {
       "id": "noti_1784450358360_l5rvz",
       "timestamp": "2026-07-19T08:39:18.360Z",
-      "read": false,
+      "read": true,
       "type": "revenue_summary",
       "title": "📊 สรุปรายได้วันนี้",
       "message": "JUL 19, 2026 — รายได้ ฿53,500 จาก 1 ออเดอร์",
@@ -439,7 +523,7 @@
     {
       "id": "noti_1784450352998_gijmr",
       "timestamp": "2026-07-19T08:39:12.998Z",
-      "read": false,
+      "read": true,
       "type": "high_value_order",
       "title": "💰 ออเดอร์มูลค่าสูง!",
       "message": "Order #GOGO-576296 มูลค่า ฿53,500 — ต้องให้ความสำคัญ",
@@ -448,7 +532,7 @@
     {
       "id": "noti_1784450352990_ifx2r",
       "timestamp": "2026-07-19T08:39:12.990Z",
-      "read": false,
+      "read": true,
       "type": "new_order",
       "title": "🛒 ออเดอร์ใหม่เข้ามาแล้ว!",
       "message": "Order #GOGO-576296 จาก วรศักดิ์  นิลห้อย — ฿53,500",
@@ -457,7 +541,7 @@
     {
       "id": "noti_1784450226767_55ciq",
       "timestamp": "2026-07-19T08:37:06.768Z",
-      "read": false,
+      "read": true,
       "type": "revenue_summary",
       "title": "📊 สรุปรายได้วันนี้",
       "message": "JUL 19, 2026 — รายได้ ฿0 จาก 0 ออเดอร์",
@@ -467,7 +551,7 @@
     {
       "id": "noti_1784450217699_tfres",
       "timestamp": "2026-07-19T08:36:57.699Z",
-      "read": false,
+      "read": true,
       "type": "revenue_summary",
       "title": "📊 สรุปรายได้วันนี้",
       "message": "JUL 19, 2026 — รายได้ ฿0 จาก 0 ออเดอร์",
@@ -477,7 +561,7 @@
     {
       "id": "noti_1784450173149_4f693",
       "timestamp": "2026-07-19T08:36:13.149Z",
-      "read": false,
+      "read": true,
       "type": "revenue_summary",
       "title": "📊 สรุปรายได้วันนี้",
       "message": "JUL 19, 2026 — รายได้ ฿0 จาก 0 ออเดอร์",
@@ -487,7 +571,7 @@
     {
       "id": "noti_1784450146567_7kxsl",
       "timestamp": "2026-07-19T08:35:46.567Z",
-      "read": false,
+      "read": true,
       "type": "revenue_summary",
       "title": "📊 สรุปรายได้วันนี้",
       "message": "JUL 19, 2026 — รายได้ ฿0 จาก 0 ออเดอร์",
@@ -497,7 +581,7 @@
     {
       "id": "noti_1784450103589_f7x5d",
       "timestamp": "2026-07-19T08:35:03.589Z",
-      "read": false,
+      "read": true,
       "type": "revenue_summary",
       "title": "📊 สรุปรายได้วันนี้",
       "message": "JUL 19, 2026 — รายได้ ฿0 จาก 0 ออเดอร์",
@@ -507,7 +591,7 @@
     {
       "id": "noti_1784370024880_e5orn",
       "timestamp": "2026-07-18T10:20:24.880Z",
-      "read": false,
+      "read": true,
       "type": "high_value_order",
       "title": "💰 ออเดอร์มูลค่าสูง!",
       "message": "Order #GOGO-771417 มูลค่า ฿16,942 — ต้องให้ความสำคัญ",
@@ -516,7 +600,7 @@
     {
       "id": "noti_1784370024855_4iaq9",
       "timestamp": "2026-07-18T10:20:24.855Z",
-      "read": false,
+      "read": true,
       "type": "new_order",
       "title": "🛒 ออเดอร์ใหม่เข้ามาแล้ว!",
       "message": "Order #GOGO-771417 จาก Tongmen JaiSaard — ฿16,942",
@@ -525,7 +609,7 @@
     {
       "id": "noti_1784369742359_i9rlf",
       "timestamp": "2026-07-18T10:15:42.359Z",
-      "read": false,
+      "read": true,
       "type": "high_value_order",
       "title": "💰 ออเดอร์มูลค่าสูง!",
       "message": "Order #GOGO-708136 มูลค่า ฿12,020 — ต้องให้ความสำคัญ",
@@ -534,7 +618,7 @@
     {
       "id": "noti_1784369742327_jubsv",
       "timestamp": "2026-07-18T10:15:42.327Z",
-      "read": false,
+      "read": true,
       "type": "new_order",
       "title": "🛒 ออเดอร์ใหม่เข้ามาแล้ว!",
       "message": "Order #GOGO-708136 จาก Tongmen JaiSaard — ฿12,020",
@@ -551,6 +635,15 @@
     },
     {
       "id": "#GOGO-810325",
+      "date": "JUL 19, 2026",
+      "title": "Purchase successful!",
+      "status": "Preparing",
+      "read": true
+    }
+  ],
+  "bam": [
+    {
+      "id": "#GOGO-435324",
       "date": "JUL 19, 2026",
       "title": "Purchase successful!",
       "status": "Preparing",

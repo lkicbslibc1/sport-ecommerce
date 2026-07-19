@@ -50,5 +50,14 @@
     "role": "customer",
     "isActive": true,
     "joined": "JUL 19, 2026"
+  },
+  {
+    "id": 1784467562768,
+    "username": "bam",
+    "email": "ochigamerjack@gmail.com",
+    "password": "123",
+    "role": "customer",
+    "isActive": true,
+    "joined": "JUL 19, 2026"
   }
 ]

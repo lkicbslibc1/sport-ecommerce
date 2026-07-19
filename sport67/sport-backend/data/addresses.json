@@ -80,5 +80,17 @@
       "isDefault": true,
       "id": "1784463458884"
     }
+  ],
+  "bam": [
+    {
+      "firstName": "jyu",
+      "lastName": "Grace",
+      "phone": "2333352525",
+      "streetAddress": "191 Chulalongkorn Soi 48, Rama IV Road\nWang Mai Subdistrict, Pathum Wan District",
+      "city": "Bangkok",
+      "zipCode": "10330",
+      "isDefault": true,
+      "id": "1784467869213"
+    }
   ]
 }

@@ -1,5 +1,43 @@
 [
   {
+    "id": "#GOGO-435324",
+    "username": "bam",
+    "customer": "jyu Grace",
+    "shippingAddress": {
+      "firstName": "jyu",
+      "lastName": "Grace",
+      "phone": "2333352525",
+      "streetAddress": "191 Chulalongkorn Soi 48, Rama IV Road\nWang Mai Subdistrict, Pathum Wan District",
+      "city": "Bangkok",
+      "zipCode": "10330",
+      "isDefault": true,
+      "id": "1784467869213"
+    },
+    "shippingMethod": "standard",
+    "shippingCost": 0,
+    "date": "JUL 19, 2026",
+    "total": 6955,
+    "status": "Preparing",
+    "items": [
+      {
+        "id": 10,
+        "color": "Beige",
+        "size": "40",
+        "name": "Adidas Ultraboost Light",
+        "sku": "AD-RN-2024-010",
+        "qty": 1,
+        "price": "6,500 ฿",
+        "image": "image/adidas10Be.png"
+      }
+    ],
+    "actions": [
+      "Update Status",
+      "Mark Shipped",
+      "Mark Preparing",
+      "Cancel Order"
+    ]
+  },
+  {
     "id": "#GOGO-810325",
     "username": "jo",
     "customer": "Nawarood Inmeesri",
