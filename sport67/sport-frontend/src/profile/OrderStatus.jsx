@@ -86,7 +86,7 @@ export default function OrderStatus({ onViewChange, user, setUser, cart, orderId
     };
 
     allReviews[productId].push(newReview);
-    saveReviews(allReviews);
+    await saveReviews(allReviews);
 
     // Update order item to mark as reviewed
     try {

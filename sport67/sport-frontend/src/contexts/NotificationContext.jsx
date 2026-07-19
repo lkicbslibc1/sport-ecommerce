@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
-import { notifyStockAlert, notifyStaleOrders, notifyDailyRevenue, LOW_STOCK_THRESHOLD } from '../data/notificationService.js';
+import { notifyStockAlert, notifyStaleOrders, LOW_STOCK_THRESHOLD } from '../data/notificationService.js';
 
 const NotificationContext = createContext(null);
 
@@ -16,7 +16,6 @@ const CHECK_INTERVAL = 5 * 60_000; // 5min — stock + stale order check
 export function NotificationProvider({ user, products, children }) {
   const [notifications, setNotifications] = useState([]);
   const [panelOpen, setPanelOpen] = useState(false);
-  const lastRevenueDate = useRef(null);
 
   // Which noti key to read for this user
   const staffKey = user?.role === 'manager' ? '__manager__' : '__employee__';
@@ -102,34 +101,12 @@ export function NotificationProvider({ user, products, children }) {
     await fetchNotifications();
   }, [products, fetchNotifications]);
 
-  // ─── Daily revenue for manager ─────────────────────────────────────────────────
-  const checkDailyRevenue = useCallback(async () => {
-    if (user?.role !== 'manager') return;
-    const todayStr = new Date().toDateString();
-    if (lastRevenueDate.current === todayStr) return;
-    lastRevenueDate.current = todayStr;
-
-    try {
-      const res = await fetch(`${API_BASE}/orders`);
-      const orders = res.ok ? await res.json() : [];
-      const todayLabel = new Date()
-        .toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-        .toUpperCase();
-      const todayOrders = orders.filter(
-        o => o.date && o.date.toUpperCase() === todayLabel && o.status !== 'Cancelled'
-      );
-      const todayRevenue = todayOrders.reduce((sum, o) => sum + (o.total || 0), 0);
-      await notifyDailyRevenue(todayRevenue, todayOrders.length, todayLabel);
-      await fetchNotifications();
-    } catch {/* silent */}
-  }, [user, fetchNotifications]);
 
   // ─── Polling ──────────────────────────────────────────────────────────────────
   useEffect(() => {
     if (!user || !['manager', 'employee'].includes(user.role)) return;
 
     fetchNotifications();
-    checkDailyRevenue();
 
     const pollTimer = setInterval(fetchNotifications, POLL_INTERVAL);
     const checkTimer = setInterval(runChecks, CHECK_INTERVAL);
@@ -142,7 +119,7 @@ export function NotificationProvider({ user, products, children }) {
       clearInterval(checkTimer);
       clearTimeout(firstCheck);
     };
-  }, [user, fetchNotifications, runChecks, checkDailyRevenue]);
+  }, [user, fetchNotifications, runChecks]);
 
   const unreadCount = notifications.filter(n => !n.read).length;
 

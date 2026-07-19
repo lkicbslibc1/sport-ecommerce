@@ -52,7 +52,7 @@ export async function pushNoti(targets, noti) {
 // ─── Domain-specific senders ───────────────────────────────────────────────────
 
 /** Notify employees: Manager added/edited/deleted a product */
-export async function notifyProductChange(action, productName) {
+export async function notifyProductChange(action, productName, details = "") {
   // action: 'added' | 'updated' | 'deleted'
   const actionLabel = action === 'added' ? 'เพิ่ม' : action === 'updated' ? 'แก้ไข' : 'ลบ';
   const icon = action === 'added' ? '🟢' : action === 'updated' ? '🟡' : '🔴';
@@ -60,7 +60,7 @@ export async function notifyProductChange(action, productName) {
     type: 'product_update',
     action,
     title: `${icon} Manager ${actionLabel}สินค้า`,
-    message: `"${productName}" ถูก${actionLabel}โดย Manager`,
+    message: `"${productName}" ถูก${actionLabel}โดย Manager${details ? `\nรายละเอียด: ${details}` : ''}`,
   });
 }
 
@@ -72,20 +72,8 @@ export async function notifyNewOrder(orderId, customer, total) {
     message: `Order ${orderId} จาก ${customer} — ฿${total.toLocaleString('th-TH')}`,
     orderId,
   };
-  const targets = total >= 5000
-    ? ['__employee__', '__manager__']
-    : ['__employee__'];
+  const targets = ['__employee__', '__manager__'];
   await pushNoti(targets, payload);
-
-  if (total >= 5000) {
-    // Extra highlighted noti for manager
-    await pushNoti('__manager__', {
-      type: 'high_value_order',
-      title: '💰 ออเดอร์มูลค่าสูง!',
-      message: `Order ${orderId} มูลค่า ฿${total.toLocaleString('th-TH')} — ต้องให้ความสำคัญ`,
-      orderId,
-    });
-  }
 }
 
 /** Notify both roles: Low stock / Out of stock */
@@ -206,15 +194,5 @@ export async function notifyStaleOrders(orders) {
   await saveNoti(allNotis);
 }
 
-/** Notify manager: Daily revenue summary (called once per day on login) */
-export async function notifyDailyRevenue(todayRevenue, todayOrdersCount, date) {
-  await pushNoti('__manager__', {
-    type: 'revenue_summary',
-    title: '📊 สรุปรายได้วันนี้',
-    message: `${date} — รายได้ ฿${todayRevenue.toLocaleString('th-TH')} จาก ${todayOrdersCount} ออเดอร์`,
-    revenue: todayRevenue,
-    orderCount: todayOrdersCount,
-  });
-}
 
 export { LOW_STOCK_THRESHOLD };

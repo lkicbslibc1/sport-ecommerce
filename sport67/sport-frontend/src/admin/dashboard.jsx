@@ -46,14 +46,19 @@ export default function GogoAthleticDashboard({ onViewChange, user, setUser }) {
 function DashboardInner({ onViewChange, user, setUser }) {
   const [range, setRange] = useState("daily");
   const [currentPage, setCurrentPage] = useState(user?.role === 'employee' ? "orders" : "dashboard");
+  const [highlightId, setHighlightId] = useState(null);
+
+  const handleNavigate = (page, targetId = null) => {
+    setCurrentPage(page);
+    setHighlightId(targetId);
+  };
 
 // Restrict employee access
   React.useEffect(() => {
     if (user?.role === 'employee' && !["orders", "products"].includes(currentPage)) {
-      setCurrentPage("orders");
+      handleNavigate("orders");
     }
   }, [user, currentPage]);
-
 
   // Get products and orders from context and localStorage
   const { products } = useContext(ProductContext);
@@ -243,22 +248,22 @@ function DashboardInner({ onViewChange, user, setUser }) {
   const { unreadCount, setPanelOpen } = useNotifications();
 
   if (currentPage === "orders") {
-    return <GogoAthleticOrders onNavigate={setCurrentPage} onViewChange={onViewChange} user={user} setUser={setUser} />;
+    return <GogoAthleticOrders onNavigate={handleNavigate} onViewChange={onViewChange} user={user} setUser={setUser} highlightId={highlightId} />;
   }
   if (currentPage === "products") {
-    return <GogoAthleticProducts onNavigate={setCurrentPage} onViewChange={onViewChange} user={user} setUser={setUser} />;
+    return <GogoAthleticProducts onNavigate={handleNavigate} onViewChange={onViewChange} user={user} setUser={setUser} highlightId={highlightId} />;
   }
   if (currentPage === "team") {
     return (
       <TeamProvider>
-        <GogoAthleticTeam onNavigate={setCurrentPage} onViewChange={onViewChange} user={user} setUser={setUser} />
+        <GogoAthleticTeam onNavigate={handleNavigate} onViewChange={onViewChange} user={user} setUser={setUser} highlightId={highlightId} />
       </TeamProvider>
     );
   }
 
   return (
     <div className="min-h-screen w-full bg-neutral-950 text-neutral-100 flex">
-      <NotificationPanel />
+      <NotificationPanel onNavigate={handleNavigate} />
       <Sidebar
         user={user}
         setUser={setUser}

@@ -20,6 +20,7 @@ import {
 import { ProductContext, getSizeOptions, getTotalStock } from "../data/products.jsx";
 import { useAlert } from "../contexts/AlertContext.jsx";
 import { useNotifications } from "../contexts/NotificationContext.jsx";
+import NotificationPanel from "./NotificationPanel.jsx";
 import { notifyProductChange } from "../data/notificationService.js";
 
 const STATUS_STYLES = {
@@ -114,7 +115,7 @@ const makeEmptyVariant = (color = "") => ({
     stock: {}        // { "S": 10, "M": 5, ... } or { "38": 3, ... }
 });
 
-export default function GogoAthleticProducts({ onNavigate, onViewChange, user, setUser }) {
+export default function GogoAthleticProducts({ onNavigate, onViewChange, user, setUser, highlightId }) {
     const { showAlert } = useAlert();
     const { unreadCount, setPanelOpen } = useNotifications();
     const { products, addProduct, updateProduct, deleteProduct } = useContext(ProductContext);
@@ -307,6 +308,14 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange, user, s
             else { Object.values(v.stock || {}).forEach(q => { total += parseInt(q) || 0; }); }
         });
         updateProduct({ id: selectedItem.id, colorVariants: updatedVariants, amount: total });
+        
+        // Notify with detailed stock changes
+        const oldQty = sizes.length === 0 ? (selectedItem.colorVariants[variantIdx].amount || 0) : (selectedItem.colorVariants[variantIdx].stock[adjustQtySize] || 0);
+        const diffText = sizes.length === 0 
+          ? `ปรับสต็อกสี ${adjustQtyColor} จาก ${oldQty} เป็น ${qtyNum}`
+          : `ปรับสต็อกสี ${adjustQtyColor} ไซส์ ${adjustQtySize} จาก ${oldQty} เป็น ${qtyNum}`;
+        notifyProductChange('updated', selectedItem.name, diffText);
+
         setStockModalOpen(false);
         showAlert("Stock updated successfully.", "success");
     };
@@ -401,14 +410,46 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange, user, s
         };
 
         if (currentProduct) {
+            let changes = [];
+            if (currentProduct.name !== productData.name) changes.push(`ชื่อ: ${currentProduct.name} -> ${productData.name}`);
+            if (currentProduct.price !== productData.price) changes.push(`ราคา: ${currentProduct.price} -> ${productData.price}`);
+            if (currentProduct.status !== productData.status) changes.push(`สถานะ: ${currentProduct.status} -> ${productData.status}`);
+            if (currentProduct.brand !== productData.brand) changes.push(`แบรนด์: ${currentProduct.brand} -> ${productData.brand}`);
+            
+            // Basic check for color additions/removals
+            const oldColors = currentProduct.colorVariants.map(v => v.color).join(', ');
+            const newColors = productData.colorVariants.map(v => v.color).join(', ');
+            if (oldColors !== newColors) changes.push(`สี: ${oldColors || 'ไม่มี'} -> ${newColors || 'ไม่มี'}`);
+            
+            if (currentProduct.amount !== productData.amount) {
+                changes.push(`จำนวนรวม: ${currentProduct.amount || 0} -> ${productData.amount}`);
+            }
+            
+            productData.colorVariants.forEach(newV => {
+                const oldV = currentProduct.colorVariants.find(v => v.color === newV.color);
+                if (oldV) {
+                    if (sizes.length === 0) {
+                        if (oldV.amount !== newV.amount) changes.push(`สต็อกสี ${newV.color}: ${oldV.amount || 0} -> ${newV.amount}`);
+                    } else {
+                        Object.keys(newV.stock || {}).forEach(sz => {
+                            if (oldV.stock[sz] !== newV.stock[sz]) {
+                                changes.push(`สี ${newV.color} ไซส์ ${sz}: ${oldV.stock[sz] || 0} -> ${newV.stock[sz]}`);
+                            }
+                        });
+                    }
+                }
+            });
+            
+            const detailsText = changes.length > 0 ? changes.join(' | ') : 'แก้ไขข้อมูลทั่วไป';
+            
             updateProduct({ ...currentProduct, ...productData });
-            notifyProductChange('updated', formFields.name);
+            notifyProductChange('updated', formFields.name, detailsText);
         } else {
             addProduct({
                 id: products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1,
                 ...productData
             });
-            notifyProductChange('added', formFields.name);
+            notifyProductChange('added', formFields.name, "เพิ่มสินค้าใหม่เข้าสู่ระบบ");
         }
         showAlert(currentProduct ? "Product updated!" : "Product added!", "success");
         setModalOpen(false);
@@ -419,7 +460,7 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange, user, s
         if (window.confirm("Are you sure you want to delete this product?")) {
             deleteProduct(id);
             setModalOpen(false);
-            if (productToDelete) notifyProductChange('deleted', productToDelete.name);
+            if (productToDelete) notifyProductChange('deleted', productToDelete.name, "ลบสินค้าออกจากระบบ");
         }
     };
 
@@ -496,8 +537,25 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange, user, s
         setCurrentPage(1);
     }, [searchQuery, selectedCategory, selectedStatus, selectedStockStatus, sortField]);
 
+    React.useEffect(() => {
+        if (highlightId && filteredProducts.length > 0) {
+            const index = sortedProducts.findIndex(p => p.id === parseInt(highlightId));
+            if (index !== -1) {
+                const page = Math.floor(index / itemsPerPage) + 1;
+                setCurrentPage(page);
+                setTimeout(() => {
+                    const el = document.getElementById(`product-row-${highlightId}`);
+                    if (el) {
+                        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }, 300);
+            }
+        }
+    }, [highlightId, sortedProducts, itemsPerPage]);
+
     return (
         <div className="min-h-screen w-full bg-neutral-950 text-neutral-100 flex">
+            <NotificationPanel onNavigate={onNavigate} />
             <Sidebar
                 user={user}
                 setUser={setUser}
@@ -701,10 +759,12 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange, user, s
                                     {paginatedProducts.map((item) => {
                                         const stockStatusText = getStockStatus(item.amount);
                                         const s = STOCK_STYLES[stockStatusText];
+                                        const isHighlighted = item.id === parseInt(highlightId);
                                         return (
                                             <tr
                                                 key={item.id}
-                                                className="group hover:bg-white/[0.02] hover:border-l-4 hover:border-orange-500 transition-colors"
+                                                id={`product-row-${item.id}`}
+                                                className={`group transition-all duration-500 ${isHighlighted ? 'bg-orange-500/20 border-l-4 border-orange-400 shadow-[inset_0_0_20px_rgba(249,115,22,0.3)]' : 'hover:bg-white/[0.02] hover:border-l-4 hover:border-orange-500'}`}
                                             >
                                                 <td className="px-6 py-6 flex items-center gap-4">
                                                     <div className="w-12 h-12 bg-neutral-900 border border-white/10 shrink-0 flex items-center justify-center overflow-hidden">

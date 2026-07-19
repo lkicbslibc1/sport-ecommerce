@@ -60,10 +60,23 @@ function relativeTime(isoString) {
   return `${days} วันที่แล้ว`;
 }
 
-export default function NotificationPanel() {
+export default function NotificationPanel({ onNavigate }) {
   const { notifications, unreadCount, panelOpen, setPanelOpen, markAsRead, markAllAsRead, clearAll } = useNotifications();
 
   if (!panelOpen) return null;
+
+  const handleNotificationClick = (noti) => {
+    markAsRead(noti.id);
+    setPanelOpen(false);
+
+    if (!onNavigate) return;
+
+    if (['new_order', 'stale_order', 'high_value_order'].includes(noti.type)) {
+      onNavigate('orders', noti.orderId);
+    } else if (['product_update', 'low_stock', 'out_of_stock'].includes(noti.type)) {
+      onNavigate('products', noti.productId);
+    }
+  };
 
   return (
     <>
@@ -131,7 +144,7 @@ export default function NotificationPanel() {
                 return (
                   <li
                     key={noti.id}
-                    onClick={() => markAsRead(noti.id)}
+                    onClick={() => handleNotificationClick(noti)}
                     className={`px-6 py-5 cursor-pointer transition-all hover:bg-white/[0.03] relative ${
                       !noti.read ? 'bg-white/[0.02]' : ''
                     }`}
@@ -152,7 +165,7 @@ export default function NotificationPanel() {
                         <p className={`font-bold text-sm leading-tight mb-1 ${noti.read ? 'text-neutral-400' : 'text-neutral-100'}`}>
                           {noti.title}
                         </p>
-                        <p className="text-xs text-neutral-500 leading-relaxed">
+                        <p className="text-xs text-neutral-500 leading-relaxed whitespace-pre-line">
                           {noti.message}
                         </p>
                         <p className="text-[10px] text-neutral-600 mt-2 uppercase tracking-widest">

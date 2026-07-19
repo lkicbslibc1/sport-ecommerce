@@ -10,6 +10,7 @@ import {
   ChevronRight,
   X,
   Package,
+  Printer,
 } from "lucide-react";
 import { getStoredOrders, saveOrders } from "../data/products.jsx";
 import NotificationPanel from "./NotificationPanel.jsx";
@@ -35,7 +36,7 @@ function GlassPanel({ className = "", children }) {
   );
 }
 
-export default function GogoAthleticOrders({ onNavigate, onViewChange, user, setUser }) {
+export default function GogoAthleticOrders({ onNavigate, onViewChange, user, setUser, highlightId }) {
   const [ordersList, setOrdersList] = useState([]);
   const { unreadCount, setPanelOpen } = useNotifications();
 
@@ -63,24 +64,32 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange, user, set
 
   const [selectedOrderIds, setSelectedOrderIds] = useState([]);
   const [bulkStatus, setBulkStatus] = useState("Shipped");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const ITEMS_PER_PAGE = 10;
 
   React.useEffect(() => {
     setSelectedOrderIds([]);
+    setCurrentPage(1);
   }, [searchQuery, selectedStatus]);
 
+
   const handleUpdateStatus = async (orderId, newStatus) => {
-    let orderUsername = null;
-    let orderDate = null;
-    const updated = ordersList.map(o => {
-      if (o.id === orderId) {
-        orderUsername = o.username;
-        orderDate = o.date;
-        return { ...o, status: newStatus };
-      }
-      return o;
-    });
-    setOrdersList(updated);
-    await saveOrders(updated);
+    if (isUpdating) return;
+    setIsUpdating(true);
+    try {
+      let orderUsername = null;
+      let orderDate = null;
+      const updated = ordersList.map(o => {
+        if (o.id === orderId) {
+          orderUsername = o.username;
+          orderDate = o.date;
+          return { ...o, status: newStatus };
+        }
+        return o;
+      });
+      setOrdersList(updated);
+      await saveOrders(updated);
 
     if (orderUsername && orderUsername !== 'Guest') {
       try {
@@ -105,7 +114,115 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange, user, set
         console.error("Failed to save noti:", err);
       }
     }
+    } finally {
+      setIsUpdating(false);
+    }
   };
+
+  const printInvoice = (order) => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+    
+    const itemsHtml = order.items && order.items.length > 0 
+      ? order.items.map(item => {
+          let details = [];
+          if (item.color) details.push(`Color: <span style="text-transform: capitalize;">${item.color}</span>`);
+          if (item.size) details.push(`Size: ${item.size}`);
+          const detailsStr = details.length > 0 ? ` | ${details.join(', ')}` : '';
+          return `
+            <tr>
+              <td style="padding: 12px; border-bottom: 1px solid #eee;">
+                ${item.name}<br>
+                <small style="color: #666;">SKU: ${item.sku}${detailsStr}</small>
+              </td>
+              <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: center;">${item.qty}</td>
+              <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right;">${item.price}</td>
+              <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right;">${((parseFloat((item.price || "0").replace(/,/g, '').replace(' ฿', '')) || 0) * item.qty).toLocaleString("th-TH")} ฿</td>
+            </tr>
+          `;
+        }).join('')
+      : '<tr><td colspan="4" style="text-align: center; padding: 12px;">No items</td></tr>';
+
+    const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Invoice - ${order.id}</title>
+        <style>
+          body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 40px; color: #333; line-height: 1.6; }
+          .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px; border-bottom: 2px solid #333; padding-bottom: 20px; }
+          .store-name { font-size: 24px; font-weight: 900; font-style: italic; text-transform: uppercase; letter-spacing: 2px; }
+          .invoice-title { font-size: 32px; color: #ccc; font-weight: bold; text-transform: uppercase; }
+          .details-row { display: flex; justify-content: space-between; margin-bottom: 40px; }
+          .details-col { flex: 1; }
+          table { w-full; width: 100%; border-collapse: collapse; margin-bottom: 40px; }
+          th { text-align: left; padding: 12px; border-bottom: 2px solid #333; text-transform: uppercase; font-size: 12px; letter-spacing: 1px; }
+          .totals { width: 300px; margin-left: auto; }
+          .total-row { display: flex; justify-content: space-between; padding: 8px 0; }
+          .total-final { font-size: 20px; font-weight: bold; border-top: 2px solid #333; padding-top: 12px; margin-top: 12px; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <div>
+            <div class="store-name">Gogo Athletic</div>
+            <div style="font-size: 12px; color: #666; margin-top: 5px;">123 Sport Avenue, Bangkok, TH<br>contact@gogoathletic.com</div>
+          </div>
+          <div class="invoice-title">INVOICE</div>
+        </div>
+        
+        <div class="details-row">
+          <div class="details-col">
+            <h4 style="margin: 0 0 10px 0; font-size: 12px; color: #666; text-transform: uppercase;">Billed To:</h4>
+            <strong>${order.customer}</strong><br>
+            ${order.shippingAddress ? `
+              ${order.shippingAddress.streetAddress}<br>
+              ${order.shippingAddress.city}, ${order.shippingAddress.zipCode}<br>
+              Tel: ${order.shippingAddress.phone}
+            ` : 'No address provided'}
+          </div>
+          <div class="details-col" style="text-align: right;">
+            <h4 style="margin: 0 0 10px 0; font-size: 12px; color: #666; text-transform: uppercase;">Invoice Details:</h4>
+            <strong>Order ID:</strong> ${order.id}<br>
+            <strong>Date:</strong> ${order.date}<br>
+            <strong>Shipping:</strong> ${order.shippingMethod === 'express' ? 'Express' : 'Standard'}
+          </div>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Item Description</th>
+              <th style="text-align: center;">Qty</th>
+              <th style="text-align: right;">Unit Price</th>
+              <th style="text-align: right;">Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${itemsHtml}
+          </tbody>
+        </table>
+
+        <div class="totals">
+          <div class="total-row">
+            <span>Shipping</span>
+            <span>${order.shippingCost > 0 ? order.shippingCost.toLocaleString("th-TH") + ' ฿' : 'Free'}</span>
+          </div>
+          <div class="total-row total-final">
+            <span>Total</span>
+            <span>${(order.total || 0).toLocaleString("th-TH")} ฿</span>
+          </div>
+        </div>
+      </body>
+      <script>
+        window.onload = function() { window.print(); window.close(); }
+      </script>
+      </html>
+    `;
+    printWindow.document.write(html);
+    printWindow.document.close();
+  };
+
 
   const filteredOrders = useMemo(() => {
     return ordersList.filter(o => {
@@ -116,6 +233,28 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange, user, set
       return matchSearch && matchStatus;
     });
   }, [ordersList, searchQuery, selectedStatus]);
+
+  React.useEffect(() => {
+    if (highlightId && filteredOrders.length > 0) {
+      const index = filteredOrders.findIndex(o => o.id === highlightId);
+      if (index !== -1) {
+        const page = Math.floor(index / ITEMS_PER_PAGE) + 1;
+        setCurrentPage(page);
+        setTimeout(() => {
+          const el = document.getElementById(`order-row-${highlightId}`);
+          if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 300);
+      }
+    }
+  }, [highlightId, filteredOrders, ITEMS_PER_PAGE]);
+
+  const totalPages = Math.ceil(filteredOrders.length / ITEMS_PER_PAGE);
+  const paginatedOrders = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredOrders.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [filteredOrders, currentPage, ITEMS_PER_PAGE]);
 
   const handleSelectAll = (e) => {
     if (e.target.checked) {
@@ -196,11 +335,11 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange, user, set
 
   const selectedOrderTax = selectedOrderSubtotal * 0.07;
   const selectedOrderTotalNum = selectedOrder ? (selectedOrder.total || 0) : 0;
-  const selectedOrderShipping = Math.max(0, selectedOrderTotalNum - selectedOrderSubtotal - selectedOrderTax);
+  const selectedOrderShipping = selectedOrder ? (selectedOrder.shippingCost || 0) : 0;
 
   return (
     <div className="min-h-screen w-full bg-neutral-950 text-neutral-100 flex">
-      <NotificationPanel />
+      <NotificationPanel onNavigate={onNavigate} />
       <Sidebar
         user={user}
         setUser={setUser}
@@ -323,6 +462,13 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange, user, set
                 </div>
               )}
             </div>
+            
+            <button
+              onClick={() => setShowActionModal(true)}
+              className="bg-neutral-900 border border-white/10 text-neutral-100 text-[10px] uppercase font-black tracking-widest py-2 px-4 hover:bg-neutral-800 transition-colors flex items-center gap-2"
+            >
+              <Package size={14} /> Actions
+            </button>
           </GlassPanel>
 
           {/* Orders Table */}
@@ -365,10 +511,13 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange, user, set
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/5">
-                  {filteredOrders.map((order) => (
+                  {paginatedOrders.map((order) => {
+                    const isHighlighted = order.id === highlightId;
+                    return (
                     <tr
                       key={order.id}
-                      className={`hover:bg-orange-600/5 hover:border-l-2 hover:border-orange-400 transition-colors ${selectedOrderIds.includes(order.id) ? 'bg-orange-600/10 border-l-2 border-orange-400' : ''}`}
+                      id={`order-row-${order.id}`}
+                      className={`hover:bg-orange-600/5 hover:border-l-2 hover:border-orange-400 transition-all duration-500 ${selectedOrderIds.includes(order.id) ? 'bg-orange-600/10 border-l-2 border-orange-400' : ''} ${isHighlighted ? 'bg-orange-500/20 border-l-4 border-orange-400 shadow-[inset_0_0_20px_rgba(249,115,22,0.3)]' : ''}`}
                     >
                       <td className="p-6">
                         <input
@@ -437,7 +586,8 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange, user, set
                         </div>
                       </td>
                     </tr>
-                  ))}
+                  );
+                })}
                 </tbody>
               </table>
             </div>
@@ -445,13 +595,20 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange, user, set
             {/* Pagination */}
             <div className="p-6 border-t border-white/10 bg-neutral-900/60 flex justify-between items-center">
               <p className="text-[10px] font-black text-neutral-400 uppercase tracking-widest">
-                Showing {filteredOrders.length} of {ordersList.length} orders
+                Showing {paginatedOrders.length} of {filteredOrders.length} orders
               </p>
               <div className="flex gap-2">
-                <button className="p-2 border border-white/10 hover:bg-orange-600 hover:text-white transition-all">
+                <button 
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="p-2 border border-white/10 hover:bg-orange-600 hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed">
                   <ChevronLeft size={16} />
                 </button>
-                <button className="p-2 border border-white/10 hover:bg-orange-600 hover:text-white transition-all">
+                <span className="text-[10px] text-neutral-400 flex items-center px-2">Page {currentPage} of {totalPages || 1}</span>
+                <button 
+                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages || totalPages === 0}
+                  className="p-2 border border-white/10 hover:bg-orange-600 hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed">
                   <ChevronRight size={16} />
                 </button>
               </div>
@@ -473,9 +630,20 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange, user, set
                 <h3 className="text-2xl italic uppercase font-black text-orange-300">
                   Order Details
                 </h3>
-                <p className="text-[10px] text-neutral-400 tracking-widest">
-                  {selectedOrder.id} / {selectedOrder.customer}
-                </p>
+                <div className="flex items-center gap-4 mt-1">
+                  <p className="text-[10px] text-neutral-400 tracking-widest">
+                    {selectedOrder.id} / {selectedOrder.customer}
+                  </p>
+                  <div className="flex gap-2 ml-4">
+                    <button 
+                      onClick={() => printInvoice(selectedOrder)}
+                      className="flex items-center gap-1.5 px-3 py-1 bg-white/[0.05] hover:bg-orange-600 border border-white/10 hover:border-orange-500 text-[9px] uppercase tracking-widest font-bold transition-colors text-neutral-300 hover:text-white"
+                    >
+                      <Printer size={12} />
+                      Invoice
+                    </button>
+                  </div>
+                </div>
               </div>
               <button
                 onClick={() => setSelectedOrder(null)}
@@ -607,14 +775,50 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange, user, set
             <div className="flex-1 p-6 space-y-4">
 
               <button
-                onClick={() => {
+                onClick={async () => {
                   const preparingOrders = ordersList.filter(o => o.status === "Preparing");
                   if (preparingOrders.length > 0) {
-                    const updated = ordersList.map(o =>
-                      o.status === "Preparing" ? { ...o, status: "Shipped" } : o
-                    );
+                    let hasNotisChanged = false;
+                    let allNotis = {};
+                    try {
+                      const notiRes = await fetch('http://localhost:5000/api/noti');
+                      if (notiRes.ok) allNotis = await notiRes.json();
+                    } catch (err) {
+                      console.error(err);
+                    }
+
+                    const updated = ordersList.map(o => {
+                      if (o.status === "Preparing") {
+                        if (o.username && o.username !== 'Guest') {
+                          const userNotis = allNotis[o.username] || [];
+                          const newNoti = {
+                            id: o.id,
+                            date: o.date,
+                            title: "Order status updated",
+                            status: "Shipped",
+                            read: false
+                          };
+                          allNotis[o.username] = [newNoti, ...userNotis];
+                          hasNotisChanged = true;
+                        }
+                        return { ...o, status: "Shipped" };
+                      }
+                      return o;
+                    });
                     setOrdersList(updated);
-                    saveOrders(updated);
+                    await saveOrders(updated);
+
+                    if (hasNotisChanged) {
+                      try {
+                        await fetch('http://localhost:5000/api/noti', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify(allNotis)
+                        });
+                      } catch (err) {
+                        console.error(err);
+                      }
+                    }
                   }
                   setShowActionModal(false);
                 }}

@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import Navbar from "../navbar.jsx";
 import { useAlert } from "../contexts/AlertContext.jsx";
+import { getSizeOptions } from "../data/products.jsx";
 
 const C = {
     bg: "#050505",
@@ -60,6 +61,8 @@ function BagItem({ item, updateQuantity, removeItem, updateItemAttribute, onView
     const currentImage = (item.colorImages && currentColor && item.colorImages[currentColor]) 
         ? item.colorImages[currentColor] 
         : item.image;
+        
+    const itemSizes = item.sizes || getSizeOptions(item.productType, item.clothesType) || [];
 
     return (
         <div
@@ -114,15 +117,15 @@ function BagItem({ item, updateQuantity, removeItem, updateItemAttribute, onView
                         <p className="text-[10px] uppercase mb-1" style={{ color: C.onSurfaceVariant }}>
                             SIZE
                         </p>
-                        {item.sizes && item.sizes.length > 0 ? (
+                        {itemSizes && itemSizes.length > 0 ? (
                             <div className="relative w-fit group">
                                 <select
-                                    value={item.selectedSize || item.size || item.sizes[0]}
+                                    value={item.selectedSize || item.size || itemSizes[0]}
                                     onChange={(e) => updateItemAttribute(item.cartId || item.id, 'selectedSize', e.target.value)}
                                     className="font-black italic px-3 py-1 border outline-none cursor-pointer appearance-none pr-8 transition-colors hover:border-primary focus:border-primary"
                                     style={{ backgroundColor: C.surfaceContainerHigh, borderColor: C.outlineVariant, color: C.onSurface }}
                                 >
-                                    {item.sizes.map(size => (
+                                    {itemSizes.map(size => (
                                         <option key={size} value={size} className="bg-[#1c1b1b] text-white not-italic">{size}</option>
                                     ))}
                                 </select>
@@ -138,7 +141,21 @@ function BagItem({ item, updateQuantity, removeItem, updateItemAttribute, onView
                         <p className="text-[10px] uppercase mb-1" style={{ color: C.onSurfaceVariant }}>
                             COLOR
                         </p>
-                        {item.colorNames && item.colorNames.length > 0 ? (
+                        {item.colorVariants && item.colorVariants.length > 0 ? (
+                            <div className="relative w-fit group">
+                                <select
+                                    value={item.selectedColor || item.color || item.colorVariants[0].color}
+                                    onChange={(e) => updateItemAttribute(item.cartId || item.id, 'selectedColor', e.target.value)}
+                                    className="font-black italic px-3 py-1 border outline-none cursor-pointer appearance-none pr-8 transition-colors hover:border-primary focus:border-primary "
+                                    style={{ backgroundColor: C.surfaceContainerHigh, borderColor: C.outlineVariant, color: C.onSurface }}
+                                >
+                                    {item.colorVariants.map(variant => (
+                                        <option key={variant.color} value={variant.color} className="bg-[#1c1b1b] text-white not-italic">{variant.color}</option>
+                                    ))}
+                                </select>
+                                <span className="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-[16px] text-white/50 group-hover:text-primary transition-colors">expand_more</span>
+                            </div>
+                        ) : item.colorNames && item.colorNames.length > 0 ? (
                             <div className="relative w-fit group">
                                 <select
                                     value={item.selectedColor || item.color || item.colorNames[0]}
@@ -224,7 +241,7 @@ export default function GoGoBag({ onViewChange, cart = [], setCart, user, setUse
     };
 
     const subtotal = cart.reduce((sum, i) => sum + i.price * i.quantity, 0);
-    const tax = subtotal * 0.08;
+    const tax = subtotal * 0.07;
     const total = subtotal + tax;
 
     return (

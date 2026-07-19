@@ -38,7 +38,7 @@
     "sportType": "Running",
     "targetGroup": "men",
     "fabricMaterial": "polyester",
-    "amount": 116,
+    "amount": 113,
     "review": 4.9,
     "description": "Premium carbon-plated road racing shoe built for speed.",
     "sku": "GA-FW-2024-001",
@@ -72,7 +72,7 @@
           "41": 7,
           "42": 7,
           "43": 7,
-          "44": 7,
+          "44": 4,
           "45": 7
         }
       },
@@ -559,8 +559,7 @@
     "price": 950,
     "brand": "Adidas",
     "sizes": [
-      "S",
-      "M"
+      "One Size"
     ],
     "colorNames": [
       "Black"
@@ -585,7 +584,11 @@
         "amount": 85,
         "stock": {}
       }
-    ]
+    ],
+    "colorImages": {
+      "black": "image/adidas08B.png"
+    },
+    "clothesType": ""
   },
   {
     "id": 9,
@@ -650,22 +653,26 @@
     "price": 6500,
     "brand": "Adidas",
     "sizes": [
+      "38",
       "39",
       "40",
       "41",
       "42",
       "43",
-      "44"
+      "44",
+      "45"
     ],
     "colorNames": [
       "Purple",
       "White",
-      "Beige"
+      "Beige",
+      "Grey"
     ],
     "colors": [
       "bg-[#423943]",
       "bg-white",
-      "bg-[#e5ded4]"
+      "bg-[#e5ded4]",
+      "bg-gray-500"
     ],
     "badge": "New Arrival",
     "badgeType": "tertiary",
@@ -675,7 +682,7 @@
     "sportType": "Running",
     "targetGroup": "men",
     "fabricMaterial": "Primeknit",
-    "amount": 74,
+    "amount": 84,
     "review": 4.8,
     "description": "Lightest Ultraboost ever with epic energy return.",
     "sku": "AD-RN-2024-010",
@@ -722,8 +729,23 @@
           "43": 4,
           "44": 4
         }
+      },
+      {
+        "color": "grey",
+        "colorClass": "bg-gray-500",
+        "image": "image/1784482736089.png",
+        "amount": 0,
+        "stock": {
+          "40": 10
+        }
       }
-    ]
+    ],
+    "colorImages": {
+      "purple": "image/adidas10P.png",
+      "white": "image/adidas10W.png",
+      "beige": "image/adidas10Be.png",
+      "grey": "image/1784482736089.png"
+    }
   },
   {
     "id": 11,
@@ -1125,7 +1147,7 @@
     "brand": "Adidas",
     "sportType": "Swimming",
     "targetGroup": "men",
-    "amount": 0,
+    "amount": 2,
     "image": "image/1784286746252.png",
     "colorNames": [
       "Orange"
@@ -1148,7 +1170,7 @@
         "color": "orange",
         "colorClass": "bg-primary",
         "image": "image/1784286746252.png",
-        "amount": 0,
+        "amount": 2,
         "stock": {}
       }
     ]
