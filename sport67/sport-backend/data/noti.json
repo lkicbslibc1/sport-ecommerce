@@ -1,4 +1,104 @@
 {
+  "4444": [
+    {
+      "id": "#GOGO-764396",
+      "date": "JUL 19, 2026",
+      "title": "Order status updated",
+      "status": "Shipped",
+      "read": false
+    },
+    {
+      "id": "#GOGO-764396",
+      "date": "JUL 19, 2026",
+      "title": "Order status updated",
+      "status": "Preparing",
+      "read": false
+    },
+    {
+      "id": "#GOGO-764396",
+      "date": "JUL 19, 2026",
+      "title": "Order status updated",
+      "status": "Shipped",
+      "read": false
+    },
+    {
+      "id": "#GOGO-764396",
+      "date": "JUL 19, 2026",
+      "title": "Order status updated",
+      "status": "Delivered",
+      "read": false
+    },
+    {
+      "id": "#GOGO-764396",
+      "date": "JUL 19, 2026",
+      "title": "Order status updated",
+      "status": "Cancelled",
+      "read": false
+    },
+    {
+      "id": "#GOGO-539929",
+      "date": "JUL 19, 2026",
+      "title": "Order status updated",
+      "status": "Delivered",
+      "read": false
+    },
+    {
+      "id": "#GOGO-764396",
+      "date": "JUL 19, 2026",
+      "title": "Order status updated",
+      "status": "Shipped",
+      "read": false
+    },
+    {
+      "id": "#GOGO-764396",
+      "date": "JUL 19, 2026",
+      "title": "Order status updated",
+      "status": "Delivered",
+      "read": false
+    },
+    {
+      "id": "#GOGO-764396",
+      "date": "JUL 19, 2026",
+      "title": "Purchase successful!",
+      "status": "Preparing",
+      "read": false
+    },
+    {
+      "id": "#GOGO-539929",
+      "date": "JUL 19, 2026",
+      "title": "Order status updated",
+      "status": "Shipped",
+      "read": true
+    },
+    {
+      "id": "#GOGO-539929",
+      "date": "JUL 19, 2026",
+      "title": "Purchase successful!",
+      "status": "Preparing",
+      "read": true
+    },
+    {
+      "id": "#GOGO-576296",
+      "date": "JUL 19, 2026",
+      "title": "Order status updated",
+      "status": "Preparing",
+      "read": true
+    },
+    {
+      "id": "#GOGO-576296",
+      "date": "JUL 19, 2026",
+      "title": "Order status updated",
+      "status": "Shipped",
+      "read": true
+    },
+    {
+      "id": "#GOGO-576296",
+      "date": "JUL 19, 2026",
+      "title": "Purchase successful!",
+      "status": "Preparing",
+      "read": true
+    }
+  ],
   "mook3": [
     {
       "id": "#GOGO-411992",
@@ -54,6 +154,13 @@
   ],
   "mook": [
     {
+      "id": "#GOGO-880210",
+      "date": "JUL 17, 2026",
+      "title": "Order status updated",
+      "status": "Cancelled",
+      "read": false
+    },
+    {
       "id": "#GOGO-386043",
       "date": "JUL 17, 2026",
       "title": "Purchase successful!",
@@ -86,6 +193,34 @@
     {
       "id": "#GOGO-771417",
       "date": "JUL 18, 2026",
+      "title": "Order status updated",
+      "status": "Delivered",
+      "read": false
+    },
+    {
+      "id": "#GOGO-771417",
+      "date": "JUL 18, 2026",
+      "title": "Order status updated",
+      "status": "Shipped",
+      "read": false
+    },
+    {
+      "id": "#GOGO-771417",
+      "date": "JUL 18, 2026",
+      "title": "Order status updated",
+      "status": "Delivered",
+      "read": false
+    },
+    {
+      "id": "#GOGO-771417",
+      "date": "JUL 18, 2026",
+      "title": "Order status updated",
+      "status": "Cancelled",
+      "read": false
+    },
+    {
+      "id": "#GOGO-771417",
+      "date": "JUL 18, 2026",
       "title": "Purchase successful!",
       "status": "Preparing",
       "read": false
@@ -114,6 +249,42 @@
   ],
   "__employee__": [
     {
+      "id": "noti_1784452518986_pdgme",
+      "timestamp": "2026-07-19T09:15:18.986Z",
+      "read": false,
+      "type": "out_of_stock",
+      "title": "🚫 สินค้าหมด Stock!",
+      "message": "\"roblox guy\" หมด stock แล้ว — กรุณาเติมสินค้า",
+      "productId": 19
+    },
+    {
+      "id": "noti_1784452508216_v19ww",
+      "timestamp": "2026-07-19T09:15:08.216Z",
+      "read": false,
+      "type": "new_order",
+      "title": "🛒 ออเดอร์ใหม่เข้ามาแล้ว!",
+      "message": "Order #GOGO-764396 จาก วรศักดิ์  นิลห้อย — ฿1,926,250",
+      "orderId": "#GOGO-764396"
+    },
+    {
+      "id": "noti_1784452419923_tky8g",
+      "timestamp": "2026-07-19T09:13:39.923Z",
+      "read": false,
+      "type": "new_order",
+      "title": "🛒 ออเดอร์ใหม่เข้ามาแล้ว!",
+      "message": "Order #GOGO-539929 จาก วรศักดิ์  นิลห้อย — ฿256,158",
+      "orderId": "#GOGO-539929"
+    },
+    {
+      "id": "noti_1784450352990_ifx2r",
+      "timestamp": "2026-07-19T08:39:12.990Z",
+      "read": false,
+      "type": "new_order",
+      "title": "🛒 ออเดอร์ใหม่เข้ามาแล้ว!",
+      "message": "Order #GOGO-576296 จาก วรศักดิ์  นิลห้อย — ฿53,500",
+      "orderId": "#GOGO-576296"
+    },
+    {
       "id": "noti_1784370024855_4iaq9",
       "timestamp": "2026-07-18T10:20:24.855Z",
       "read": false,
@@ -133,6 +304,149 @@
     }
   ],
   "__manager__": [
+    {
+      "id": "noti_1784452518986_yfflp",
+      "timestamp": "2026-07-19T09:15:18.986Z",
+      "read": false,
+      "type": "out_of_stock",
+      "title": "🚫 สินค้าหมด Stock!",
+      "message": "\"roblox guy\" หมด stock แล้ว — กรุณาเติมสินค้า",
+      "productId": 19
+    },
+    {
+      "id": "noti_1784452513976_y0h6l",
+      "timestamp": "2026-07-19T09:15:13.976Z",
+      "read": false,
+      "type": "revenue_summary",
+      "title": "📊 สรุปรายได้วันนี้",
+      "message": "JUL 19, 2026 — รายได้ ฿2,235,908 จาก 3 ออเดอร์",
+      "revenue": 2235908,
+      "orderCount": 3
+    },
+    {
+      "id": "noti_1784452508223_t3mss",
+      "timestamp": "2026-07-19T09:15:08.223Z",
+      "read": false,
+      "type": "high_value_order",
+      "title": "💰 ออเดอร์มูลค่าสูง!",
+      "message": "Order #GOGO-764396 มูลค่า ฿1,926,250 — ต้องให้ความสำคัญ",
+      "orderId": "#GOGO-764396"
+    },
+    {
+      "id": "noti_1784452508216_v19ww",
+      "timestamp": "2026-07-19T09:15:08.216Z",
+      "read": false,
+      "type": "new_order",
+      "title": "🛒 ออเดอร์ใหม่เข้ามาแล้ว!",
+      "message": "Order #GOGO-764396 จาก วรศักดิ์  นิลห้อย — ฿1,926,250",
+      "orderId": "#GOGO-764396"
+    },
+    {
+      "id": "noti_1784452424775_c3y07",
+      "timestamp": "2026-07-19T09:13:44.775Z",
+      "read": false,
+      "type": "revenue_summary",
+      "title": "📊 สรุปรายได้วันนี้",
+      "message": "JUL 19, 2026 — รายได้ ฿309,658 จาก 2 ออเดอร์",
+      "revenue": 309658,
+      "orderCount": 2
+    },
+    {
+      "id": "noti_1784452419931_iorv4",
+      "timestamp": "2026-07-19T09:13:39.931Z",
+      "read": false,
+      "type": "high_value_order",
+      "title": "💰 ออเดอร์มูลค่าสูง!",
+      "message": "Order #GOGO-539929 มูลค่า ฿256,158 — ต้องให้ความสำคัญ",
+      "orderId": "#GOGO-539929"
+    },
+    {
+      "id": "noti_1784452419923_tky8g",
+      "timestamp": "2026-07-19T09:13:39.923Z",
+      "read": false,
+      "type": "new_order",
+      "title": "🛒 ออเดอร์ใหม่เข้ามาแล้ว!",
+      "message": "Order #GOGO-539929 จาก วรศักดิ์  นิลห้อย — ฿256,158",
+      "orderId": "#GOGO-539929"
+    },
+    {
+      "id": "noti_1784450358360_l5rvz",
+      "timestamp": "2026-07-19T08:39:18.360Z",
+      "read": false,
+      "type": "revenue_summary",
+      "title": "📊 สรุปรายได้วันนี้",
+      "message": "JUL 19, 2026 — รายได้ ฿53,500 จาก 1 ออเดอร์",
+      "revenue": 53500,
+      "orderCount": 1
+    },
+    {
+      "id": "noti_1784450352998_gijmr",
+      "timestamp": "2026-07-19T08:39:12.998Z",
+      "read": false,
+      "type": "high_value_order",
+      "title": "💰 ออเดอร์มูลค่าสูง!",
+      "message": "Order #GOGO-576296 มูลค่า ฿53,500 — ต้องให้ความสำคัญ",
+      "orderId": "#GOGO-576296"
+    },
+    {
+      "id": "noti_1784450352990_ifx2r",
+      "timestamp": "2026-07-19T08:39:12.990Z",
+      "read": false,
+      "type": "new_order",
+      "title": "🛒 ออเดอร์ใหม่เข้ามาแล้ว!",
+      "message": "Order #GOGO-576296 จาก วรศักดิ์  นิลห้อย — ฿53,500",
+      "orderId": "#GOGO-576296"
+    },
+    {
+      "id": "noti_1784450226767_55ciq",
+      "timestamp": "2026-07-19T08:37:06.768Z",
+      "read": false,
+      "type": "revenue_summary",
+      "title": "📊 สรุปรายได้วันนี้",
+      "message": "JUL 19, 2026 — รายได้ ฿0 จาก 0 ออเดอร์",
+      "revenue": 0,
+      "orderCount": 0
+    },
+    {
+      "id": "noti_1784450217699_tfres",
+      "timestamp": "2026-07-19T08:36:57.699Z",
+      "read": false,
+      "type": "revenue_summary",
+      "title": "📊 สรุปรายได้วันนี้",
+      "message": "JUL 19, 2026 — รายได้ ฿0 จาก 0 ออเดอร์",
+      "revenue": 0,
+      "orderCount": 0
+    },
+    {
+      "id": "noti_1784450173149_4f693",
+      "timestamp": "2026-07-19T08:36:13.149Z",
+      "read": false,
+      "type": "revenue_summary",
+      "title": "📊 สรุปรายได้วันนี้",
+      "message": "JUL 19, 2026 — รายได้ ฿0 จาก 0 ออเดอร์",
+      "revenue": 0,
+      "orderCount": 0
+    },
+    {
+      "id": "noti_1784450146567_7kxsl",
+      "timestamp": "2026-07-19T08:35:46.567Z",
+      "read": false,
+      "type": "revenue_summary",
+      "title": "📊 สรุปรายได้วันนี้",
+      "message": "JUL 19, 2026 — รายได้ ฿0 จาก 0 ออเดอร์",
+      "revenue": 0,
+      "orderCount": 0
+    },
+    {
+      "id": "noti_1784450103589_f7x5d",
+      "timestamp": "2026-07-19T08:35:03.589Z",
+      "read": false,
+      "type": "revenue_summary",
+      "title": "📊 สรุปรายได้วันนี้",
+      "message": "JUL 19, 2026 — รายได้ ฿0 จาก 0 ออเดอร์",
+      "revenue": 0,
+      "orderCount": 0
+    },
     {
       "id": "noti_1784370024880_e5orn",
       "timestamp": "2026-07-18T10:20:24.880Z",
