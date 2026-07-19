@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import runningBannerImg from './assets/running_banner.png';
 import ballSportsBannerImg from './assets/ball_sports_banner.png';
 import swimmingBannerImg from './assets/swimming_banner.png';
+import runningHeroBannerImg from './assets/running_hero_banner.png';
 import AllProducts from './shopping/all_products.jsx';
 import Navbar from './navbar.jsx';
 import Dashboard from './admin/dashboard.jsx';
@@ -16,6 +17,33 @@ import OrderStatus from './profile/OrderStatus.jsx';
 import { ProductProvider, useProducts } from './data/products.jsx';
 import ProductDetails from './shopping/product_details.jsx';
 import { useAlert } from './contexts/AlertContext.jsx';
+
+const HERO_SLIDES = [
+  {
+    image: runningHeroBannerImg,
+    badge: "Hot Release",
+    title: "UNLEASH THE INNER PRO",
+    description: "Experience the next generation of high-performance compression gear designed for maximum mobility and endurance.",
+    buttonText: "Shop Now",
+    targetView: "running"
+  },
+  {
+    image: ballSportsBannerImg,
+    badge: "Elite Gear",
+    title: "DOMINATE THE PITCH",
+    description: "Elevate your game with elite football boots and equipment engineered for ultimate speed, control, and precision.",
+    buttonText: "Explore Gear",
+    targetView: "football"
+  },
+  {
+    image: swimmingBannerImg,
+    badge: "Performance Specs",
+    title: "BREAK THE SURFACE",
+    description: "Dive into speed with hydrodynamic swimwear and high-performance goggles crafted for champion swimmers.",
+    buttonText: "View Performance",
+    targetView: "swimming"
+  }
+];
 
 export default function MainPage() {
   return (
@@ -34,6 +62,22 @@ function MainPageContent() {
   const { showAlert } = useAlert();
   const { products } = useProducts();
   const [activeCategory, setActiveCategory] = useState('men');
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide(prev => (prev + 1) % HERO_SLIDES.length);
+    }, 6000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const nextSlide = () => {
+    setCurrentSlide(prev => (prev + 1) % HERO_SLIDES.length);
+  };
+
+  const prevSlide = () => {
+    setCurrentSlide(prev => (prev - 1 + HERO_SLIDES.length) % HERO_SLIDES.length);
+  };
   const [currentView, setCurrentView] = useState(() => {
     const hash = window.location.hash.replace('#', '');
     return hash || 'home';
@@ -214,36 +258,88 @@ function MainPageContent() {
 
       <main className="pt-20">
         {/* BEGIN: HeroSection */}
-        <section className="relative h-[90vh] min-h-[700px] w-full overflow-hidden">
-          <img
-            alt="Hero Runner"
-            className="absolute inset-0 w-full h-full object-cover"
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuDvnyX2uWeWErduCcq6jGLNvAq-RdhA4hl5IIkz-m1I1LBulRb10pDPzwKy7v9WoGRbplpUE7SYXWQgnkbPcVCV3od0Wce07Jl7Qo5NaGCSr0NCym_hrURV5Zm5Z0OhmPzQBEFpZsNk3J22mEWjhp58473X49LNl5fuWJzGewGDyzEGlyIBIbWRW6QHoZ7QForMXenC6XFvGMXdJmnZQEfrKfnhemT_5o8Ex3LQEeh6oWmun53HfsPP2Wc4oKZnTxdeaokyLXbjcns"
-          />
-          <div className="absolute inset-0 hero-gradient flex items-center">
-            <div className="max-w-[1440px] mx-auto px-6 lg:px-12 w-full text-white">
-              <div className="overflow-hidden mb-6">
-                <span className="inline-block bg-primary text-[10px] font-black px-3 py-1 uppercase tracking-widest transform translate-y-0">Hot Release</span>
-              </div>
-              <h2 className="text-7xl md:text-9xl font-anybody font-black leading-[0.85] italic uppercase tracking-tighter mb-8">
-                UNLEASH<br />THE <span className="text-stroke">INNER</span><br />PRO
-              </h2>
-              <p className="max-w-md text-base text-gray-300 mb-10 leading-relaxed font-light">
-                Experience the next generation of high-performance compression gear designed for maximum mobility and endurance.
-              </p>
-              <div className="flex flex-wrap gap-6">
-                <button onClick={() => setCurrentView('sport')} className="bg-primary hover:bg-orange-600 px-12 py-5 font-anybody font-black text-sm uppercase tracking-widest transition-all duration-300 transform hover:scale-105">Shop Now</button>
+        <section className="relative h-[90vh] min-h-[700px] w-full overflow-hidden hero-slider-container bg-black">
+          {HERO_SLIDES.map((slide, idx) => (
+            <div
+              key={idx}
+              className={`hero-slide ${idx === currentSlide ? 'active' : ''}`}
+            >
+              <img
+                alt={slide.title}
+                className="absolute inset-0 w-full h-full object-cover hero-slide-img"
+                src={slide.image}
+              />
+              <div className="absolute inset-0 hero-gradient flex items-center">
+                <div className="max-w-[1440px] mx-auto px-6 lg:px-12 w-full text-white">
+                  <div className="overflow-hidden mb-6">
+                    <span className="inline-block bg-primary text-[10px] font-black px-3 py-1 uppercase tracking-widest animate-slide-up-fade">
+                      {slide.badge}
+                    </span>
+                  </div>
+                  <h2 className="text-5xl md:text-8xl lg:text-9xl font-anybody font-black leading-[0.85] italic uppercase tracking-tighter mb-8 animate-slide-up-fade delay-150">
+                    {slide.title.includes('INNER') ? (
+                      <>
+                        UNLEASH<br />THE <span className="text-stroke">INNER</span><br />PRO
+                      </>
+                    ) : slide.title.includes('PITCH') ? (
+                      <>
+                        DOMINATE<br />THE <span className="text-stroke">ELITE</span><br />PITCH
+                      </>
+                    ) : (
+                      <>
+                        BREAK<br />THE <span className="text-stroke">DEEP</span><br />SURFACE
+                      </>
+                    )}
+                  </h2>
+                  <p className="max-w-md text-base text-gray-300 mb-10 leading-relaxed font-light animate-slide-up-fade delay-300">
+                    {slide.description}
+                  </p>
+                  <div className="flex flex-wrap gap-6 animate-slide-up-fade delay-450">
+                    <button
+                      onClick={() => setCurrentView(slide.targetView)}
+                      className="bg-primary hover:bg-orange-600 px-12 py-5 font-anybody font-black text-sm uppercase tracking-widest transition-all duration-300 transform hover:scale-105"
+                    >
+                      {slide.buttonText}
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-          {/* Hero Navigation */}
-          <div className="absolute bottom-12 right-12 flex items-center gap-6">
+          ))}
+
+          {/* Slider Controls */}
+          <button
+            onClick={prevSlide}
+            className="absolute left-6 top-1/2 -translate-y-1/2 z-20 w-12 h-12 flex items-center justify-center rounded-full bg-black/40 hover:bg-primary/80 border border-white/10 text-white transition-all hover:scale-110"
+            aria-label="Previous slide"
+          >
+            <span className="material-symbols-outlined">chevron_left</span>
+          </button>
+          <button
+            onClick={nextSlide}
+            className="absolute right-6 top-1/2 -translate-y-1/2 z-20 w-12 h-12 flex items-center justify-center rounded-full bg-black/40 hover:bg-primary/80 border border-white/10 text-white transition-all hover:scale-110"
+            aria-label="Next slide"
+          >
+            <span className="material-symbols-outlined">chevron_right</span>
+          </button>
+
+          {/* Hero Navigation Indicator */}
+          <div className="absolute bottom-12 right-6 lg:right-12 z-20 flex items-center gap-6">
             <div className="flex gap-3">
-              <div className="w-12 h-[2px] bg-white"></div>
-              <div className="w-12 h-[2px] bg-white/20"></div>
-              <div className="w-12 h-[2px] bg-white/20"></div>
+              {HERO_SLIDES.map((_, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setCurrentSlide(idx)}
+                  className={`h-[3px] transition-all duration-500 cursor-pointer ${
+                    idx === currentSlide ? 'w-16 bg-primary' : 'w-8 bg-white/30 hover:bg-white/60'
+                  }`}
+                  aria-label={`Go to slide ${idx + 1}`}
+                />
+              ))}
             </div>
-            <span className="font-anybody font-bold text-xs tracking-widest text-white">01 / 03</span>
+            <span className="font-anybody font-bold text-xs tracking-widest text-white">
+              0{currentSlide + 1} / 0{HERO_SLIDES.length}
+            </span>
           </div>
         </section>
         {/* END: HeroSection */}
@@ -252,52 +348,55 @@ function MainPageContent() {
         <section className="max-w-[1440px] mx-auto px-6 lg:px-12 py-32 space-y-16">
           <div className="grid grid-cols-1 gap-12">
             {/* Running Banner */}
-            <div onClick={() => setCurrentView('running')} className="relative h-[450px] group cursor-pointer overflow-hidden border border-white/5">
+            <div onClick={() => setCurrentView('running')} className="relative h-[450px] group cursor-pointer overflow-hidden border border-white/5 hover:border-primary/30 transition-all duration-500">
               <img
                 alt="Running"
-                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                 src={runningBannerImg}
               />
-              <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-all duration-500"></div>
-              <div className="absolute bottom-12 left-12">
-                <h3 className="text-white text-5xl md:text-7xl font-anybody font-black italic uppercase tracking-tighter">วิ่ง / RUNNING</h3>
-                <div className="mt-6 flex items-center gap-4 text-white font-bold text-xs uppercase tracking-[0.3em] overflow-hidden">
-                  <span className="group-hover:translate-x-0 -translate-x-4 transition-transform duration-300">Shop Collection</span>
-                  <span className="material-symbols-outlined">arrow_forward</span>
+              <div className="absolute inset-0 bg-gradient-to-tr from-black/90 via-black/40 to-transparent group-hover:via-black/30 transition-all duration-500"></div>
+              <div className="absolute bottom-12 left-12 transition-all duration-500 max-w-[90%] md:max-w-md">
+                <span className="text-[10px] font-black text-primary uppercase tracking-widest block mb-2 drop-shadow-md">High Endurance</span>
+                <h3 className="text-white text-4xl md:text-6xl font-anybody font-black italic uppercase tracking-tighter leading-none mb-4 drop-shadow-lg">วิ่ง / RUNNING</h3>
+                <div className="flex items-center gap-4 text-white font-bold text-xs uppercase tracking-[0.3em] overflow-hidden">
+                  <span className="group-hover:text-primary transition-colors duration-300 drop-shadow-md">Shop Collection</span>
+                  <span className="material-symbols-outlined text-primary group-hover:translate-x-2 transition-transform duration-300 drop-shadow-md">arrow_forward</span>
                 </div>
               </div>
             </div>
 
             {/* Ball Sports Banner */}
-            <div onClick={() => setCurrentView('football')} className="relative h-[450px] group cursor-pointer overflow-hidden border border-white/5">
+            <div onClick={() => setCurrentView('football')} className="relative h-[450px] group cursor-pointer overflow-hidden border border-white/5 hover:border-primary/30 transition-all duration-500">
               <img
                 alt="Ball Sports"
-                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                 src={ballSportsBannerImg}
               />
-              <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-all duration-500"></div>
-              <div className="absolute bottom-12 right-12 text-right">
-                <h3 className="text-white text-5xl md:text-7xl font-anybody font-black italic uppercase tracking-tighter">บอล / BALL SPORTS</h3>
-                <div className="mt-6 flex items-center justify-end gap-4 text-white font-bold text-xs uppercase tracking-[0.3em]">
-                  <span>Explore Gear</span>
-                  <span className="material-symbols-outlined">arrow_forward</span>
+              <div className="absolute inset-0 bg-gradient-to-tl from-black/90 via-black/40 to-transparent group-hover:via-black/30 transition-all duration-500"></div>
+              <div className="absolute bottom-12 right-12 p-2 text-right transition-all duration-500 max-w-[90%] md:max-w-md">
+                <span className="text-[10px] font-black text-primary uppercase tracking-widest block mb-2 drop-shadow-md">Speed & Control</span>
+                <h3 className="text-white text-4xl md:text-6xl font-anybody font-black italic uppercase tracking-tighter leading-none mb-4 drop-shadow-lg">บอล / BALL SPORTS</h3>
+                <div className="flex items-center justify-end gap-4 text-white font-bold text-xs uppercase tracking-[0.3em] overflow-hidden">
+                  <span className="group-hover:text-primary transition-colors duration-300 drop-shadow-md">Explore Gear</span>
+                  <span className="material-symbols-outlined text-primary group-hover:translate-x-2 transition-transform duration-300 drop-shadow-md">arrow_forward</span>
                 </div>
               </div>
             </div>
 
             {/* Swimming Banner */}
-            <div onClick={() => setCurrentView('swimming')} className="relative h-[450px] group cursor-pointer overflow-hidden border border-white/5">
+            <div onClick={() => setCurrentView('swimming')} className="relative h-[450px] group cursor-pointer overflow-hidden border border-white/5 hover:border-primary/30 transition-all duration-500">
               <img
                 alt="Swimming"
-                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                 src={swimmingBannerImg}
               />
-              <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-all duration-500"></div>
-              <div className="absolute bottom-12 left-12">
-                <h3 className="text-white text-5xl md:text-7xl font-anybody font-black italic uppercase tracking-tighter">ว่ายน้ำ / SWIMMING</h3>
-                <div className="mt-6 flex items-center gap-4 text-white font-bold text-xs uppercase tracking-[0.3em]">
-                  <span>View Performance</span>
-                  <span className="material-symbols-outlined">arrow_forward</span>
+              <div className="absolute inset-0 bg-gradient-to-tr from-black/90 via-black/40 to-transparent group-hover:via-black/30 transition-all duration-500"></div>
+              <div className="absolute bottom-12 left-12 transition-all duration-500 max-w-[90%] md:max-w-md">
+                <span className="text-[10px] font-black text-primary uppercase tracking-widest block mb-2 drop-shadow-md">Aquatic Power</span>
+                <h3 className="text-white text-4xl md:text-6xl font-anybody font-black italic uppercase tracking-tighter leading-none mb-4 drop-shadow-lg">ว่ายน้ำ / SWIMMING</h3>
+                <div className="flex items-center gap-4 text-white font-bold text-xs uppercase tracking-[0.3em] overflow-hidden">
+                  <span className="group-hover:text-primary transition-colors duration-300 drop-shadow-md">View Performance</span>
+                  <span className="material-symbols-outlined text-primary group-hover:translate-x-2 transition-transform duration-300 drop-shadow-md">arrow_forward</span>
                 </div>
               </div>
             </div>
@@ -313,25 +412,28 @@ function MainPageContent() {
                 <h4 className="text-4xl md:text-6xl font-anybody font-black italic uppercase tracking-tighter strikethrough-accent inline-block">แฟชั่นที่กำลังเป็นที่นิยม</h4>
                 <p className="text-on-surface-variant mt-4 text-sm font-light tracking-wide">TRENDING PERFORMANCE FOOTWEAR &amp; APPAREL</p>
               </div>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 <button
                   onClick={() => setActiveCategory('men')}
-                  className={`font-bold text-[10px] px-8 py-3 uppercase tracking-widest transition-all ${activeCategory === 'men' ? 'bg-primary text-white' : 'glass text-white hover:bg-white/10'
-                    }`}
+                  className={`font-bold text-[10px] px-8 py-3.5 uppercase tracking-widest trending-tab-pill ${
+                    activeCategory === 'men' ? 'active text-white' : 'glass text-gray-400 hover:text-white hover:bg-white/5'
+                  }`}
                 >
                   Men / ผู้ชาย
                 </button>
                 <button
                   onClick={() => setActiveCategory('women')}
-                  className={`font-bold text-[10px] px-8 py-3 uppercase tracking-widest transition-all ${activeCategory === 'women' ? 'bg-primary text-white' : 'glass text-white hover:bg-white/10'
-                    }`}
+                  className={`font-bold text-[10px] px-8 py-3.5 uppercase tracking-widest trending-tab-pill ${
+                    activeCategory === 'women' ? 'active text-white' : 'glass text-gray-400 hover:text-white hover:bg-white/5'
+                  }`}
                 >
                   Women / ผู้หญิง
                 </button>
                 <button
                   onClick={() => setActiveCategory('kids')}
-                  className={`font-bold text-[10px] px-8 py-3 uppercase tracking-widest transition-all ${activeCategory === 'kids' ? 'bg-primary text-white' : 'glass text-white hover:bg-white/10'
-                    }`}
+                  className={`font-bold text-[10px] px-8 py-3.5 uppercase tracking-widest trending-tab-pill ${
+                    activeCategory === 'kids' ? 'active text-white' : 'glass text-gray-400 hover:text-white hover:bg-white/5'
+                  }`}
                 >
                   Kids / เด็ก
                 </button>
@@ -346,31 +448,39 @@ function MainPageContent() {
                     setSelectedProduct(product);
                     setCurrentView('product_details');
                   }}
-                  className="group cursor-pointer"
+                  className="group cursor-pointer premium-border-hover border border-white/5 bg-surface-container p-4 flex flex-col justify-between"
                 >
-                  <div className="aspect-[4/5] bg-[#111] mb-6 relative overflow-hidden flex items-center justify-center p-8 border border-white/5">
-                    <img
-                      alt={product.name}
-                      className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-110"
-                      src={product.image}
-                    />
-                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          addToCart(product);
-                        }}
-                        className="px-8 py-3 bg-white text-black font-black text-[10px] uppercase tracking-widest hover:bg-primary hover:text-white transition-all"
-                      >
-                        Quick Add
-                      </button>
+                  <div>
+                    <div className="aspect-[4/5] bg-black/40 mb-6 relative overflow-hidden flex items-center justify-center p-6 border border-white/5">
+                      <img
+                        alt={product.name}
+                        className="w-full h-full object-contain transition-transform duration-700 group-hover:scale-110"
+                        src={product.image}
+                      />
+                      <div className="absolute inset-0 bg-black/75 opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col items-center justify-center gap-3 p-4">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            addToCart(product);
+                          }}
+                          className="w-full py-3 bg-primary text-white font-black text-[10px] uppercase tracking-widest hover:bg-white hover:text-black transition-all"
+                        >
+                          Quick Add
+                        </button>
+                        <button
+                          className="w-full py-3 bg-transparent border border-white/20 text-white font-black text-[10px] uppercase tracking-widest hover:bg-white hover:text-black transition-all"
+                        >
+                          View Details
+                        </button>
+                      </div>
                     </div>
+                    <h5 className="text-xs font-bold uppercase tracking-widest line-clamp-2 min-h-[32px] group-hover:text-primary transition-colors duration-300">{product.name}</h5>
                   </div>
-                  <div className="space-y-2">
-                    <h5 className="text-xs font-bold uppercase tracking-widest">{product.name}</h5>
+                  <div className="mt-4 pt-4 border-t border-white/5 flex items-center justify-between">
                     <p className="text-sm font-anybody font-black text-primary italic">
                       {product.price.toLocaleString("th-TH", { minimumFractionDigits: 2 })} ฿ THB
                     </p>
+                    <span className="material-symbols-outlined text-sm text-gray-500 group-hover:text-primary transition-colors">arrow_forward</span>
                   </div>
                 </div>
               ))}
@@ -391,69 +501,74 @@ function MainPageContent() {
             <div className="h-[1px] flex-grow mx-12 bg-white/10 hidden md:block"></div>
             <a className="text-[10px] font-bold uppercase tracking-[0.3em] hover:text-primary" href="#">View All</a>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4 h-[600px]">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4 h-auto md:h-[600px]">
             {/* Gravel */}
-            <div onClick={() => setCurrentView('sport-equipment')} className="relative group cursor-pointer overflow-hidden border border-white/5">
+            <div onClick={() => setCurrentView('sport-equipment')} className="relative h-[250px] md:h-full group cursor-pointer overflow-hidden border border-white/5 activity-grid-card">
               <img
                 alt="Gravel"
-                className="w-full h-full object-cover transition duration-1000 group-hover:scale-110"
+                className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuDwI1BJkcmMfFeHFHjL9hGFa114fWssQJ1ZV1k5-QGR7rvpTnzh0FxWHzIWCzvtKUe8g5bj1mKSgQc-_TBVnbwo4UNJKiU7d1zYk7LiEYmY0RhjPqmnaSiqN984BN4umgnHOME544H71UeP6nzDAb1bvQNwnz8IeI0UcEb-B52roEISKJ6_wr-fdG3byAzSsYMEjZuD_xv2d0veukGDMpG_O9UvnJBBlySpdYWfYHXLKZagrNnpUw4af0NOO0tQ5Kkwpnf-hEDrQEw"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent"></div>
-              <div className="absolute bottom-6 left-6">
-                <span className="text-white font-anybody font-black text-lg uppercase tracking-tighter italic">Gravel</span>
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent group-hover:from-black/80 transition-all duration-500"></div>
+              <div className="absolute bottom-6 left-6 flex items-center gap-2">
+                <span className="text-white font-anybody font-black text-lg uppercase tracking-tighter italic group-hover:text-primary transition-colors duration-300">Gravel</span>
+                <span className="material-symbols-outlined text-primary text-sm opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">arrow_forward</span>
               </div>
             </div>
 
             {/* Trail Running */}
-            <div onClick={() => setCurrentView('running-shoes')} className="relative group cursor-pointer overflow-hidden border border-white/5">
+            <div onClick={() => setCurrentView('running-shoes')} className="relative h-[250px] md:h-full group cursor-pointer overflow-hidden border border-white/5 activity-grid-card">
               <img
                 alt="Trail Running"
-                className="w-full h-full object-cover transition duration-1000 group-hover:scale-110"
+                className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuC--eJwzzF_DIGIN03c_n27fJ28usAuxwfxm9TFLO4XYv0T1x1z92-CjChPdPbyp8RlbsaHFplKVlsOvBMz9FcYpIdTTbPLtC_oE9Ei4rq7ReNJWbpQjFnKUM_3umf3698xYTQrr7hl_tfUum_uxgnmKUiTNFcQm9vqo02KvuR9bqO5XPz3V-XBS3U8tXWVwdk_LLhEau3iC0XB1yEuRAkhhFDSaY3KlZDTOW0KB6VcPYi2hi4jJh0TeAMV6BoxyGegj0l7gIWpp_Y"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent"></div>
-              <div className="absolute bottom-6 left-6">
-                <span className="text-white font-anybody font-black text-lg uppercase tracking-tighter italic">Trail Running</span>
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent group-hover:from-black/80 transition-all duration-500"></div>
+              <div className="absolute bottom-6 left-6 flex items-center gap-2">
+                <span className="text-white font-anybody font-black text-lg uppercase tracking-tighter italic group-hover:text-primary transition-colors duration-300">Trail Running</span>
+                <span className="material-symbols-outlined text-primary text-sm opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">arrow_forward</span>
               </div>
             </div>
 
             {/* Road Running */}
-            <div onClick={() => setCurrentView('running')} className="relative group cursor-pointer overflow-hidden border border-white/5 md:col-span-1">
+            <div onClick={() => setCurrentView('running')} className="relative h-[250px] md:h-full group cursor-pointer overflow-hidden border border-white/5 activity-grid-card">
               <img
                 alt="Road Running"
-                className="w-full h-full object-cover transition duration-1000 group-hover:scale-110"
+                className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuBZhb-q_KAYbqBH6599uwZ6hkkqxYG15hXMpjUOSOXUvI3supurXQp37FA-K-qJLGQF6afWoGFQkFtaZT38aOuUbwQ7eDgyfFTxGt1MdzKxagVWszJ8RPeGu7uvVZlZf8C8h-l4UJ3iclI1WJJKwfrCIjkMf6yEsUTbnBb5BzPcd2-pq78BZgNuz1KjVL7ZH7LO4C76VUImcOFjis3kDaf-FsSiW5ed2dHE1-BnRpk6k2pTgf-qeivmRxQfYoFlsx5Em-UGuiTgIl4"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent"></div>
-              <div className="absolute bottom-6 left-6">
-                <span className="text-white font-anybody font-black text-lg uppercase tracking-tighter italic">Road Running</span>
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent group-hover:from-black/80 transition-all duration-500"></div>
+              <div className="absolute bottom-6 left-6 flex items-center gap-2">
+                <span className="text-white font-anybody font-black text-lg uppercase tracking-tighter italic group-hover:text-primary transition-colors duration-300">Road Running</span>
+                <span className="material-symbols-outlined text-primary text-sm opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">arrow_forward</span>
               </div>
             </div>
 
             {/* Sportstyle */}
-            <div onClick={() => setCurrentView('sport')} className="relative group cursor-pointer overflow-hidden border border-white/5">
+            <div onClick={() => setCurrentView('sport')} className="relative h-[250px] md:h-full group cursor-pointer overflow-hidden border border-white/5 activity-grid-card">
               <img
                 alt="Sportstyle"
-                className="w-full h-full object-cover transition duration-1000 group-hover:scale-110"
+                className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuAvWxfAp9lr8iEB7K51T_XKXUg2vlac7IHU8HUFuI6XqzF7NCGXOFDqXCrIMpunWzhRPVsTG8jsNq6bhsJdoAXbw_Fqr9jHN8SIpmY_TXYKe4twX5ns8NW9rYUU7YlCcGHeAyao8bURnrNhPPbtmzJijh5Hg77XouU4T3K-AP9SBeUp_Hc3eYVEQGJQPvCcktUUl5dwBKm578ZFIzL49702ZluC3u5q3gmHV9jvuSw1VIFZ6iKhToVYV2ziANQi4055Z0suzycVYxo"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent"></div>
-              <div className="absolute bottom-6 left-6">
-                <span className="text-white font-anybody font-black text-lg uppercase tracking-tighter italic">Sportstyle</span>
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent group-hover:from-black/80 transition-all duration-500"></div>
+              <div className="absolute bottom-6 left-6 flex items-center gap-2">
+                <span className="text-white font-anybody font-black text-lg uppercase tracking-tighter italic group-hover:text-primary transition-colors duration-300">Sportstyle</span>
+                <span className="material-symbols-outlined text-primary text-sm opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">arrow_forward</span>
               </div>
             </div>
 
             {/* Outdoor */}
-            <div onClick={() => setCurrentView('running-bottom')} className="relative group cursor-pointer overflow-hidden border border-white/5">
+            <div onClick={() => setCurrentView('running-bottom')} className="relative h-[250px] md:h-full group cursor-pointer overflow-hidden border border-white/5 activity-grid-card">
               <img
                 alt="Outdoor"
-                className="w-full h-full object-cover transition duration-1000 group-hover:scale-110"
+                className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuAQBZiEffmZVFsytTv0jaiwLF3NIN33A2fYhx2hemY0InuMgaGNGf6PyuwVk5wCixk0-qo-Tx53yg85R5Wg7P-ozGfj8hAzeHPXQd0_rZUrPDxdjYe2fjd-jaG8wLMACIRmDIBqIkxXwld2HyfNIEJLQxPALBBfz8rwSdEPqL3iMVsubWuET6inMWwtY8o3xEtWiX7f6RURdzQjq_KZyrP1jIk26z010mCoJ2Ht5ldt5ch_dlNdI6jbMC_CMjdlBw81_x0nThij8Qo"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent"></div>
-              <div className="absolute bottom-6 left-6">
-                <span className="text-white font-anybody font-black text-lg uppercase tracking-tighter italic">Outdoor</span>
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent group-hover:from-black/80 transition-all duration-500"></div>
+              <div className="absolute bottom-6 left-6 flex items-center gap-2">
+                <span className="text-white font-anybody font-black text-lg uppercase tracking-tighter italic group-hover:text-primary transition-colors duration-300">Outdoor</span>
+                <span className="material-symbols-outlined text-primary text-sm opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">arrow_forward</span>
               </div>
             </div>
           </div>

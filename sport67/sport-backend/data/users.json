@@ -41,5 +41,14 @@
     "role": "customer",
     "isActive": true,
     "joined": "JUL 19, 2026"
+  },
+  {
+    "id": 1784462064166,
+    "username": "jo",
+    "email": "nawaroodinmeesri@gmail.com",
+    "password": "123",
+    "role": "customer",
+    "isActive": true,
+    "joined": "JUL 19, 2026"
   }
 ]

@@ -38,7 +38,7 @@
     "sportType": "Running",
     "targetGroup": "men",
     "fabricMaterial": "polyester",
-    "amount": 117,
+    "amount": 116,
     "review": 4.9,
     "description": "Premium carbon-plated road racing shoe built for speed.",
     "sku": "GA-FW-2024-001",
@@ -82,7 +82,7 @@
         "image": "image/1784285570957.png",
         "amount": 0,
         "stock": {
-          "40": 5
+          "40": 4
         }
       }
     ]

@@ -68,5 +68,17 @@
       "isDefault": true,
       "id": "1784365760155"
     }
+  ],
+  "jo": [
+    {
+      "firstName": "Nawarood",
+      "lastName": "Inmeesri",
+      "phone": "0900705081",
+      "streetAddress": "ซอยเจริญรัถ17\nห้องเช่า",
+      "city": "กรุงเทพ",
+      "zipCode": "10600",
+      "isDefault": true,
+      "id": "1784463458884"
+    }
   ]
 }

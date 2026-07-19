@@ -249,6 +249,24 @@
   ],
   "__employee__": [
     {
+      "id": "noti_1784463472952_w3ari",
+      "timestamp": "2026-07-19T12:17:52.952Z",
+      "read": false,
+      "type": "new_order",
+      "title": "🛒 ออเดอร์ใหม่เข้ามาแล้ว!",
+      "message": "Order #GOGO-810325 จาก Nawarood Inmeesri — ฿4,815",
+      "orderId": "#GOGO-810325"
+    },
+    {
+      "id": "noti_1784463084359_559by",
+      "timestamp": "2026-07-19T12:11:24.358Z",
+      "read": false,
+      "type": "out_of_stock",
+      "title": "🚫 สินค้าหมด Stock!",
+      "message": "\"roblox guy\" หมด stock แล้ว — กรุณาเติมสินค้า",
+      "productId": 19
+    },
+    {
       "id": "noti_1784452518986_pdgme",
       "timestamp": "2026-07-19T09:15:18.986Z",
       "read": false,
@@ -304,6 +322,45 @@
     }
   ],
   "__manager__": [
+    {
+      "id": "noti_1784463532752_z7rh5",
+      "timestamp": "2026-07-19T12:18:52.752Z",
+      "read": false,
+      "type": "revenue_summary",
+      "title": "📊 สรุปรายได้วันนี้",
+      "message": "JUL 19, 2026 — รายได้ ฿2,240,723 จาก 4 ออเดอร์",
+      "revenue": 2240723,
+      "orderCount": 4
+    },
+    {
+      "id": "noti_1784463194540_uypls",
+      "timestamp": "2026-07-19T12:13:14.540Z",
+      "read": false,
+      "type": "revenue_summary",
+      "title": "📊 สรุปรายได้วันนี้",
+      "message": "JUL 19, 2026 — รายได้ ฿2,235,908 จาก 3 ออเดอร์",
+      "revenue": 2235908,
+      "orderCount": 3
+    },
+    {
+      "id": "noti_1784463084359_0pdff",
+      "timestamp": "2026-07-19T12:11:24.358Z",
+      "read": false,
+      "type": "out_of_stock",
+      "title": "🚫 สินค้าหมด Stock!",
+      "message": "\"roblox guy\" หมด stock แล้ว — กรุณาเติมสินค้า",
+      "productId": 19
+    },
+    {
+      "id": "noti_1784463079369_ade5w",
+      "timestamp": "2026-07-19T12:11:19.369Z",
+      "read": false,
+      "type": "revenue_summary",
+      "title": "📊 สรุปรายได้วันนี้",
+      "message": "JUL 19, 2026 — รายได้ ฿2,235,908 จาก 3 ออเดอร์",
+      "revenue": 2235908,
+      "orderCount": 3
+    },
     {
       "id": "noti_1784452518986_yfflp",
       "timestamp": "2026-07-19T09:15:18.986Z",
@@ -482,6 +539,22 @@
       "title": "🛒 ออเดอร์ใหม่เข้ามาแล้ว!",
       "message": "Order #GOGO-708136 จาก Tongmen JaiSaard — ฿12,020",
       "orderId": "#GOGO-708136"
+    }
+  ],
+  "jo": [
+    {
+      "id": "#GOGO-810325",
+      "date": "JUL 19, 2026",
+      "title": "Order status updated",
+      "status": "Delivered",
+      "read": true
+    },
+    {
+      "id": "#GOGO-810325",
+      "date": "JUL 19, 2026",
+      "title": "Purchase successful!",
+      "status": "Preparing",
+      "read": true
     }
   ]
 }
