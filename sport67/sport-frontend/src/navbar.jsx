@@ -3,9 +3,7 @@ import { useAlert } from './contexts/AlertContext.jsx';
 
 export default function Navbar({ setCurrentView, user, setUser, cart = [] }) {
   const { showAlert } = useAlert();
-  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
-  const [searchValue, setSearchValue] = useState('');
-  const [isMobileNavLowOpacity, setIsMobileNavLowOpacity] = useState(false);
+
   const [selectedRole, setSelectedRole] = useState('user');
   const [loginIdentifier, setLoginIdentifier] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
@@ -101,62 +99,14 @@ export default function Navbar({ setCurrentView, user, setUser, cart = [] }) {
     }, 500);
   };
 
-  const searchContainerRef = useRef(null);
-  const searchInputRef = useRef(null);
 
-  const handleSearchTriggerClick = (e) => {
-    if (!isSearchExpanded) {
-      e.preventDefault();
-      setIsSearchExpanded(true);
-      if (window.innerWidth < 1024) {
-        setIsMobileNavLowOpacity(true);
-      }
-      setTimeout(() => {
-        searchInputRef.current?.focus();
-      }, 50);
-    } else {
-      if (searchValue === '') {
-        setIsSearchExpanded(false);
-        setIsMobileNavLowOpacity(false);
-      } else {
-        console.log('Searching for:', searchValue);
-      }
-    }
-  };
 
   useEffect(() => {
     // Backend API already has the base users (manager, employee) seeded.
     // No need to seed localStorage here anymore.
   }, []);
 
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (
-        searchContainerRef.current &&
-        !searchContainerRef.current.contains(e.target) &&
-        isSearchExpanded
-      ) {
-        setIsSearchExpanded(false);
-        setIsMobileNavLowOpacity(false);
-        setSearchValue('');
-      }
-    };
 
-    const handleKeyDown = (e) => {
-      if (e.key === 'Escape' && isSearchExpanded) {
-        setIsSearchExpanded(false);
-        setIsMobileNavLowOpacity(false);
-        setSearchValue('');
-      }
-    };
-
-    document.addEventListener('click', handleClickOutside);
-    document.addEventListener('keydown', handleKeyDown);
-    return () => {
-      document.removeEventListener('click', handleClickOutside);
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [isSearchExpanded]);
 
   return (
     <>
@@ -170,7 +120,6 @@ export default function Navbar({ setCurrentView, user, setUser, cart = [] }) {
           <nav
             className="hidden md:flex items-center space-x-8 lg:space-x-12 text-[11px] font-bold uppercase tracking-[0.2em] transition-opacity duration-300"
             id="main-nav"
-            style={{ opacity: isMobileNavLowOpacity ? 0.1 : 1 }}
           >
             {['men', 'women', 'kid', 'sport'].map((cat) => (
               <div
@@ -207,39 +156,6 @@ export default function Navbar({ setCurrentView, user, setUser, cart = [] }) {
           )}
 
           <div className="flex items-center space-x-8">
-            {/* Search Container */}
-            <div
-              ref={searchContainerRef}
-              className={`relative flex items-center h-10 transition-all duration-400 group ${isSearchExpanded ? 'expanded w-[280px]' : ''}`}
-              id="search-container"
-            >
-              <input
-                ref={searchInputRef}
-                className="bg-white/5 border-none text-[11px] font-bold tracking-widest placeholder:text-white/30 focus:ring-1 focus:ring-primary h-full uppercase outline-none"
-                id="search-input"
-                placeholder="SEARCH COLLECTIONS..."
-                type="text"
-                value={searchValue}
-                onChange={(e) => setSearchValue(e.target.value)}
-                style={{
-                  width: isSearchExpanded ? '100%' : '0px',
-                  opacity: isSearchExpanded ? 1 : 0,
-                  paddingLeft: isSearchExpanded ? '1rem' : '0px',
-                  paddingRight: isSearchExpanded ? '2.5rem' : '0px',
-                  transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
-                }}
-              />
-              <button
-                onClick={handleSearchTriggerClick}
-                className="absolute right-0 hover:text-primary transition-colors flex items-center justify-center w-10 h-10"
-                id="search-trigger"
-              >
-                <span className="material-symbols-outlined text-[22px]" id="search-icon">
-                  {isSearchExpanded ? 'close' : 'search'}
-                </span>
-              </button>
-            </div>
-
             {user ? (
               <div className="relative" ref={dropdownRef}>
                 <button

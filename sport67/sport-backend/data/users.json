@@ -59,5 +59,14 @@
     "role": "customer",
     "isActive": true,
     "joined": "JUL 19, 2026"
+  },
+  {
+    "id": 1784527755686,
+    "username": "testuat",
+    "email": "test@gmail.com",
+    "password": "123",
+    "role": "customer",
+    "isActive": true,
+    "joined": "JUL 20, 2026"
   }
 ]

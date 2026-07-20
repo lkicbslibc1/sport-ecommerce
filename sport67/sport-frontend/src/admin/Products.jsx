@@ -102,7 +102,7 @@ const COLOR_CLASSES = {
 };
 
 const COLOR_NAMES = [
-    "red", "blue", "yellow", "black", "white", "purple", 
+    "red", "blue", "yellow", "black", "white", "purple",
     "green", "orange", "pink", "beige", "brown", "grey", "mixed"
 ];
 
@@ -202,7 +202,7 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange, user, s
                 const variant = makeEmptyVariant(color);
                 variant.image = product.colorImages?.[color] || product.image || "";
                 if (sizes.length > 0) {
-                    variant.stock = Object.fromEntries(sizes.map(s => [s, Math.floor((product.amount || 0) / (oldColors.length * sizes.length))])); 
+                    variant.stock = Object.fromEntries(sizes.map(s => [s, Math.floor((product.amount || 0) / (oldColors.length * sizes.length))]));
                 } else {
                     variant.amount = Math.floor((product.amount || 0) / oldColors.length);
                 }
@@ -308,12 +308,12 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange, user, s
             else { Object.values(v.stock || {}).forEach(q => { total += parseInt(q) || 0; }); }
         });
         updateProduct({ id: selectedItem.id, colorVariants: updatedVariants, amount: total });
-        
+
         // Notify with detailed stock changes
         const oldQty = sizes.length === 0 ? (selectedItem.colorVariants[variantIdx].amount || 0) : (selectedItem.colorVariants[variantIdx].stock[adjustQtySize] || 0);
-        const diffText = sizes.length === 0 
-          ? `ปรับสต็อกสี ${adjustQtyColor} จาก ${oldQty} เป็น ${qtyNum}`
-          : `ปรับสต็อกสี ${adjustQtyColor} ไซส์ ${adjustQtySize} จาก ${oldQty} เป็น ${qtyNum}`;
+        const diffText = sizes.length === 0
+            ? `ปรับสต็อกสี ${adjustQtyColor} จาก ${oldQty} เป็น ${qtyNum}`
+            : `ปรับสต็อกสี ${adjustQtyColor} ไซส์ ${adjustQtySize} จาก ${oldQty} เป็น ${qtyNum}`;
         notifyProductChange('updated', selectedItem.name, diffText);
 
         setStockModalOpen(false);
@@ -415,16 +415,16 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange, user, s
             if (currentProduct.price !== productData.price) changes.push(`ราคา: ${currentProduct.price} -> ${productData.price}`);
             if (currentProduct.status !== productData.status) changes.push(`สถานะ: ${currentProduct.status} -> ${productData.status}`);
             if (currentProduct.brand !== productData.brand) changes.push(`แบรนด์: ${currentProduct.brand} -> ${productData.brand}`);
-            
+
             // Basic check for color additions/removals
             const oldColors = currentProduct.colorVariants.map(v => v.color).join(', ');
             const newColors = productData.colorVariants.map(v => v.color).join(', ');
             if (oldColors !== newColors) changes.push(`สี: ${oldColors || 'ไม่มี'} -> ${newColors || 'ไม่มี'}`);
-            
+
             if (currentProduct.amount !== productData.amount) {
                 changes.push(`จำนวนรวม: ${currentProduct.amount || 0} -> ${productData.amount}`);
             }
-            
+
             productData.colorVariants.forEach(newV => {
                 const oldV = currentProduct.colorVariants.find(v => v.color === newV.color);
                 if (oldV) {
@@ -439,9 +439,9 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange, user, s
                     }
                 }
             });
-            
+
             const detailsText = changes.length > 0 ? changes.join(' | ') : 'แก้ไขข้อมูลทั่วไป';
-            
+
             updateProduct({ ...currentProduct, ...productData });
             notifyProductChange('updated', formFields.name, detailsText);
         } else {
@@ -471,7 +471,7 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange, user, s
                 item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 item.sku.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 item.brand.toLowerCase().includes(searchQuery.toLowerCase());
-            
+
             const matchCategory =
                 selectedCategory === "All Categories" ||
                 item.sportType === selectedCategory ||
@@ -643,7 +643,7 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange, user, s
                         <div className="flex flex-wrap items-center gap-8">
                             <div className="flex flex-col gap-1">
                                 <span className="text-[10px] text-neutral-400 uppercase tracking-widest">Sport Type / Category</span>
-                                <select 
+                                <select
                                     value={selectedCategory}
                                     onChange={(e) => setSelectedCategory(e.target.value)}
                                     className="bg-transparent border-0 border-b border-orange-300/30 text-xs uppercase py-1 focus:ring-0 focus:border-orange-300 pr-8 tracking-widest font-bold bg-neutral-900 text-neutral-100"
@@ -659,7 +659,7 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange, user, s
                             </div>
                             <div className="flex flex-col gap-1">
                                 <span className="text-[10px] text-neutral-400 uppercase tracking-widest">Status</span>
-                                <select 
+                                <select
                                     value={selectedStatus}
                                     onChange={(e) => setSelectedStatus(e.target.value)}
                                     className="bg-transparent border-0 border-b border-orange-300/30 text-xs uppercase py-1 focus:ring-0 focus:border-orange-300 pr-8 tracking-widest font-bold bg-neutral-900 text-neutral-100"
@@ -671,7 +671,7 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange, user, s
                             </div>
                             <div className="flex flex-col gap-1">
                                 <span className="text-[10px] text-neutral-400 uppercase tracking-widest">Stock Status</span>
-                                <select 
+                                <select
                                     value={selectedStockStatus}
                                     onChange={(e) => setSelectedStockStatus(e.target.value)}
                                     className="bg-transparent border-0 border-b border-orange-300/30 text-xs uppercase py-1 focus:ring-0 focus:border-orange-300 pr-8 tracking-widest font-bold bg-neutral-900 text-neutral-100"
@@ -703,7 +703,7 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange, user, s
                                     />
                                 </div>
                             </div>
-                            
+
                             {user && user.role === "manager" ? (
                                 <button
                                     onClick={handleOpenAdd}
@@ -735,8 +735,8 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange, user, s
                                             { label: "Stock Level", key: "stock" },
                                             { label: "Status", key: null }
                                         ].map((h) => (
-                                            <th 
-                                                key={h.label} 
+                                            <th
+                                                key={h.label}
                                                 className={`px-6 py-5 font-bold ${h.key ? "cursor-pointer hover:text-orange-300 select-none" : ""}`}
                                                 onClick={() => handleSort(h.key)}
                                             >
@@ -744,9 +744,9 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange, user, s
                                                     {h.label}
                                                     {h.key && (
                                                         <span className="text-neutral-500">
-                                                            {sortField === `${h.key}-asc` ? <ChevronUp size={14} className="text-orange-300"/> :
-                                                             sortField === `${h.key}-desc` ? <ChevronDown size={14} className="text-orange-300"/> :
-                                                             <ArrowUpDown size={14} />}
+                                                            {sortField === `${h.key}-asc` ? <ChevronUp size={14} className="text-orange-300" /> :
+                                                                sortField === `${h.key}-desc` ? <ChevronDown size={14} className="text-orange-300" /> :
+                                                                    <ArrowUpDown size={14} />}
                                                         </span>
                                                     )}
                                                 </div>
@@ -769,7 +769,7 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange, user, s
                                                 <td className="px-6 py-6 flex items-center gap-4">
                                                     <div className="w-12 h-12 bg-neutral-900 border border-white/10 shrink-0 flex items-center justify-center overflow-hidden">
                                                         {item.image ? (
-                                                            <img src={item.image} className="w-full h-full object-cover" alt={item.name} />
+                                                            <img src={item.image.startsWith('http') ? item.image : `/${item.image}`} className="w-full h-full object-cover" alt={item.name} />
                                                         ) : (
                                                             <Package size={20} className="text-neutral-600 group-hover:text-orange-300 transition-colors" />
                                                         )}
@@ -845,7 +845,7 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange, user, s
                                 {Math.min(currentPage * itemsPerPage, sortedProducts.length)} of {sortedProducts.length} Products
                             </p>
                             <div className="flex items-center gap-2">
-                                <button 
+                                <button
                                     onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                                     disabled={currentPage === 1}
                                     className="p-2 border border-white/10 hover:bg-white/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -853,19 +853,18 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange, user, s
                                     <ChevronLeft size={16} />
                                 </button>
                                 {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                                    <button 
+                                    <button
                                         key={page}
                                         onClick={() => setCurrentPage(page)}
-                                        className={`px-4 py-2 font-black italic text-xs ${
-                                            currentPage === page 
-                                                ? "bg-orange-300 text-neutral-950" 
+                                        className={`px-4 py-2 font-black italic text-xs ${currentPage === page
+                                                ? "bg-orange-300 text-neutral-950"
                                                 : "border border-white/10 hover:bg-white/10 text-neutral-300"
-                                        }`}
+                                            }`}
                                     >
                                         {page}
                                     </button>
                                 ))}
-                                <button 
+                                <button
                                     onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                                     disabled={currentPage === totalPages || totalPages === 0}
                                     className="p-2 border border-white/10 hover:bg-white/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -897,20 +896,20 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange, user, s
                             <div className="flex-grow overflow-y-auto p-8 sm:px-12 space-y-6">
                                 <div className="flex flex-col gap-2">
                                     <label className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold">Product Name</label>
-                                    <input 
-                                        type="text" 
+                                    <input
+                                        type="text"
                                         name="name"
                                         value={formFields.name}
                                         onChange={handleInputChange}
                                         required
-                                        placeholder="ENTER PRODUCT NAME" 
-                                        className="bg-white/5 border border-white/10 focus:border-orange-300 focus:ring-0 py-4 px-6 uppercase text-sm placeholder:text-neutral-600 w-full outline-none" 
+                                        placeholder="ENTER PRODUCT NAME"
+                                        className="bg-white/5 border border-white/10 focus:border-orange-300 focus:ring-0 py-4 px-6 uppercase text-sm placeholder:text-neutral-600 w-full outline-none"
                                     />
                                 </div>
                                 <div className="grid grid-cols-2 gap-6">
                                     <div className="flex flex-col gap-2">
                                         <label className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold">Product Type</label>
-                                        <select 
+                                        <select
                                             name="productType"
                                             value={formFields.productType}
                                             onChange={handleInputChange}
@@ -922,7 +921,7 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange, user, s
                                     </div>
                                     <div className="flex flex-col gap-2">
                                         <label className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold">Clothes Type</label>
-                                        <select 
+                                        <select
                                             name="clothesType"
                                             value={formFields.clothesType}
                                             onChange={handleInputChange}
@@ -940,32 +939,32 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange, user, s
                                 <div className="grid grid-cols-2 gap-6">
                                     <div className="flex flex-col gap-2">
                                         <label className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold">SKU</label>
-                                        <input 
-                                            type="text" 
+                                        <input
+                                            type="text"
                                             name="sku"
                                             value={formFields.sku}
                                             onChange={handleInputChange}
-                                            placeholder="GA-XX-0000 (AUTO IF BLANK)" 
-                                            className="bg-white/5 border border-white/10 focus:border-orange-300 focus:ring-0 py-4 px-6 text-sm placeholder:text-neutral-600 w-full outline-none" 
+                                            placeholder="GA-XX-0000 (AUTO IF BLANK)"
+                                            className="bg-white/5 border border-white/10 focus:border-orange-300 focus:ring-0 py-4 px-6 text-sm placeholder:text-neutral-600 w-full outline-none"
                                         />
                                     </div>
                                     <div className="flex flex-col gap-2">
                                         <label className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold">Price (฿)</label>
-                                        <input 
-                                            type="number" 
+                                        <input
+                                            type="number"
                                             name="price"
                                             value={formFields.price}
                                             onChange={handleInputChange}
                                             required
-                                            placeholder="0" 
-                                            className="bg-white/5 border border-white/10 focus:border-orange-300 focus:ring-0 py-4 px-6 italic font-black text-orange-300 w-full outline-none" 
+                                            placeholder="0"
+                                            className="bg-white/5 border border-white/10 focus:border-orange-300 focus:ring-0 py-4 px-6 italic font-black text-orange-300 w-full outline-none"
                                         />
                                     </div>
                                 </div>
                                 <div className="grid grid-cols-3 gap-6">
                                     <div className="flex flex-col gap-2">
                                         <label className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold">Brand</label>
-                                        <select 
+                                        <select
                                             name="brand"
                                             value={formFields.brand}
                                             onChange={handleInputChange}
@@ -978,7 +977,7 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange, user, s
                                     </div>
                                     <div className="flex flex-col gap-2">
                                         <label className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold">Sport Type</label>
-                                        <select 
+                                        <select
                                             name="sportType"
                                             value={formFields.sportType}
                                             onChange={handleInputChange}
@@ -991,7 +990,7 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange, user, s
                                     </div>
                                     <div className="flex flex-col gap-2">
                                         <label className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold">Target Group</label>
-                                        <select 
+                                        <select
                                             name="targetGroup"
                                             value={formFields.targetGroup}
                                             onChange={handleInputChange}
@@ -1005,7 +1004,7 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange, user, s
                                 </div>
                                 <div className="flex flex-col gap-2">
                                     <label className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold">Status</label>
-                                    <select 
+                                    <select
                                         name="status"
                                         value={formFields.status}
                                         onChange={handleInputChange}
@@ -1026,19 +1025,19 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange, user, s
                                             <Plus size={14} /> Add Color
                                         </button>
                                     </div>
-                                    
+
                                     <div className="space-y-4">
                                         {colorVariants.map((variant, index) => (
                                             <div key={index} className="bg-white/5 border border-white/10 p-6 flex flex-col gap-6 relative">
                                                 <button type="button" onClick={() => handleRemoveVariant(index)} className="absolute top-4 right-4 text-neutral-500 hover:text-red-400">
                                                     <Trash2 size={16} />
                                                 </button>
-                                                
+
                                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                                     {/* Color Select */}
                                                     <div className="flex flex-col gap-2">
                                                         <label className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold">Color</label>
-                                                        <select 
+                                                        <select
                                                             value={variant.color}
                                                             onChange={(e) => handleVariantColorChange(index, e.target.value)}
                                                             className="bg-neutral-900 border border-white/10 py-3 px-4 uppercase text-sm"
@@ -1047,7 +1046,7 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange, user, s
                                                             {COLOR_NAMES.map(c => <option key={c} value={c}>{c}</option>)}
                                                         </select>
                                                     </div>
-                                                    
+
                                                     {/* Image Upload */}
                                                     <div className="flex flex-col gap-2">
                                                         <label className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold">Image (Required)</label>
@@ -1057,8 +1056,8 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange, user, s
                                                                 <span className="text-xs uppercase text-neutral-400 font-bold">Upload</span>
                                                                 <input type="file" accept="image/*" className="hidden" onChange={(e) => handleVariantImageFile(index, e)} />
                                                             </label>
-                                                            <button 
-                                                                type="button" 
+                                                            <button
+                                                                type="button"
                                                                 onClick={() => {
                                                                     const url = prompt("Enter Image URL:", variant.image);
                                                                     if (url !== null) handleVariantImageUrl(index, url);
@@ -1087,13 +1086,13 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange, user, s
                                                     <label className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold">
                                                         {currentSizes.length > 0 ? "Stock per Size" : "Total Stock"}
                                                     </label>
-                                                    
+
                                                     {currentSizes.length > 0 ? (
                                                         <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
                                                             {currentSizes.map(size => (
                                                                 <div key={size} className="flex flex-col gap-1">
                                                                     <span className="text-[10px] text-center text-neutral-500 font-black">{size}</span>
-                                                                    <input 
+                                                                    <input
                                                                         type="number"
                                                                         min="0"
                                                                         value={variant.stock[size] || ""}
@@ -1105,7 +1104,7 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange, user, s
                                                             ))}
                                                         </div>
                                                     ) : (
-                                                        <input 
+                                                        <input
                                                             type="number"
                                                             min="0"
                                                             value={variant.amount || ""}
@@ -1121,12 +1120,12 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange, user, s
                                 </div>
                                 <div className="flex flex-col gap-2">
                                     <label className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold">Description / Series</label>
-                                    <textarea 
+                                    <textarea
                                         name="description"
                                         value={formFields.description}
                                         onChange={handleInputChange}
                                         rows="3"
-                                        placeholder="ENTER BRIEF DESCRIPTION" 
+                                        placeholder="ENTER BRIEF DESCRIPTION"
                                         className="bg-white/5 border border-white/10 focus:border-orange-300 focus:ring-0 py-4 px-6 uppercase text-sm placeholder:text-neutral-600 w-full outline-none resize-none"
                                     />
                                 </div>
@@ -1201,7 +1200,7 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange, user, s
                                     <label className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold">
                                         Reason for Adjustment
                                     </label>
-                                    <select 
+                                    <select
                                         value={adjustmentReason}
                                         onChange={(e) => setAdjustmentReason(e.target.value)}
                                         className="bg-white/5 border border-white/10 focus:border-orange-300 focus:ring-0 py-4 px-6 uppercase text-sm w-full bg-neutral-900 text-neutral-100"

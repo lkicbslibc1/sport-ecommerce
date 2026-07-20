@@ -61,6 +61,7 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange, user, set
   const isOpen = selectedOrder !== null;
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("All Statuses");
+  const [dateFilter, setDateFilter] = useState("All Time");
 
   const [selectedOrderIds, setSelectedOrderIds] = useState([]);
   const [bulkStatus, setBulkStatus] = useState("Shipped");
@@ -71,7 +72,7 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange, user, set
   React.useEffect(() => {
     setSelectedOrderIds([]);
     setCurrentPage(1);
-  }, [searchQuery, selectedStatus]);
+  }, [searchQuery, selectedStatus, dateFilter]);
 
 
   const handleUpdateStatus = async (orderId, newStatus) => {
@@ -91,29 +92,29 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange, user, set
       setOrdersList(updated);
       await saveOrders(updated);
 
-    if (orderUsername && orderUsername !== 'Guest') {
-      try {
-        const notiRes = await fetch('http://localhost:5000/api/noti');
-        const allNotis = notiRes.ok ? await notiRes.json() : {};
-        const userNotis = allNotis[orderUsername] || [];
-        const newNoti = {
-          id: orderId,
-          date: orderDate,
-          title: "Order status updated",
-          status: newStatus,
-          read: false
-        };
-        allNotis[orderUsername] = [newNoti, ...userNotis];
-        
-        await fetch('http://localhost:5000/api/noti', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(allNotis)
-        });
-      } catch (err) {
-        console.error("Failed to save noti:", err);
+      if (orderUsername && orderUsername !== 'Guest') {
+        try {
+          const notiRes = await fetch('http://localhost:5000/api/noti');
+          const allNotis = notiRes.ok ? await notiRes.json() : {};
+          const userNotis = allNotis[orderUsername] || [];
+          const newNoti = {
+            id: orderId,
+            date: orderDate,
+            title: "Order status updated",
+            status: newStatus,
+            read: false
+          };
+          allNotis[orderUsername] = [newNoti, ...userNotis];
+
+          await fetch('http://localhost:5000/api/noti', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(allNotis)
+          });
+        } catch (err) {
+          console.error("Failed to save noti:", err);
+        }
       }
-    }
     } finally {
       setIsUpdating(false);
     }
@@ -122,14 +123,14 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange, user, set
   const printInvoice = (order) => {
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
-    
-    const itemsHtml = order.items && order.items.length > 0 
+
+    const itemsHtml = order.items && order.items.length > 0
       ? order.items.map(item => {
-          let details = [];
-          if (item.color) details.push(`Color: <span style="text-transform: capitalize;">${item.color}</span>`);
-          if (item.size) details.push(`Size: ${item.size}`);
-          const detailsStr = details.length > 0 ? ` | ${details.join(', ')}` : '';
-          return `
+        let details = [];
+        if (item.color) details.push(`Color: <span style="text-transform: capitalize;">${item.color}</span>`);
+        if (item.size) details.push(`Size: ${item.size}`);
+        const detailsStr = details.length > 0 ? ` | ${details.join(', ')}` : '';
+        return `
             <tr>
               <td style="padding: 12px; border-bottom: 1px solid #eee;">
                 ${item.name}<br>
@@ -140,7 +141,7 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange, user, set
               <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right;">${((parseFloat((item.price || "0").replace(/,/g, '').replace(' ฿', '')) || 0) * item.qty).toLocaleString("th-TH")} ฿</td>
             </tr>
           `;
-        }).join('')
+      }).join('')
       : '<tr><td colspan="4" style="text-align: center; padding: 12px;">No items</td></tr>';
 
     const html = `
@@ -225,14 +226,34 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange, user, set
 
 
   const filteredOrders = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
     return ordersList.filter(o => {
       const matchSearch =
-        o.customer.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        o.id.toLowerCase().includes(searchQuery.toLowerCase());
+        o.customer?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        o.id?.toLowerCase().includes(searchQuery.toLowerCase());
       const matchStatus = selectedStatus === "All Statuses" || o.status === selectedStatus;
-      return matchSearch && matchStatus;
+
+      let matchDate = true;
+      if (dateFilter !== "All Time" && o.date) {
+        const orderDate = new Date(o.date);
+        orderDate.setHours(0, 0, 0, 0);
+        const diffTime = Math.abs(today - orderDate);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        if (dateFilter === "Today") {
+          matchDate = diffDays === 0;
+        } else if (dateFilter === "Last 7 Days") {
+          matchDate = diffDays <= 7;
+        } else if (dateFilter === "This Month") {
+          matchDate = orderDate.getMonth() === today.getMonth() && orderDate.getFullYear() === today.getFullYear();
+        }
+      }
+
+      return matchSearch && matchStatus && matchDate;
     });
-  }, [ordersList, searchQuery, selectedStatus]);
+  }, [ordersList, searchQuery, selectedStatus, dateFilter]);
 
   React.useEffect(() => {
     if (highlightId && filteredOrders.length > 0) {
@@ -298,7 +319,7 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange, user, set
       }
       return o;
     });
-    
+
     setOrdersList(updated);
     await saveOrders(updated);
     setSelectedOrderIds([]);
@@ -436,6 +457,21 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange, user, set
                   <option value="Delivered" className="bg-neutral-950 text-neutral-100">Delivered</option>
                   <option value="Cancelled" className="bg-neutral-950 text-neutral-100">Cancelled</option>
                 </select>
+                <div className="flex items-center gap-3 border-l border-white/10 pl-6">
+                  <span className="text-[10px] uppercase tracking-widest text-neutral-400">
+                    Date:
+                  </span>
+                  <select
+                    value={dateFilter}
+                    onChange={(e) => setDateFilter(e.target.value)}
+                    className="bg-neutral-900 border border-white/10 text-neutral-100 text-xs py-2 px-4 focus:ring-orange-300 focus:border-orange-300"
+                  >
+                    <option value="All Time" className="bg-neutral-950 text-neutral-100">All Time</option>
+                    <option value="Today" className="bg-neutral-950 text-neutral-100">Today</option>
+                    <option value="Last 7 Days" className="bg-neutral-950 text-neutral-100">Last 7 Days</option>
+                    <option value="This Month" className="bg-neutral-950 text-neutral-100">This Month</option>
+                  </select>
+                </div>
               </div>
 
               {selectedOrderIds.length > 0 && (
@@ -462,7 +498,7 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange, user, set
                 </div>
               )}
             </div>
-            
+
             <button
               onClick={() => setShowActionModal(true)}
               className="bg-neutral-900 border border-white/10 text-neutral-100 text-[10px] uppercase font-black tracking-widest py-2 px-4 hover:bg-neutral-800 transition-colors flex items-center gap-2"
@@ -514,80 +550,89 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange, user, set
                   {paginatedOrders.map((order) => {
                     const isHighlighted = order.id === highlightId;
                     return (
-                    <tr
-                      key={order.id}
-                      id={`order-row-${order.id}`}
-                      className={`hover:bg-orange-600/5 hover:border-l-2 hover:border-orange-400 transition-all duration-500 ${selectedOrderIds.includes(order.id) ? 'bg-orange-600/10 border-l-2 border-orange-400' : ''} ${isHighlighted ? 'bg-orange-500/20 border-l-4 border-orange-400 shadow-[inset_0_0_20px_rgba(249,115,22,0.3)]' : ''}`}
-                    >
-                      <td className="p-6">
-                        <input
-                          type="checkbox"
-                          checked={selectedOrderIds.includes(order.id)}
-                          onChange={() => handleSelectOrder(order.id)}
-                          className="w-4 h-4 accent-orange-500 cursor-pointer"
-                        />
-                      </td>
-                      <td className="p-6 text-sm text-orange-300 tracking-widest">
-                        {order.id}
-                      </td>
-                      <td className="p-6 text-sm text-neutral-200">
-                        {order.username || 'Guest'}
-                      </td>
-                      <td className="p-6">
-                        <div className="flex items-center gap-3">
-                          <span className="font-bold uppercase tracking-tight text-sm">
-                            {order.customer}
-                          </span>
+                      <tr
+                        key={order.id}
+                        id={`order-row-${order.id}`}
+                        className={`hover:bg-orange-600/5 hover:border-l-2 hover:border-orange-400 transition-all duration-500 ${selectedOrderIds.includes(order.id) ? 'bg-orange-600/10 border-l-2 border-orange-400' : ''} ${isHighlighted ? 'bg-orange-500/20 border-l-4 border-orange-400 shadow-[inset_0_0_20px_rgba(249,115,22,0.3)]' : ''}`}
+                      >
+                        <td className="p-6">
+                          <input
+                            type="checkbox"
+                            checked={selectedOrderIds.includes(order.id)}
+                            onChange={() => handleSelectOrder(order.id)}
+                            className="w-4 h-4 accent-orange-500 cursor-pointer"
+                          />
+                        </td>
+                        <td className="p-6 text-sm text-orange-300 tracking-widest">
+                          {order.id}
+                        </td>
+                        <td className="p-6 text-sm text-neutral-200">
+                          {order.username || 'Guest'}
+                        </td>
+                        <td className="p-6">
+                          <div className="flex items-center gap-3">
+                            <span className="font-bold uppercase tracking-tight text-sm">
+                              {order.customer}
+                            </span>
 
-                        </div>
-                      </td>
-                      <td className="p-6 text-neutral-400 text-xs">{order.date}</td>
-                      <td className="p-6">
-                        {order.shippingMethod ? (
-                          <span className={`px-2 py-1 text-[9px] uppercase font-black rounded-sm tracking-widest ${order.shippingMethod === 'express' ? 'bg-orange-500/20 text-orange-400' : 'bg-neutral-800 text-neutral-400'}`}>
-                            {order.shippingMethod === 'express' ? 'Express' : 'Standard'}
+                          </div>
+                        </td>
+                        <td className="p-6 text-neutral-400 text-xs">{order.date}</td>
+                        <td className="p-6">
+                          {order.shippingMethod ? (
+                            <span className={`px-2 py-1 text-[9px] uppercase font-black rounded-sm tracking-widest ${order.shippingMethod === 'express' ? 'bg-orange-500/20 text-orange-400' : 'bg-neutral-800 text-neutral-400'}`}>
+                              {order.shippingMethod === 'express' ? 'Express' : 'Standard'}
+                            </span>
+                          ) : (
+                            <span className="text-[10px] text-neutral-600">-</span>
+                          )}
+                        </td>
+                        <td className="p-6 font-bold tracking-tighter">
+                          {(order.total || 0).toLocaleString("th-TH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ฿
+                        </td>
+                        <td className="p-6">
+                          <span
+                            className={
+                              "px-3 py-1 text-[10px] font-black uppercase tracking-widest " +
+                              STATUS_STYLES[order.status]
+                            }
+                          >
+                            {order.status}
                           </span>
-                        ) : (
-                          <span className="text-[10px] text-neutral-600">-</span>
-                        )}
-                      </td>
-                      <td className="p-6 font-bold tracking-tighter">
-                        {(order.total || 0).toLocaleString("th-TH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ฿
-                      </td>
-                      <td className="p-6">
-                        <span
-                          className={
-                            "px-3 py-1 text-[10px] font-black uppercase tracking-widest " +
-                            STATUS_STYLES[order.status]
-                          }
-                        >
-                          {order.status}
-                        </span>
-                      </td>
-                      <td className="p-6">
-                        <div className="flex justify-end items-center gap-3">
-                          <button
-                            onClick={() => setSelectedOrder(order)}
-                            className="p-2 border border-white/10 hover:bg-neutral-100 hover:text-neutral-950 transition-colors"
-                            title="View Details"
-                          >
-                            <Eye size={16} />
-                          </button>
-                          <select
-                            value={order.status}
-                            onChange={(e) => handleUpdateStatus(order.id, e.target.value)}
-                            className="bg-neutral-900 border border-white/10 text-[10px] uppercase font-black focus:ring-1 focus:ring-orange-300 cursor-pointer px-4 py-1.5 text-neutral-100"
-                          >
-                            <option value="Preparing" className="bg-neutral-950 text-neutral-100">Preparing</option>
-                            <option value="Shipped" className="bg-neutral-950 text-neutral-100">Shipped</option>
-                            <option value="Delivered" className="bg-neutral-950 text-neutral-100">Delivered</option>
-                            <option value="Cancelled" className="bg-neutral-950 text-neutral-100">Cancelled</option>
-                          </select>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
+                        </td>
+                        <td className="p-6">
+                          <div className="flex justify-end items-center gap-3">
+                            <button
+                              onClick={() => setSelectedOrder(order)}
+                              className="flex items-center gap-2 bg-white/5 hover:bg-orange-500 hover:text-white border border-white/10 px-3 py-1.5 text-[10px] uppercase tracking-widest font-bold transition-all text-neutral-300"
+                              title="View Details"
+                            >
+                              <Eye size={14} /> View
+                            </button>
+                            <div className="relative">
+                              <select
+                                value={order.status}
+                                onChange={(e) => handleUpdateStatus(order.id, e.target.value)}
+                                className={`appearance-none outline-none border text-[10px] uppercase font-black cursor-pointer px-4 py-1.5 pr-8 transition-colors ${order.status === 'Preparing' ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30 hover:bg-indigo-500/30' :
+                                    order.status === 'Shipped' ? 'bg-orange-500/20 text-orange-300 border-orange-500/30 hover:bg-orange-500/30' :
+                                      order.status === 'Delivered' ? 'bg-green-500/20 text-green-400 border-green-500/30 hover:bg-green-500/30' :
+                                        'bg-red-500/20 text-red-400 border-red-500/30 hover:bg-red-500/30'
+                                  }`}
+                              >
+                                <option value="Preparing" className="bg-neutral-900 text-neutral-100">Preparing</option>
+                                <option value="Shipped" className="bg-neutral-900 text-neutral-100">Shipped</option>
+                                <option value="Delivered" className="bg-neutral-900 text-neutral-100">Delivered</option>
+                                <option value="Cancelled" className="bg-neutral-900 text-neutral-100">Cancelled</option>
+                              </select>
+                              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-current opacity-70">
+                                <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" /></svg>
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -598,14 +643,14 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange, user, set
                 Showing {paginatedOrders.length} of {filteredOrders.length} orders
               </p>
               <div className="flex gap-2">
-                <button 
+                <button
                   onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
                   className="p-2 border border-white/10 hover:bg-orange-600 hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed">
                   <ChevronLeft size={16} />
                 </button>
                 <span className="text-[10px] text-neutral-400 flex items-center px-2">Page {currentPage} of {totalPages || 1}</span>
-                <button 
+                <button
                   onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                   disabled={currentPage === totalPages || totalPages === 0}
                   className="p-2 border border-white/10 hover:bg-orange-600 hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed">
@@ -635,7 +680,7 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange, user, set
                     {selectedOrder.id} / {selectedOrder.customer}
                   </p>
                   <div className="flex gap-2 ml-4">
-                    <button 
+                    <button
                       onClick={() => printInvoice(selectedOrder)}
                       className="flex items-center gap-1.5 px-3 py-1 bg-white/[0.05] hover:bg-orange-600 border border-white/10 hover:border-orange-500 text-[9px] uppercase tracking-widest font-bold transition-colors text-neutral-300 hover:text-white"
                     >
@@ -691,10 +736,10 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange, user, set
                     >
                       <div className="w-16 h-16 bg-white shrink-0 flex items-center justify-center overflow-hidden p-1 rounded">
                         {item.image || (item.colorImages && item.selectedColor && item.colorImages[item.selectedColor]) ? (
-                          <img 
-                            src={item.colorImages && item.selectedColor && item.colorImages[item.selectedColor] ? item.colorImages[item.selectedColor] : item.image} 
-                            alt={item.name} 
-                            className="w-full h-full object-contain" 
+                          <img
+                            src={item.colorImages && item.selectedColor && item.colorImages[item.selectedColor] ? item.colorImages[item.selectedColor] : item.image}
+                            alt={item.name}
+                            className="w-full h-full object-contain"
                           />
                         ) : (
                           <Package size={24} className="text-neutral-600" />

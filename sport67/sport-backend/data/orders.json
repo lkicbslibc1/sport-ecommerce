@@ -1,5 +1,93 @@
 [
   {
+    "id": "#GOGO-243827",
+    "username": "testuat",
+    "customer": "UAT man Lastname",
+    "shippingAddress": {
+      "firstName": "UAT man",
+      "lastName": "Lastname",
+      "phone": "0614014480",
+      "streetAddress": "a",
+      "city": "a",
+      "zipCode": "10230",
+      "isDefault": true,
+      "id": "1784529560285"
+    },
+    "shippingMethod": "express",
+    "shippingCost": 250,
+    "date": "JUL 20, 2026",
+    "total": 19242.5,
+    "status": "Preparing",
+    "items": [
+      {
+        "id": 3,
+        "color": "yellow",
+        "size": "XL",
+        "name": "Endurance Flight Shorts",
+        "sku": "GA-RN-2024-003",
+        "qty": 3,
+        "price": "1,800 ฿",
+        "image": "image/puma03Y.png"
+      },
+      {
+        "id": 5,
+        "color": "brown",
+        "size": "L",
+        "name": "Elite Grip Socks",
+        "sku": "GA-RN-2024-005",
+        "qty": 1,
+        "price": "650 ฿",
+        "image": "https://www.prodirectsport.com/cdn/shop/files/245120_main.jpg?v=1784246510&width=1000"
+      },
+      {
+        "id": 11,
+        "color": "pink",
+        "size": "M",
+        "name": "Nike Dri-FIT UV Miler",
+        "sku": "NK-RN-2024-011",
+        "qty": 1,
+        "price": "1,500 ฿",
+        "image": "image/nike11Pi.png"
+      },
+      {
+        "id": 8,
+        "color": "black",
+        "size": "",
+        "name": "Hydro-Fast Swim Goggles",
+        "sku": "GA-SW-2024-008",
+        "qty": 2,
+        "price": "950 ฿",
+        "image": "image/adidas08B.png"
+      },
+      {
+        "id": 12,
+        "color": "blue",
+        "size": "M",
+        "name": "Puma teamLIGA Training Pants",
+        "sku": "PM-FB-2024-012",
+        "qty": 1,
+        "price": "1,800 ฿",
+        "image": "image/puma12Bl.jpg"
+      },
+      {
+        "id": 10,
+        "color": "white",
+        "size": "40",
+        "name": "Adidas Ultraboost Light",
+        "sku": "AD-RN-2024-010",
+        "qty": 1,
+        "price": "6,500 ฿",
+        "image": "image/adidas10P.png"
+      }
+    ],
+    "actions": [
+      "Update Status",
+      "Mark Shipped",
+      "Mark Preparing",
+      "Cancel Order"
+    ]
+  },
+  {
     "id": "#GOGO-660014",
     "username": "abc",
     "customer": "Tongmen JaiSaard",
@@ -465,7 +553,7 @@
     },
     "date": "JUL 17, 2026",
     "total": 24325,
-    "status": "Preparing",
+    "status": "Shipped",
     "items": [
       {
         "id": 1,
@@ -501,7 +589,7 @@
     },
     "date": "JUL 17, 2026",
     "total": 16407,
-    "status": "Cancelled",
+    "status": "Preparing",
     "items": [
       {
         "id": 4,

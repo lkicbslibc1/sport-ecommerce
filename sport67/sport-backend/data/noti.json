@@ -154,6 +154,20 @@
   ],
   "mook": [
     {
+      "id": "#GOGO-386043",
+      "date": "JUL 17, 2026",
+      "title": "Order status updated",
+      "status": "Shipped",
+      "read": false
+    },
+    {
+      "id": "#GOGO-880210",
+      "date": "JUL 17, 2026",
+      "title": "Order status updated",
+      "status": "Preparing",
+      "read": false
+    },
+    {
       "id": "#GOGO-880210",
       "date": "JUL 17, 2026",
       "title": "Order status updated",
@@ -269,6 +283,33 @@
     }
   ],
   "__employee__": [
+    {
+      "id": "noti_1784531244415_qwyb0",
+      "timestamp": "2026-07-20T07:07:24.415Z",
+      "read": false,
+      "type": "stale_order",
+      "title": "⏰ ออเดอร์ค้างนานกว่า 3 วัน!",
+      "message": "Order #GOGO-880210 (Tongmen JaiSaard) ยังเป็น \"Preparing\" — ไม่ได้รับการอัปเดตมากกว่า 3 วัน",
+      "orderId": "#GOGO-880210"
+    },
+    {
+      "id": "noti_1784530096102_tv167",
+      "timestamp": "2026-07-20T06:48:16.101Z",
+      "read": false,
+      "type": "low_stock",
+      "title": "⚠️ สินค้าใกล้หมด Stock!",
+      "message": "\"roblox guy\" เหลือแค่ 2 ชิ้น",
+      "productId": 19
+    },
+    {
+      "id": "noti_1784529616575_bgopl",
+      "timestamp": "2026-07-20T06:40:16.575Z",
+      "read": false,
+      "type": "new_order",
+      "title": "🛒 ออเดอร์ใหม่เข้ามาแล้ว!",
+      "message": "Order #GOGO-243827 จาก UAT man Lastname — ฿19,242.5",
+      "orderId": "#GOGO-243827"
+    },
     {
       "id": "noti_1784483331697_ha5ka",
       "timestamp": "2026-07-19T17:48:51.696Z",
@@ -434,6 +475,33 @@
   ],
   "__manager__": [
     {
+      "id": "noti_1784531244415_06fb0",
+      "timestamp": "2026-07-20T07:07:24.415Z",
+      "read": false,
+      "type": "stale_order",
+      "title": "⏰ ออเดอร์ค้างนานกว่า 3 วัน!",
+      "message": "Order #GOGO-880210 (Tongmen JaiSaard) ยังเป็น \"Preparing\" — ไม่ได้รับการอัปเดตมากกว่า 3 วัน",
+      "orderId": "#GOGO-880210"
+    },
+    {
+      "id": "noti_1784530096102_hc8fq",
+      "timestamp": "2026-07-20T06:48:16.101Z",
+      "read": false,
+      "type": "low_stock",
+      "title": "⚠️ สินค้าใกล้หมด Stock!",
+      "message": "\"roblox guy\" เหลือแค่ 2 ชิ้น",
+      "productId": 19
+    },
+    {
+      "id": "noti_1784529616575_bgopl",
+      "timestamp": "2026-07-20T06:40:16.575Z",
+      "read": false,
+      "type": "new_order",
+      "title": "🛒 ออเดอร์ใหม่เข้ามาแล้ว!",
+      "message": "Order #GOGO-243827 จาก UAT man Lastname — ฿19,242.5",
+      "orderId": "#GOGO-243827"
+    },
+    {
       "id": "noti_1784483331697_nrv9b",
       "timestamp": "2026-07-19T17:48:51.696Z",
       "read": false,
@@ -585,6 +653,15 @@
     {
       "id": "#GOGO-435324",
       "date": "JUL 19, 2026",
+      "title": "Purchase successful!",
+      "status": "Preparing",
+      "read": true
+    }
+  ],
+  "testuat": [
+    {
+      "id": "#GOGO-243827",
+      "date": "JUL 20, 2026",
       "title": "Purchase successful!",
       "status": "Preparing",
       "read": true

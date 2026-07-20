@@ -177,7 +177,7 @@
     "sportType": "Running",
     "targetGroup": "men",
     "fabricMaterial": "cotton",
-    "amount": 56,
+    "amount": 53,
     "review": 4.6,
     "description": "Extremely breathable lightweight shorts for marathon runners.",
     "sku": "GA-RN-2024-003",
@@ -202,7 +202,7 @@
         "stock": {
           "S": 9,
           "M": 9,
-          "XL": 9
+          "XL": 6
         }
       }
     ]
@@ -318,7 +318,7 @@
     "sportType": "Football",
     "targetGroup": "men",
     "fabricMaterial": "waffle",
-    "amount": 874,
+    "amount": 873,
     "review": 4.7,
     "description": "Anti-slip athletic grip socks with targeted cushioning.",
     "sku": "GA-RN-2024-005",
@@ -453,7 +453,7 @@
           "S": 17,
           "M": 3,
           "XL": 3,
-          "L": 17
+          "L": 16
         }
       },
       {
@@ -571,7 +571,7 @@
     "productType": "equipment",
     "sportType": "Swimming",
     "targetGroup": "women",
-    "amount": 85,
+    "amount": 83,
     "review": 4.5,
     "description": "Hydrodynamic swim goggles for competitive training and racing.",
     "sku": "GA-SW-2024-008",
@@ -581,7 +581,7 @@
         "color": "black",
         "colorClass": "bg-[#111111]",
         "image": "image/adidas08B.png",
-        "amount": 85,
+        "amount": 83,
         "stock": {}
       }
     ],
@@ -682,7 +682,7 @@
     "sportType": "Running",
     "targetGroup": "men",
     "fabricMaterial": "Primeknit",
-    "amount": 84,
+    "amount": 83,
     "review": 4.8,
     "description": "Lightest Ultraboost ever with epic energy return.",
     "sku": "AD-RN-2024-010",
@@ -709,7 +709,7 @@
         "amount": 0,
         "stock": {
           "39": 5,
-          "40": 5,
+          "40": 4,
           "41": 4,
           "42": 4,
           "43": 4,
@@ -777,7 +777,7 @@
     "sportType": "Running",
     "targetGroup": "men",
     "fabricMaterial": "polyester",
-    "amount": 150,
+    "amount": 149,
     "review": 4.7,
     "description": "Sweat-wicking top with UV protection for sunny runs.",
     "sku": "NK-RN-2024-011",
@@ -802,7 +802,7 @@
         "amount": 0,
         "stock": {
           "S": 19,
-          "M": 19,
+          "M": 18,
           "L": 18,
           "XL": 18
         }
@@ -838,7 +838,7 @@
     "sportType": "Football",
     "targetGroup": "men",
     "fabricMaterial": "polyester",
-    "amount": 68,
+    "amount": 67,
     "review": 4.5,
     "description": "Train like the pros in these moisture-wicking football pants.",
     "sku": "PM-FB-2024-012",
@@ -861,7 +861,7 @@
         "image": "image/puma12Bl.jpg",
         "amount": 0,
         "stock": {
-          "M": 17,
+          "M": 16,
           "L": 16,
           "XL": 0
         }

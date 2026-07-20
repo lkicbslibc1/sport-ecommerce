@@ -58,9 +58,16 @@ function Footer() {
 
 function BagItem({ item, updateQuantity, removeItem, updateItemAttribute, onViewChange, setSelectedProduct }) {
     const currentColor = item.selectedColor || item.color || (item.colorNames ? item.colorNames[0] : null);
-    const currentImage = (item.colorImages && currentColor && item.colorImages[currentColor]) 
-        ? item.colorImages[currentColor] 
-        : item.image;
+    let currentImage = item.image;
+    if (currentColor) {
+        if (item.colorVariants && item.colorVariants.length > 0) {
+            const variant = item.colorVariants.find(v => v.color.toLowerCase() === currentColor.toLowerCase());
+            if (variant && variant.image) currentImage = variant.image;
+        } else if (item.colorImages) {
+            const matchedKey = Object.keys(item.colorImages).find(k => k.toLowerCase() === currentColor.toLowerCase());
+            if (matchedKey && item.colorImages[matchedKey]) currentImage = item.colorImages[matchedKey];
+        }
+    }
         
     const itemSizes = item.sizes || getSizeOptions(item.productType, item.clothesType) || [];
 

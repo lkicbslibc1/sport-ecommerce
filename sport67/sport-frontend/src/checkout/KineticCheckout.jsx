@@ -116,7 +116,7 @@ export default function KineticCheckout({ onViewChange, cart = [], setCart, user
 
             userAddrs.push(newAddr);
             allAddresses[currentUserUsername] = userAddrs;
-            
+
             await fetch('http://localhost:5000/api/addresses', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -229,11 +229,11 @@ export default function KineticCheckout({ onViewChange, cart = [], setCart, user
                 const [monthStr, yearStr] = formData.expiry.split('/');
                 const month = parseInt(monthStr, 10);
                 const year = parseInt(`20${yearStr}`, 10);
-                
+
                 const now = new Date();
                 const currentYear = now.getFullYear();
                 const currentMonth = now.getMonth() + 1;
-                
+
                 if (year < currentYear || (year === currentYear && month < currentMonth)) {
                     showAlert("บัตรเครดิตนี้หมดอายุแล้ว ไม่สามารถใช้ทำรายการได้", "error");
                     return;
@@ -254,7 +254,7 @@ export default function KineticCheckout({ onViewChange, cart = [], setCart, user
             const ordRes = await fetch('http://localhost:5000/api/orders');
             const existingOrders = ordRes.ok ? await ordRes.json() : [];
             const currentUsername = user ? (user.username || user.name) : 'Guest';
-            
+
             const newOrder = {
                 id: "#" + randomId,
                 username: currentUsername,
@@ -277,7 +277,7 @@ export default function KineticCheckout({ onViewChange, cart = [], setCart, user
                 })),
                 actions: ["Update Status", "Mark Shipped", "Mark Preparing", "Cancel Order"]
             };
-            
+
             await fetch('http://localhost:5000/api/orders', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -296,7 +296,7 @@ export default function KineticCheckout({ onViewChange, cart = [], setCart, user
                     read: false
                 };
                 allNotis[currentUsername] = [newNoti, ...userNotis];
-                
+
                 await fetch('http://localhost:5000/api/noti', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -330,7 +330,7 @@ export default function KineticCheckout({ onViewChange, cart = [], setCart, user
                                 let newVariant = { ...variant };
                                 // ลด amount รวมของสีนี้
                                 newVariant.amount = Math.max(0, newVariant.amount - qty);
-                                
+
                                 // ลด stock แยกตามไซส์
                                 if (currentSize && newVariant.stock && newVariant.stock[currentSize] !== undefined) {
                                     newVariant.stock = { ...newVariant.stock };
@@ -378,8 +378,7 @@ export default function KineticCheckout({ onViewChange, cart = [], setCart, user
                             ORDER ID: {orderId}
                         </p>
                         <p className="text-on-surface-variant text-sm font-light leading-relaxed mb-10" style={{ color: C.onSurfaceVariant }}>
-                            Thank you for your purchase. We are preparing your elite performance gear. An email confirmation has been sent to your registered address.
-                        </p>
+                            Thank you for your purchase. We are preparing your elite performance gear. We will sent notifications for shipping</p>
                         <button
                             onClick={() => onViewChange("home")}
                             className="bg-primary hover:bg-orange-600 px-12 py-5 font-anybody font-black text-sm uppercase tracking-widest transition-all duration-300 transform hover:scale-105 cursor-pointer border-none text-black"
@@ -590,37 +589,38 @@ export default function KineticCheckout({ onViewChange, cart = [], setCart, user
                                 <div className="space-y-6 mb-10 relative z-10 max-h-[320px] overflow-y-auto pr-2">
                                     {cart.map((item) => {
                                         const currentColor = item.selectedColor || item.color || (item.colorNames ? item.colorNames[0] : null);
-                                        const currentImage = (item.colorImages && currentColor && item.colorImages[currentColor]) 
-                                            ? item.colorImages[currentColor] 
+                                        const currentImage = (item.colorImages && currentColor && item.colorImages[currentColor])
+                                            ? item.colorImages[currentColor]
                                             : item.image;
-                                        
+
                                         return (
-                                        <div className="flex gap-4" key={item.cartId || item.id}>
-                                            <div
-                                                className="w-24 h-24 border overflow-hidden flex-shrink-0"
-                                                style={{ backgroundColor: C.surfaceLowest, borderColor: "rgba(255,255,255,0.05)" }}
-                                            >
-                                                <img
-                                                    className="w-full h-full object-cover"
-                                                    src={currentImage}
-                                                    alt={item.name}
-                                                />
-                                            </div>
-                                            <div className="flex-grow flex flex-col justify-between py-1">
-                                                <div>
-                                                    <h4 className="font-bold uppercase text-sm" style={{ color: C.onSurface }}>
-                                                        {item.name}
-                                                    </h4>
-                                                    <p className="text-[10px] mt-1 uppercase" style={{ color: C.onSurfaceVariant }}>
-                                                        QTY: {item.quantity} | SIZE: {item.selectedSize || item.size || "M"} | COLOR: {currentColor || "DEFAULT"}
-                                                    </p>
+                                            <div className="flex gap-4" key={item.cartId || item.id}>
+                                                <div
+                                                    className="w-24 h-24 border overflow-hidden flex-shrink-0"
+                                                    style={{ backgroundColor: C.surfaceLowest, borderColor: "rgba(255,255,255,0.05)" }}
+                                                >
+                                                    <img
+                                                        className="w-full h-full object-cover"
+                                                        src={currentImage}
+                                                        alt={item.name}
+                                                    />
                                                 </div>
-                                                <div className="font-black italic" style={{ color: C.primary }}>
-                                                    {(item.price * item.quantity).toLocaleString("th-TH")} ฿
+                                                <div className="flex-grow flex flex-col justify-between py-1">
+                                                    <div>
+                                                        <h4 className="font-bold uppercase text-sm" style={{ color: C.onSurface }}>
+                                                            {item.name}
+                                                        </h4>
+                                                        <p className="text-[10px] mt-1 uppercase" style={{ color: C.onSurfaceVariant }}>
+                                                            QTY: {item.quantity} | SIZE: {item.selectedSize || item.size || "M"} | COLOR: {currentColor || "DEFAULT"}
+                                                        </p>
+                                                    </div>
+                                                    <div className="font-black italic" style={{ color: C.primary }}>
+                                                        {(item.price * item.quantity).toLocaleString("th-TH")} ฿
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    )})}
+                                        )
+                                    })}
                                 </div>
                                 <div className="space-y-4 border-t pt-8 relative z-10" style={{ borderColor: "rgba(255,255,255,0.1)" }}>
                                     <div className="flex justify-between text-[10px]" style={{ color: C.onSurfaceVariant }}>

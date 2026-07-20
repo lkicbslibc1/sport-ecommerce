@@ -45,7 +45,7 @@ export default function GogoAthleticDashboard({ onViewChange, user, setUser }) {
 
 function DashboardInner({ onViewChange, user, setUser }) {
   const [range, setRange] = useState("daily");
-  const [currentPage, setCurrentPage] = useState(user?.role === 'employee' ? "orders" : "dashboard");
+  const [currentPage, setCurrentPage] = useState("dashboard");
   const [highlightId, setHighlightId] = useState(null);
 
   const handleNavigate = (page, targetId = null) => {
@@ -55,8 +55,8 @@ function DashboardInner({ onViewChange, user, setUser }) {
 
 // Restrict employee access
   React.useEffect(() => {
-    if (user?.role === 'employee' && !["orders", "products"].includes(currentPage)) {
-      handleNavigate("orders");
+    if (user?.role === 'employee' && !["dashboard", "orders", "products"].includes(currentPage)) {
+      handleNavigate("dashboard");
     }
   }, [user, currentPage]);
 
@@ -102,11 +102,36 @@ function DashboardInner({ onViewChange, user, setUser }) {
 
   const dynamicAlerts = useMemo(() => {
     return criticalProducts.map(p => ({
+      id: p.id,
       name: p.name,
       sku: p.sku || `GA-PROD-${p.id}`,
-      status: p.amount === 0 ? "OUT OF STOCK" : `${p.amount} LEFT`
+      status: p.amount === 0 ? "OUT OF STOCK" : `${p.amount} LEFT`,
+      image: p.image || 
+             (p.colorVariants && p.colorVariants.length > 0 ? p.colorVariants[0].image : null) || 
+             (p.colorImages && Object.values(p.colorImages).length > 0 ? Object.values(p.colorImages)[0] : null)
     })).slice(0, 5);
   }, [criticalProducts]);
+
+  // Employee Dashboard Metrics
+  const dailyNewOrders = useMemo(() => {
+    const todayStr = new Date().toLocaleDateString("en-US", {
+      month: "short", day: "2-digit", year: "numeric"
+    }).toUpperCase();
+    return ordersList.filter(o => o.date && o.date.toUpperCase() === todayStr).length;
+  }, [ordersList]);
+
+  const staleOrders = useMemo(() => {
+    const threeDaysAgo = new Date();
+    threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+    threeDaysAgo.setHours(0,0,0,0);
+    return ordersList.filter(o => {
+      if (o.status !== "Preparing") return false;
+      if (!o.date) return false;
+      const orderDate = new Date(o.date);
+      orderDate.setHours(0,0,0,0);
+      return orderDate <= threeDaysAgo;
+    });
+  }, [ordersList]);
 
   // Compute last 7 days or 7 weeks of revenue from real orders
   const chartData = useMemo(() => {
@@ -367,6 +392,79 @@ function DashboardInner({ onViewChange, user, setUser }) {
           </div>
 
           {/* BENTO GRID LAYOUT */}
+          {user?.role === 'employee' ? (
+            <div className="grid grid-cols-12 gap-6">
+              {[
+                { label: "Today's New Orders", value: dailyNewOrders.toString(), icon: ShoppingCart, trend: "Requires processing", trendColor: dailyNewOrders > 0 ? "text-orange-300" : "text-neutral-500" },
+                { label: "Stale Orders (>3 Days)", value: staleOrders.length.toString(), icon: AlertTriangle, trend: "Pending Action", trendColor: staleOrders.length > 0 ? "text-red-400" : "text-green-400" },
+                { label: "Critical Stock Alerts", value: criticalProducts.length.toString(), icon: Package, trend: "Low Inventory", trendColor: criticalProducts.length > 0 ? "text-red-400" : "text-green-400" }
+              ].map(({ label, value, icon: Icon, trend, trendColor }) => (
+                <div key={label} className="col-span-12 lg:col-span-4 relative overflow-hidden group">
+                  <GlassPanel className="p-8 relative overflow-hidden h-full cursor-pointer hover:bg-white/5 transition-colors" onClick={() => setCurrentPage(label.includes('Stock') ? 'products' : 'orders')}>
+                    <div className="relative z-10">
+                      <p className="text-[11px] text-neutral-400 uppercase tracking-widest mb-2">{label}</p>
+                      <h4 className="text-4xl italic tracking-tighter font-black mb-4">{value}</h4>
+                      <div className={"flex items-center gap-2 font-bold " + trendColor}>
+                        <span className="text-sm">{trend}</span>
+                      </div>
+                    </div>
+                    <Icon size={160} className="absolute -right-10 -bottom-10 opacity-10 scale-150 group-hover:rotate-12 transition-transform duration-700 text-neutral-500" />
+                  </GlassPanel>
+                </div>
+              ))}
+              
+              <div className="col-span-12 lg:col-span-6 flex flex-col gap-6">
+                <GlassPanel className="p-8 bg-red-950/20 border-red-500/20 flex-1">
+                  <div className="flex items-center justify-between mb-6">
+                    <h5 className="text-sm text-red-400 uppercase italic tracking-widest font-black flex items-center gap-2">
+                      <AlertTriangle size={18} className="fill-red-400/20" /> Stale Orders Action Needed
+                    </h5>
+                  </div>
+                  <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2">
+                    {staleOrders.length > 0 ? staleOrders.map(o => (
+                      <div key={o.id} onClick={() => handleNavigate('orders', o.id)} className="flex items-center justify-between py-3 px-4 -mx-4 border-b border-white/5 last:border-b-0 last:pb-3 cursor-pointer hover:bg-white/5 transition-colors rounded">
+                        <div>
+                          <p className="font-bold text-sm uppercase">{o.id} - {o.customer || o.username}</p>
+                          <p className="text-[10px] text-neutral-500">Date: {o.date}</p>
+                        </div>
+                        <span className="text-orange-300 text-[10px] font-bold underline uppercase tracking-widest">Update</span>
+                      </div>
+                    )) : <p className="text-neutral-500 text-xs italic">No stale orders.</p>}
+                  </div>
+                </GlassPanel>
+              </div>
+
+              <div className="col-span-12 lg:col-span-6 flex flex-col gap-6">
+                <GlassPanel className="p-8 bg-red-950/20 border-red-500/20 flex-1">
+                  <div className="flex items-center justify-between mb-6">
+                    <h5 className="text-sm text-red-400 uppercase italic tracking-widest font-black flex items-center gap-2">
+                      <AlertTriangle size={18} className="fill-red-400/20" /> Critical Stock Alerts
+                    </h5>
+                    <span className="text-[10px] bg-red-400 text-red-950 px-2 py-0.5 font-bold">{criticalProducts.length} SKUs</span>
+                  </div>
+                  <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2">
+                    {dynamicAlerts.length > 0 ? dynamicAlerts.map(({ id, name, sku, status, image }) => (
+                      <div key={sku} onClick={() => handleNavigate("products", id)} className="flex items-center justify-between py-3 px-4 -mx-4 border-b border-white/5 last:border-b-0 last:pb-3 cursor-pointer hover:bg-white/5 transition-colors rounded">
+                        <div className="flex items-center gap-4">
+                          <div className="w-16 h-16 bg-white/5 border border-white/10 shrink-0 flex items-center justify-center overflow-hidden p-2 rounded">
+                             {image ? <img src={image.startsWith('http') ? image : `/${image}`} alt={name} className="w-full h-full object-contain" /> : <Package size={24} className="text-neutral-600" />}
+                          </div>
+                          <div>
+                            <p className="font-bold text-sm uppercase">{name}</p>
+                            <p className="text-[10px] text-neutral-500">SKU: {sku}</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-red-400 font-black">{status}</p>
+                          <span className="text-orange-300 text-[10px] font-bold underline uppercase tracking-widest">Restock</span>
+                        </div>
+                      </div>
+                    )) : <p className="text-neutral-500 text-xs italic">All stock levels normal.</p>}
+                  </div>
+                </GlassPanel>
+              </div>
+            </div>
+          ) : (
           <div className="grid grid-cols-12 gap-6">
             {/* KPI CARDS */}
             {[
@@ -507,23 +605,26 @@ function DashboardInner({ onViewChange, user, setUser }) {
                 </div>
                 <div className="space-y-4">
                   {dynamicAlerts.length > 0 ? (
-                    dynamicAlerts.map(({ name, sku, status }) => (
+                    dynamicAlerts.map(({ id, name, sku, status, image }) => (
                       <div
                         key={sku}
-                        className="flex items-center justify-between py-3 border-b border-white/5 last:border-b-0 last:pb-0"
+                        onClick={() => handleNavigate("products", id)}
+                        className="flex items-center justify-between py-3 px-4 -mx-4 border-b border-white/5 last:border-b-0 last:pb-3 cursor-pointer hover:bg-white/5 transition-colors rounded"
                       >
-                        <div>
-                          <p className="font-bold text-sm uppercase">{name}</p>
-                          <p className="text-[10px] text-neutral-500">SKU: {sku}</p>
+                        <div className="flex items-center gap-4">
+                          <div className="w-16 h-16 bg-white/5 border border-white/10 shrink-0 flex items-center justify-center overflow-hidden p-2 rounded">
+                             {image ? <img src={image.startsWith('http') ? image : `/${image}`} alt={name} className="w-full h-full object-contain" /> : <Package size={24} className="text-neutral-600" />}
+                          </div>
+                          <div>
+                            <p className="font-bold text-sm uppercase">{name}</p>
+                            <p className="text-[10px] text-neutral-500">SKU: {sku}</p>
+                          </div>
                         </div>
                         <div className="text-right">
                           <p className="text-red-400 font-black">{status}</p>
-<button
-                            onClick={() => setCurrentPage("products")}
-                            className="text-orange-300 text-[10px] font-bold underline uppercase tracking-widest"
-                        >
+                          <span className="text-orange-300 text-[10px] font-bold underline uppercase tracking-widest">
                             Restock
-                        </button>
+                          </span>
                         </div>
                       </div>
                     ))
@@ -557,7 +658,7 @@ function DashboardInner({ onViewChange, user, setUser }) {
                     <div key={rank} className="group">
                       <div className="relative aspect-square bg-neutral-900 overflow-hidden mb-4 border border-white/5 transition-all duration-500 group-hover:border-orange-300/50 flex items-center justify-center">
                         {image ? (
-                          <img src={image} className="w-full h-full object-cover group-hover:scale-110 duration-700 transition-transform" alt={name} />
+                          <img src={image.startsWith('http') ? image : `/${image}`} className="w-full h-full object-cover group-hover:scale-110 duration-700 transition-transform" alt={name} />
                         ) : (
                           <Boxes
                             size={72}
@@ -596,6 +697,7 @@ function DashboardInner({ onViewChange, user, setUser }) {
               </GlassPanel>
             </div>
           </div>
+          )}
         </main>
       </div>
 
