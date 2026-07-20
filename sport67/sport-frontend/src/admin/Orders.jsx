@@ -144,6 +144,12 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange, user, set
       }).join('')
       : '<tr><td colspan="4" style="text-align: center; padding: 12px;">No items</td></tr>';
 
+    const subtotal = order.items ? order.items.reduce((sum, item) => {
+      const p = parseFloat((item.price || "0").replace(/,/g, '').replace(' ฿', '')) || 0;
+      return sum + (p * item.qty);
+    }, 0) : 0;
+    const tax = subtotal * 0.07;
+
     const html = `
       <!DOCTYPE html>
       <html>
@@ -205,6 +211,14 @@ export default function GogoAthleticOrders({ onNavigate, onViewChange, user, set
         </table>
 
         <div class="totals">
+          <div class="total-row">
+            <span>Subtotal</span>
+            <span>${subtotal.toLocaleString("th-TH")} ฿</span>
+          </div>
+          <div class="total-row">
+            <span>VAT (7%)</span>
+            <span>${tax.toLocaleString("th-TH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ฿</span>
+          </div>
           <div class="total-row">
             <span>Shipping</span>
             <span>${order.shippingCost > 0 ? order.shippingCost.toLocaleString("th-TH") + ' ฿' : 'Free'}</span>

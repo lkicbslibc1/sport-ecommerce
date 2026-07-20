@@ -284,6 +284,15 @@
   ],
   "__employee__": [
     {
+      "id": "noti_1784559815112_mb42h",
+      "timestamp": "2026-07-20T15:03:35.112Z",
+      "read": false,
+      "type": "low_stock",
+      "title": "⚠️ สินค้าใกล้หมด Stock!",
+      "message": "\"roblox guy\" เหลือแค่ 2 ชิ้น",
+      "productId": 19
+    },
+    {
       "id": "noti_1784532238783_sug73",
       "timestamp": "2026-07-20T07:23:58.783Z",
       "read": false,
@@ -501,6 +510,15 @@
     }
   ],
   "__manager__": [
+    {
+      "id": "noti_1784559815112_517w2",
+      "timestamp": "2026-07-20T15:03:35.112Z",
+      "read": false,
+      "type": "low_stock",
+      "title": "⚠️ สินค้าใกล้หมด Stock!",
+      "message": "\"roblox guy\" เหลือแค่ 2 ชิ้น",
+      "productId": 19
+    },
     {
       "id": "noti_1784532210632_slsx5",
       "timestamp": "2026-07-20T07:23:30.632Z",
