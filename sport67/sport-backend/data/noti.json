@@ -284,6 +284,33 @@
   ],
   "__employee__": [
     {
+      "id": "noti_1784532238783_sug73",
+      "timestamp": "2026-07-20T07:23:58.783Z",
+      "read": false,
+      "type": "product_update",
+      "action": "deleted",
+      "title": "🔴 Manager ลบสินค้า",
+      "message": "\"miracle shoe\" ถูกลบโดย Manager\nรายละเอียด: ลบสินค้าออกจากระบบ"
+    },
+    {
+      "id": "noti_1784532210632_bxeye",
+      "timestamp": "2026-07-20T07:23:30.632Z",
+      "read": false,
+      "type": "low_stock",
+      "title": "⚠️ สินค้าใกล้หมด Stock!",
+      "message": "\"miracle shoe\" เหลือแค่ 2 ชิ้น",
+      "productId": 20
+    },
+    {
+      "id": "noti_1784532205689_7y6qo",
+      "timestamp": "2026-07-20T07:23:25.689Z",
+      "read": false,
+      "type": "product_update",
+      "action": "added",
+      "title": "🟢 Manager เพิ่มสินค้า",
+      "message": "\"miracle shoe\" ถูกเพิ่มโดย Manager\nรายละเอียด: เพิ่มสินค้าใหม่เข้าสู่ระบบ"
+    },
+    {
       "id": "noti_1784531244415_qwyb0",
       "timestamp": "2026-07-20T07:07:24.415Z",
       "read": false,
@@ -475,6 +502,15 @@
   ],
   "__manager__": [
     {
+      "id": "noti_1784532210632_slsx5",
+      "timestamp": "2026-07-20T07:23:30.632Z",
+      "read": false,
+      "type": "low_stock",
+      "title": "⚠️ สินค้าใกล้หมด Stock!",
+      "message": "\"miracle shoe\" เหลือแค่ 2 ชิ้น",
+      "productId": 20
+    },
+    {
       "id": "noti_1784531244415_06fb0",
       "timestamp": "2026-07-20T07:07:24.415Z",
       "read": false,
@@ -659,6 +695,13 @@
     }
   ],
   "testuat": [
+    {
+      "id": "#GOGO-243827",
+      "date": "JUL 20, 2026",
+      "title": "Order status updated",
+      "status": "Delivered",
+      "read": false
+    },
     {
       "id": "#GOGO-243827",
       "date": "JUL 20, 2026",

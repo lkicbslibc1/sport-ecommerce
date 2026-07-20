@@ -17,7 +17,7 @@
     "shippingCost": 250,
     "date": "JUL 20, 2026",
     "total": 19242.5,
-    "status": "Preparing",
+    "status": "Delivered",
     "items": [
       {
         "id": 3,
@@ -27,7 +27,8 @@
         "sku": "GA-RN-2024-003",
         "qty": 3,
         "price": "1,800 ฿",
-        "image": "image/puma03Y.png"
+        "image": "image/puma03Y.png",
+        "reviewed": true
       },
       {
         "id": 5,
