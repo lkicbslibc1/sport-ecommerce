@@ -173,46 +173,233 @@
 
 ## 16. System Architecture
 
-สถาปัตยกรรมของระบบ (System Architecture) ถูกออกแบบในรูปแบบ **Client-Server Architecture** โดยเน้นความเรียบง่ายซึ่งมีการเก็บข้อมูลในรูปแบบไฟล์ JSON
+สถาปัตยกรรมของระบบ (System Architecture) ถูกออกแบบในรูปแบบ **Client-Server Architecture** แบ่งออกเป็น 2 ชั้นหลัก ได้แก่ **Frontend** (React + Vite) และ **Backend** (Node.js + Express) โดยใช้ **JSON File-based Storage** เป็นฐานข้อมูล
+
+---
+
+### 16.1 ภาพรวม System Architecture
 
 ```mermaid
 flowchart TB
-    subgraph Client ["🖥️ 1. Presentation Tier (Frontend)"]
-        direction TB
-        React["React.js (UI Components)"]
-        State["State Management"]
-        Axios["API Client (Axios/Fetch)"]
-        React --> State
-        State --> Axios
-        style React fill:#61dafb,stroke:#333,stroke-width:2px,color:#000
+    subgraph Browser ["🌐 Browser (User)"]
+        direction LR
+        Customer["👤 Customer"]
+        Staff["🧑‍💻 Staff"]
+        Manager["👔 Manager"]
     end
 
-    subgraph Server ["⚙️ 2. Logic & Data Tier (Backend API)"]
+    subgraph Frontend ["🖥️ Frontend — React 19 + Vite 8"]
         direction TB
-        Express["Node.js + Express.js Server"]
-        Upload["File Storage (Images/Slips)"]
-        JSONDB["JSON File System (Database)"]
-        
-        Express --> Upload
-        Express --> JSONDB
-        style Express fill:#339933,stroke:#333,stroke-width:2px,color:#fff
-        style JSONDB fill:#e8a838,stroke:#333,stroke-width:2px,color:#000
+
+        subgraph Pages ["Pages / Views"]
+            PG1["homepage.jsx\n(Product Listing, Brand Filter)"]
+            PG2["login.jsx\n(Auth & Role Detection)"]
+            PG3["navbar.jsx\n(Navigation + Cart Badge)"]
+            PG4["shopping/all_products.jsx\n(Browse & Filter)"]
+            PG5["shopping/product_details.jsx\n(Detail + Add to Cart)"]
+            PG6["bag/gogobag.jsx\n(Cart Management)"]
+            PG7["checkout/KineticCheckout.jsx\n(Checkout Flow)"]
+            PG8["profile/profile.jsx\n(User Profile & Address)"]
+            PG9["profile/OrderStatus.jsx\n(Order Tracking)"]
+            PG10["brand/nike.jsx\nbrand/adidas.jsx\nbrand/puma.jsx\n(Brand Pages)"]
+        end
+
+        subgraph AdminPages ["Admin Pages"]
+            ADM1["admin/dashboard.jsx\n(Sales Dashboard)"]
+            ADM2["admin/Products.jsx\n(Product Management)"]
+            ADM3["admin/Orders.jsx\n(Order Management)"]
+            ADM4["admin/Team.jsx\n(User Management)"]
+            ADM5["admin/Sidebar.jsx\n(Admin Navigation)"]
+            ADM6["admin/NotificationPanel.jsx\n(Notification Bell)"]
+        end
+
+        subgraph Contexts ["React Contexts (Global State)"]
+            CTX1["AlertContext\n(Global Toast / Modal Alert)"]
+            CTX2["NotificationContext\n(Polling: 30s noti / 5min stock check)"]
+        end
+
+        FetchAPI["Fetch API\n(Native HTTP Client)"]
     end
 
-    %% Flow connections
-    Client -- "HTTP Requests (REST API)" --> Server
-    Server -- "JSON Responses" --> Client
+    subgraph Backend ["⚙️ Backend — Node.js + Express 5"]
+        direction TB
+
+        subgraph API ["REST API Routes"]
+            R1["GET /api/:resource\n(Read JSON data)"]
+            R2["POST /api/:resource\n(Overwrite JSON data)"]
+            R3["POST /api/upload\n(Base64 → Image file)"]
+            R4["GET /\n(Health check)"]
+        end
+
+        subgraph FileSystem ["📁 File-Based Storage"]
+            DB1["data/users.json\n(users + roles)"]
+            DB2["data/products.json\n(product catalog)"]
+            DB3["data/orders.json\n(order records)"]
+            DB4["data/cart.json\n(cart items)"]
+            DB5["data/addresses.json\n(delivery addresses)"]
+            DB6["data/noti.json\n(__manager__ / __employee__)"]
+            DB7["data/reviews.json\n(product reviews)"]
+            IMG["sport-frontend/public/image/\n(uploaded product images)"]
+        end
+    end
+
+    Browser --> Frontend
+    Frontend --> FetchAPI
+    FetchAPI -- "HTTP REST (localhost:5000)" --> API
+    API --> FileSystem
+    FileSystem --> API
+    API --> FetchAPI
 ```
 
-### รายละเอียดการทำงานแต่ละส่วน:
-1. **Presentation Tier (Frontend):** 
-   - พัฒนาด้วย **React** สำหรับการสร้าง Interactive UI ที่ตอบสนองรวดเร็ว
-   - มีการจัดการสถานะ (State) ภายในแอปพลิเคชัน
-   - สื่อสารกับหลังบ้านผ่าน API Client
-2. **Logic & Data Tier (Backend API):**
-   - พัฒนาด้วย **Node.js** และ **Express.js** สร้างเป็น RESTful API
-   - **File Storage:** บริหารจัดการการอัปโหลดไฟล์รูปภาพสินค้าและสลิปการโอนเงิน
-   - **Database (JSON):** ระบบฐานข้อมูลใช้การอ่านและเขียนไฟล์ในรูปแบบ **JSON** โดยตรง (File-based storage) โดยไม่ได้ใช้ ORM หรือฐานข้อมูลเชิงสัมพันธ์ เพื่อความเรียบง่ายและลดความซับซ้อน
+---
+
+### 16.2 Frontend Architecture
+
+| ส่วนประกอบ | เทคโนโลยี | รายละเอียด |
+|---|---|---|
+| **UI Framework** | React 19 | Component-based UI, Hooks |
+| **Build Tool** | Vite 8 | Fast HMR, ESM bundling |
+| **Styling** | TailwindCSS 3 | Utility-first CSS, Responsive Design |
+| **Icons** | Lucide React | SVG icon set |
+| **HTTP Client** | Fetch API (native) | ไม่ใช้ Axios — ใช้ `fetch()` ของ browser โดยตรง |
+| **State Management** | React Context API | `AlertContext`, `NotificationContext` |
+| **Routing** | State-based (no router) | การเปลี่ยนหน้าใช้ React state ภายใน `homepage.jsx` |
+
+#### โครงสร้างโฟลเดอร์ Frontend
+
+```
+sport-frontend/src/
+├── main.jsx                  ← Entry point (wraps AlertProvider)
+├── App.jsx                   ← App root
+├── homepage.jsx              ← Main page controller (state-based routing)
+├── navbar.jsx                ← Top navigation + cart badge
+├── login.jsx                 ← Login & Register form
+├── index.css                 ← Global styles
+│
+├── shopping/
+│   ├── all_products.jsx      ← Browse & filter all products
+│   └── product_details.jsx  ← Product detail + Add to cart
+│
+├── bag/
+│   └── gogobag.jsx          ← Shopping cart management
+│
+├── checkout/
+│   └── KineticCheckout.jsx  ← Multi-step checkout flow
+│
+├── profile/
+│   ├── profile.jsx          ← User profile & address book
+│   └── OrderStatus.jsx      ← Order history & tracking
+│
+├── brand/
+│   ├── nike.jsx             ← Nike brand page
+│   ├── adidas.jsx           ← Adidas brand page
+│   └── puma.jsx             ← Puma brand page
+│
+├── admin/
+│   ├── dashboard.jsx        ← Sales dashboard (chart + low stock alert)
+│   ├── Products.jsx         ← CRUD product management
+│   ├── Orders.jsx           ← Order management + status update
+│   ├── Team.jsx             ← User/staff management
+│   ├── Sidebar.jsx          ← Admin sidebar navigation
+│   └── NotificationPanel.jsx ← Notification bell panel
+│
+└── contexts/
+    ├── AlertContext.jsx      ← Global modal alert (info/success/error/warning)
+    └── NotificationContext.jsx ← Polling-based notification system
+```
+
+---
+
+### 16.3 Backend Architecture
+
+| ส่วนประกอบ | เทคโนโลยี | รายละเอียด |
+|---|---|---|
+| **Runtime** | Node.js (ES Module) | `"type": "module"` |
+| **Framework** | Express 5 | RESTful API server |
+| **Port** | 5000 | `http://localhost:5000` |
+| **CORS** | cors package | อนุญาต cross-origin จาก frontend |
+| **Storage** | JSON File System | อ่าน/เขียนไฟล์ `.json` โดยตรง (ไม่มี ORM/DB) |
+| **Image Upload** | Base64 → Binary file | บันทึกรูปลง `sport-frontend/public/image/` |
+
+#### API Endpoints
+
+| Method | Endpoint | หน้าที่ |
+|---|---|---|
+| `GET` | `/api/products` | ดึงรายการสินค้าทั้งหมด |
+| `POST` | `/api/products` | บันทึกข้อมูลสินค้า (overwrite) |
+| `GET` | `/api/orders` | ดึงรายการออเดอร์ทั้งหมด |
+| `POST` | `/api/orders` | บันทึกออเดอร์ (overwrite) |
+| `GET` | `/api/users` | ดึงข้อมูลผู้ใช้ |
+| `POST` | `/api/users` | บันทึกข้อมูลผู้ใช้ |
+| `GET` | `/api/cart` | ดึงข้อมูลตะกร้า |
+| `POST` | `/api/cart` | บันทึกข้อมูลตะกร้า |
+| `GET` | `/api/addresses` | ดึงที่อยู่จัดส่ง |
+| `POST` | `/api/addresses` | บันทึกที่อยู่จัดส่ง |
+| `GET` | `/api/noti` | ดึงการแจ้งเตือน (manager/employee) |
+| `POST` | `/api/noti` | บันทึกการแจ้งเตือน |
+| `GET` | `/api/reviews` | ดึงรีวิวสินค้า |
+| `POST` | `/api/reviews` | บันทึกรีวิวสินค้า |
+| `POST` | `/api/upload` | อัปโหลดรูปสินค้า (Base64) |
+| `GET` | `/` | Health check |
+
+---
+
+### 16.4 Data Flow Diagram
+
+```mermaid
+sequenceDiagram
+    participant U as 👤 User (Browser)
+    participant FE as React Frontend
+    participant BE as Express Backend
+    participant FS as JSON Files
+
+    U->>FE: กดสั่งซื้อสินค้า
+    FE->>BE: GET /api/products (ดึงสต็อก)
+    BE->>FS: อ่าน products.json
+    FS-->>BE: ข้อมูลสินค้า
+    BE-->>FE: JSON Response
+    FE->>FE: ตรวจสอบสต็อกเพียงพอ
+    FE->>BE: POST /api/orders (บันทึกออเดอร์)
+    BE->>FS: เขียน orders.json
+    FE->>BE: POST /api/products (ตัดสต็อก)
+    BE->>FS: เขียน products.json
+    FE->>BE: POST /api/noti (แจ้งพนักงาน)
+    BE->>FS: เขียน noti.json
+    FE-->>U: แสดงผลสำเร็จ
+```
+
+---
+
+### 16.5 Notification System
+
+ระบบแจ้งเตือน (Notification) ทำงานแบบ **Polling** ผ่าน `NotificationContext`:
+
+```mermaid
+flowchart LR
+    NC["NotificationContext"]
+    NC -- "ทุก 30 วินาที" --> FetchNoti["GET /api/noti\n(รีเฟรชรายการแจ้งเตือน)"]
+    NC -- "ทุก 5 นาที" --> CheckStock["ตรวจสอบสินค้าสต็อกต่ำ\n(Low Stock Alert)"]
+    NC -- "ทุก 5 นาที" --> CheckOrders["ตรวจสอบออเดอร์ค้างนาน\n(Stale Order Alert)"]
+    FetchNoti --> NotiPanel["NotificationPanel.jsx\n(Bell Icon + Badge)"]
+    CheckStock --> NotiPanel
+    CheckOrders --> NotiPanel
+```
+
+| การแจ้งเตือน | เงื่อนไข | ผู้รับ |
+|---|---|---|
+| **Low Stock Alert** | สินค้าเหลือน้อยกว่า threshold | Manager, Employee |
+| **Stale Order Alert** | ออเดอร์ไม่ได้อัปเดตนาน > 3 วัน | Manager, Employee |
+| **New Order** | มีคำสั่งซื้อใหม่เข้ามา | Employee |
+
+---
+
+### 16.6 User Role & Access Control
+
+| Role | หน้าที่สามารถเข้าถึง |
+|---|---|
+| **Customer** | Homepage, Product Browse, Cart, Checkout, Profile, Order Status |
+| **Employee (Staff)** | Admin Dashboard, Orders (update status), Notification |
+| **Manager** | Admin Dashboard, Products (CRUD), Orders, Team Management, Notification |
 ## 17. Data schema
 ![schema](img/schema1.png)
 ![schema2](img/schema2.png)
