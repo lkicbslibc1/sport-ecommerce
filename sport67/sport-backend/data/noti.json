@@ -1,4 +1,22 @@
 {
+  "6": [
+    {
+      "id": "#GOGO-555661",
+      "date": "JUL 21, 2026",
+      "title": "Purchase successful!",
+      "status": "Preparing",
+      "read": false
+    }
+  ],
+  "12": [
+    {
+      "id": "#GOGO-173987",
+      "date": "JUL 21, 2026",
+      "title": "Purchase successful!",
+      "status": "Preparing",
+      "read": true
+    }
+  ],
   "4444": [
     {
       "id": "#GOGO-764396",
@@ -284,6 +302,60 @@
   ],
   "__employee__": [
     {
+      "id": "noti_1784608368208_mazc3",
+      "timestamp": "2026-07-21T04:32:48.208Z",
+      "read": false,
+      "type": "new_order",
+      "title": "🛒 ออเดอร์ใหม่เข้ามาแล้ว!",
+      "message": "Order #GOGO-173987 จาก หำเดะห ฟหกดฟห — ฿4,102",
+      "orderId": "#GOGO-173987"
+    },
+    {
+      "id": "noti_1784606525301_pay11",
+      "timestamp": "2026-07-21T04:02:05.301Z",
+      "read": false,
+      "type": "new_order",
+      "title": "🛒 ออเดอร์ใหม่เข้ามาแล้ว!",
+      "message": "Order #GOGO-555661 จาก หำเดะห ฟหกดฟห — ฿52,162.5",
+      "orderId": "#GOGO-555661"
+    },
+    {
+      "id": "noti_1784606039370_h1ecj",
+      "timestamp": "2026-07-21T03:53:59.369Z",
+      "read": false,
+      "type": "stale_order",
+      "title": "⏰ ออเดอร์ค้างนานกว่า 3 วัน!",
+      "message": "Order #GOGO-386043 (Tongmen JaiSaard) ยังเป็น \"Shipped\" — ไม่ได้รับการอัปเดตมากกว่า 3 วัน",
+      "orderId": "#GOGO-386043"
+    },
+    {
+      "id": "noti_1784606039370_eo76e",
+      "timestamp": "2026-07-21T03:53:59.369Z",
+      "read": false,
+      "type": "stale_order",
+      "title": "⏰ ออเดอร์ค้างนานกว่า 3 วัน!",
+      "message": "Order #GOGO-499219 (Tongmen JaiSaard) ยังเป็น \"Shipped\" — ไม่ได้รับการอัปเดตมากกว่า 3 วัน",
+      "orderId": "#GOGO-499219"
+    },
+    {
+      "id": "noti_1784606039370_ipy7t",
+      "timestamp": "2026-07-21T03:53:59.369Z",
+      "read": false,
+      "type": "stale_order",
+      "title": "⏰ ออเดอร์ค้างนานกว่า 3 วัน!",
+      "message": "Order #GOGO-708136 (Tongmen JaiSaard) ยังเป็น \"Preparing\" — ไม่ได้รับการอัปเดตมากกว่า 3 วัน",
+      "orderId": "#GOGO-708136"
+    },
+    {
+      "id": "noti_1784606039354_g9ctv",
+      "timestamp": "2026-07-21T03:53:59.354Z",
+      "read": false,
+      "type": "low_stock",
+      "title": "⚠️ สินค้าใกล้หมด Stock!",
+      "message": "\"roblox guy\" เหลือแค่ 2 ชิ้น",
+      "productId": 19
+    },
+    {
       "id": "noti_1784559815112_mb42h",
       "timestamp": "2026-07-20T15:03:35.112Z",
       "read": false,
@@ -510,6 +582,60 @@
     }
   ],
   "__manager__": [
+    {
+      "id": "noti_1784608368208_mazc3",
+      "timestamp": "2026-07-21T04:32:48.208Z",
+      "read": false,
+      "type": "new_order",
+      "title": "🛒 ออเดอร์ใหม่เข้ามาแล้ว!",
+      "message": "Order #GOGO-173987 จาก หำเดะห ฟหกดฟห — ฿4,102",
+      "orderId": "#GOGO-173987"
+    },
+    {
+      "id": "noti_1784606525301_pay11",
+      "timestamp": "2026-07-21T04:02:05.301Z",
+      "read": false,
+      "type": "new_order",
+      "title": "🛒 ออเดอร์ใหม่เข้ามาแล้ว!",
+      "message": "Order #GOGO-555661 จาก หำเดะห ฟหกดฟห — ฿52,162.5",
+      "orderId": "#GOGO-555661"
+    },
+    {
+      "id": "noti_1784606039370_bf4qw",
+      "timestamp": "2026-07-21T03:53:59.369Z",
+      "read": false,
+      "type": "stale_order",
+      "title": "⏰ ออเดอร์ค้างนานกว่า 3 วัน!",
+      "message": "Order #GOGO-386043 (Tongmen JaiSaard) ยังเป็น \"Shipped\" — ไม่ได้รับการอัปเดตมากกว่า 3 วัน",
+      "orderId": "#GOGO-386043"
+    },
+    {
+      "id": "noti_1784606039370_girth",
+      "timestamp": "2026-07-21T03:53:59.369Z",
+      "read": false,
+      "type": "stale_order",
+      "title": "⏰ ออเดอร์ค้างนานกว่า 3 วัน!",
+      "message": "Order #GOGO-499219 (Tongmen JaiSaard) ยังเป็น \"Shipped\" — ไม่ได้รับการอัปเดตมากกว่า 3 วัน",
+      "orderId": "#GOGO-499219"
+    },
+    {
+      "id": "noti_1784606039370_aermg",
+      "timestamp": "2026-07-21T03:53:59.369Z",
+      "read": false,
+      "type": "stale_order",
+      "title": "⏰ ออเดอร์ค้างนานกว่า 3 วัน!",
+      "message": "Order #GOGO-708136 (Tongmen JaiSaard) ยังเป็น \"Preparing\" — ไม่ได้รับการอัปเดตมากกว่า 3 วัน",
+      "orderId": "#GOGO-708136"
+    },
+    {
+      "id": "noti_1784606039354_y2kij",
+      "timestamp": "2026-07-21T03:53:59.354Z",
+      "read": false,
+      "type": "low_stock",
+      "title": "⚠️ สินค้าใกล้หมด Stock!",
+      "message": "\"roblox guy\" เหลือแค่ 2 ชิ้น",
+      "productId": 19
+    },
     {
       "id": "noti_1784559815112_517w2",
       "timestamp": "2026-07-20T15:03:35.112Z",

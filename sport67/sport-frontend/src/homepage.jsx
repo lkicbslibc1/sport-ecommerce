@@ -106,6 +106,7 @@ function MainPageContent() {
 
   const [cart, setCart] = useState([]);
   const [isCartLoaded, setIsCartLoaded] = useState(false);
+  const [orders, setOrders] = useState([]);
 
   // When user changes (login / logout), load that user's cart from API
   useEffect(() => {
@@ -126,6 +127,66 @@ function MainPageContent() {
     setIsCartLoaded(false);
     fetchCart();
   }, [user]);
+
+  // Load orders for trending products calculation
+  useEffect(() => {
+    async function fetchOrders() {
+      try {
+        const res = await fetch('http://localhost:5000/api/orders');
+        if (res.ok) {
+          const data = await res.json();
+          setOrders(data || []);
+        }
+      } catch (err) {
+        console.error("Failed to fetch orders:", err);
+      }
+    }
+    fetchOrders();
+  }, []);
+
+  // Calculate trending fashion products based on order count
+  const filteredTrendingProducts = React.useMemo(() => {
+    // Calculate order count for each product
+    const productOrderCount = {};
+    
+    orders.forEach(order => {
+      if (order.status !== 'Cancelled' && order.items) {
+        order.items.forEach(item => {
+          const productId = item.id || item.sku;
+          if (productId) {
+            if (!productOrderCount[productId]) {
+              productOrderCount[productId] = 0;
+            }
+            productOrderCount[productId] += item.qty || 1;
+          }
+        });
+      }
+    });
+
+    // Create product lookup by id and sku
+    const productMap = {};
+    (products || []).forEach(p => {
+      productMap[p.id] = p;
+      if (p.sku) productMap[p.sku] = p;
+    });
+
+    // Filter fashion products (clothes) and sort by order count
+    return (products || [])
+      .filter(product => {
+        // Filter by target group
+        if (activeCategory === 'men' && product.targetGroup !== 'men') return false;
+        if (activeCategory === 'women' && product.targetGroup !== 'women') return false;
+        if (activeCategory === 'kids' && product.targetGroup !== 'kid') return false;
+        // Filter only fashion products (clothes)
+        return product.productType === 'clothes';
+      })
+      .map(product => ({
+        ...product,
+        orderCount: productOrderCount[product.id] || productOrderCount[product.sku] || 0
+      }))
+      .sort((a, b) => b.orderCount - a.orderCount)
+      .slice(0, 4);
+  }, [products, orders, activeCategory]);
 
   // Save cart to the global cart object under current user's name
   useEffect(() => {
@@ -241,14 +302,6 @@ function MainPageContent() {
     const finalOrderId = orderId === 'order_status' ? null : orderId;
     return <OrderStatus onViewChange={setCurrentView} user={user} setUser={setUser} cart={cart} orderId={finalOrderId} />;
   }
-  const filteredTrendingProducts = (products || [])
-    .filter(product => {
-      if (activeCategory === 'men') return product.targetGroup === 'men';
-      if (activeCategory === 'women') return product.targetGroup === 'women';
-      if (activeCategory === 'kids') return product.targetGroup === 'kid';
-      return false;
-    })
-    .slice(0, 4);
 
   return (
     <div className="selection:bg-primary selection:text-white min-h-screen bg-background text-on-background">
@@ -473,9 +526,16 @@ function MainPageContent() {
                     <h5 className="text-xs font-bold uppercase tracking-widest line-clamp-2 min-h-[32px] group-hover:text-primary transition-colors duration-300">{product.name}</h5>
                   </div>
                   <div className="mt-4 pt-4 border-t border-white/5 flex items-center justify-between">
-                    <p className="text-sm font-anybody font-black text-primary italic">
-                      {product.price.toLocaleString("th-TH", { minimumFractionDigits: 2 })} ฿ THB
-                    </p>
+                    <div>
+                      <p className="text-sm font-anybody font-black text-primary italic">
+                        {product.price.toLocaleString("th-TH", { minimumFractionDigits: 2 })} ฿ THB
+                      </p>
+                      {product.orderCount > 0 && (
+                        <p className="text-[10px] text-neutral-500 uppercase tracking-widest mt-1">
+                          สั่งซื้อแล้ว {product.orderCount.toLocaleString("th-TH")} ชิ้น
+                        </p>
+                      )}
+                    </div>
                     <span className="material-symbols-outlined text-sm text-gray-500 group-hover:text-primary transition-colors">arrow_forward</span>
                   </div>
                 </div>
