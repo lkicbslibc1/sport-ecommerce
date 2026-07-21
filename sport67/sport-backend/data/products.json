@@ -318,7 +318,7 @@
     "sportType": "Football",
     "targetGroup": "men",
     "fabricMaterial": "waffle",
-    "amount": 873,
+    "amount": 798,
     "review": 4.7,
     "description": "Anti-slip athletic grip socks with targeted cushioning.",
     "sku": "GA-RN-2024-005",
@@ -330,7 +330,7 @@
         "image": "https://www.prodirectsport.com/cdn/shop/files/173121_main.jpg?v=1784382886&width=2000",
         "amount": 0,
         "stock": {
-          "S": 75,
+          "S": 0,
           "M": 75,
           "L": 75,
           "XL": 75
@@ -838,7 +838,7 @@
     "sportType": "Football",
     "targetGroup": "men",
     "fabricMaterial": "polyester",
-    "amount": 67,
+    "amount": 65,
     "review": 4.5,
     "description": "Train like the pros in these moisture-wicking football pants.",
     "sku": "PM-FB-2024-012",

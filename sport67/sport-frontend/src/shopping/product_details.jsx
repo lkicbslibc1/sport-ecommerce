@@ -8,9 +8,23 @@ function formatPrice(n) {
 }
 
 export default function ProductDetails({ onViewChange, product, user, setUser, cart, addToCart }) {
+  // All hooks must be called before any early return
+  const [reviews, setReviews] = useState({});
+  
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+
+  useEffect(() => {
+    async function fetchReviews() {
+      const data = await getStoredReviews();
+      if (data) setReviews(data);
+    }
+    fetchReviews();
+  }, []);
+
+  // Early return after all hooks are called
+  if (!product) return null;
 
   // Use colorVariants if present, fall back to legacy colorNames
   const colorVariants = product?.colorVariants || [];
@@ -24,8 +38,6 @@ export default function ProductDetails({ onViewChange, product, user, setUser, c
   const [quantity, setQuantity] = useState(1);
   const [showLoginPopup, setShowLoginPopup] = useState(false);
 
-  if (!product) return null;
-
   // Get image for currently selected color
   const currentImage = hasVariants
     ? getVariantImage(product, selectedColor)
@@ -35,16 +47,6 @@ export default function ProductDetails({ onViewChange, product, user, setUser, c
   const currentStock = hasVariants
     ? getVariantStock(product, selectedColor, selectedSize)
     : product.amount;
-
-  const [reviews, setReviews] = useState({});
-
-  useEffect(() => {
-    async function fetchReviews() {
-      const data = await getStoredReviews();
-      if (data) setReviews(data);
-    }
-    fetchReviews();
-  }, []);
 
   const productReviews = reviews[product?.id] || [];
 
