@@ -48,6 +48,9 @@ function DashboardInner({ onViewChange, user, setUser }) {
   const [currentPage, setCurrentPage] = useState("dashboard");
   const [highlightId, setHighlightId] = useState(null);
 
+  // Get notifications context at the top - must be before any early returns
+  const { unreadCount, setPanelOpen } = useNotifications();
+
   const handleNavigate = (page, targetId = null) => {
     setCurrentPage(page);
     setHighlightId(targetId);
@@ -204,7 +207,7 @@ function DashboardInner({ onViewChange, user, setUser }) {
 
   // Best Sellers - calculated from real order data
   const bestSellers = useMemo(() => {
-    // Calculate revenue from actual orders
+    // Calculate quantity from actual orders
     const productRevenue = {};
     
     ordersList.forEach(order => {
@@ -237,7 +240,7 @@ function DashboardInner({ onViewChange, user, setUser }) {
       if (p.sku) productMap[p.sku] = p;
     });
     
-    // Sort products by revenue and get top 4
+    // Sort products by quantity and get top 4
     const sortedProducts = Object.entries(productRevenue)
       .map(([key, data]) => {
         const product = productMap[key];
@@ -251,14 +254,14 @@ function DashboardInner({ onViewChange, user, setUser }) {
         return null;
       })
       .filter(Boolean)
-      .sort((a, b) => b.totalRevenue - a.totalRevenue)
+      .sort((a, b) => b.totalQty - a.totalQty)
       .slice(0, 4);
     
     return sortedProducts.map((item, idx) => ({
       rank: idx + 1,
       name: item.product.name,
       series: item.product.series || item.product.description || "Core Technical Gear",
-      revenue: item.totalRevenue.toLocaleString("th-TH") + " ฿",
+      quantity: item.totalQty.toLocaleString("th-TH") + " ชิ้น",
       image: item.product.image,
       rankBg: idx === 0
         ? "bg-orange-300 text-neutral-950"
@@ -269,8 +272,6 @@ function DashboardInner({ onViewChange, user, setUser }) {
             : "bg-neutral-700 text-neutral-100"
     }));
   }, [products, ordersList]);
-
-  const { unreadCount, setPanelOpen } = useNotifications();
 
   if (currentPage === "orders") {
     return <GogoAthleticOrders onNavigate={handleNavigate} onViewChange={onViewChange} user={user} setUser={setUser} highlightId={highlightId} />;
@@ -654,7 +655,7 @@ function DashboardInner({ onViewChange, user, setUser }) {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                  {bestSellers.map(({ rank, name, series, revenue, image, rankBg }) => (
+                  {bestSellers.map(({ rank, name, series, quantity, image, rankBg }) => (
                     <div key={rank} className="group">
                       <div className="relative aspect-square bg-neutral-900 overflow-hidden mb-4 border border-white/5 transition-all duration-500 group-hover:border-orange-300/50 flex items-center justify-center">
                         {image ? (
@@ -685,9 +686,9 @@ function DashboardInner({ onViewChange, user, setUser }) {
                           </p>
                         </div>
                         <div className="text-right shrink-0">
-                          <p className="text-orange-300 font-black">{revenue}</p>
+                          <p className="text-orange-300 font-black">{quantity}</p>
                           <p className="text-[10px] text-neutral-500 uppercase">
-                            Revenue
+                            จำนวนสั่งซื้อ
                           </p>
                         </div>
                       </div>
