@@ -11,5 +11,108 @@
   "jo": [],
   "bam": [],
   "testuat": [],
-  "testfinal1": []
+  "testfinal1": [
+    {
+      "id": 1,
+      "name": "Gogo Aero-Run V1",
+      "series": "Racing Series / Hyper-Responsive",
+      "price": 4500,
+      "brand": "Nike",
+      "sizes": [
+        "38",
+        "39",
+        "40",
+        "41",
+        "42",
+        "43",
+        "44",
+        "45"
+      ],
+      "colorNames": [
+        "Orange",
+        "Black",
+        "Green",
+        "Brown"
+      ],
+      "colors": [
+        "bg-primary",
+        "bg-black border border-white/20",
+        "bg-green-500",
+        "bg-[#8b4513]"
+      ],
+      "image": "image/1784688003787.png",
+      "colorImages": {
+        "orange": "image/nikeOr01.png",
+        "black": "image/nikeB01.png",
+        "green": "image/1784285570957.png",
+        "brown": "image/1784688003787.png"
+      },
+      "productType": "clothes",
+      "clothesType": "shoes",
+      "sportType": "Running",
+      "targetGroup": "men",
+      "fabricMaterial": "polyester",
+      "amount": 127,
+      "review": 4.9,
+      "description": "Premium carbon-plated road racing shoe built for speed.",
+      "sku": "GA-FW-2024-001",
+      "status": "Published",
+      "colorVariants": [
+        {
+          "color": "orange",
+          "colorClass": "bg-primary",
+          "image": "image/nikeOr01.png",
+          "amount": 0,
+          "stock": {
+            "38": 7,
+            "39": 7,
+            "40": 7,
+            "41": 8,
+            "42": 10,
+            "43": 7,
+            "44": 7,
+            "45": 7
+          }
+        },
+        {
+          "color": "black",
+          "colorClass": "bg-black border border-white/20",
+          "image": "image/nikeB01.png",
+          "amount": 0,
+          "stock": {
+            "38": 7,
+            "39": 7,
+            "40": 7,
+            "41": 7,
+            "42": 7,
+            "43": 7,
+            "44": 4,
+            "45": 7
+          }
+        },
+        {
+          "color": "green",
+          "colorClass": "bg-green-500",
+          "image": "image/1784285570957.png",
+          "amount": 0,
+          "stock": {
+            "40": 4
+          }
+        },
+        {
+          "color": "brown",
+          "colorClass": "bg-[#8b4513]",
+          "image": "image/1784688003787.png",
+          "amount": 0,
+          "stock": {
+            "40": 10
+          }
+        }
+      ],
+      "cartId": "1-brown-40",
+      "selectedColor": "brown",
+      "selectedSize": "40",
+      "quantity": 1
+    }
+  ]
 }

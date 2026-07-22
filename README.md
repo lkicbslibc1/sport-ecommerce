@@ -344,33 +344,8 @@ sport-frontend/src/
 
 ---
 
-### 16.4 Data Flow Diagram
 
-```mermaid
-sequenceDiagram
-    participant U as 👤 User (Browser)
-    participant FE as React Frontend
-    participant BE as Express Backend
-    participant FS as JSON Files
-
-    U->>FE: กดสั่งซื้อสินค้า
-    FE->>BE: GET /api/products (ดึงสต็อก)
-    BE->>FS: อ่าน products.json
-    FS-->>BE: ข้อมูลสินค้า
-    BE-->>FE: JSON Response
-    FE->>FE: ตรวจสอบสต็อกเพียงพอ
-    FE->>BE: POST /api/orders (บันทึกออเดอร์)
-    BE->>FS: เขียน orders.json
-    FE->>BE: POST /api/products (ตัดสต็อก)
-    BE->>FS: เขียน products.json
-    FE->>BE: POST /api/noti (แจ้งพนักงาน)
-    BE->>FS: เขียน noti.json
-    FE-->>U: แสดงผลสำเร็จ
-```
-
----
-
-### 16.5 Notification System
+### 16.4 Notification System
 
 ระบบแจ้งเตือน (Notification) ทำงานแบบ **Polling** ผ่าน `NotificationContext`:
 
@@ -393,7 +368,7 @@ flowchart LR
 
 ---
 
-### 16.6 User Role & Access Control
+### 16.5 User Role & Access Control
 
 | Role | หน้าที่สามารถเข้าถึง |
 |---|---|
