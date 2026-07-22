@@ -1,5 +1,63 @@
 [
   {
+    "id": "#GOGO-866379",
+    "username": "testfinal1",
+    "customer": "UAT man Lastname",
+    "shippingAddress": {
+      "firstName": "UAT man",
+      "lastName": "Lastname",
+      "phone": "0614014480",
+      "streetAddress": "a",
+      "city": "a",
+      "zipCode": "10230",
+      "isDefault": true,
+      "id": "1784687886330"
+    },
+    "shippingMethod": "express",
+    "shippingCost": 250,
+    "date": "JUL 22, 2026",
+    "total": 3192.5,
+    "status": "Shipped",
+    "items": [
+      {
+        "id": 9,
+        "color": "white",
+        "size": "M",
+        "name": "Classic Swim Cap V1",
+        "sku": "GA-SW-2024-009",
+        "qty": 2,
+        "price": "350 ฿",
+        "image": "image/nike09W.png"
+      },
+      {
+        "id": 15,
+        "color": "brown",
+        "size": "L",
+        "name": "Women's Power Training Tee",
+        "sku": "AD-WT-2026-015",
+        "qty": 1,
+        "price": "1,400 ฿",
+        "image": "image/adidasBr15.png"
+      },
+      {
+        "id": 5,
+        "color": "purple",
+        "size": "L",
+        "name": "Elite Grip Socks",
+        "sku": "GA-RN-2024-005",
+        "qty": 1,
+        "price": "650 ฿",
+        "image": "https://www.prodirectsport.com/cdn/shop/files/245118_main.jpg?v=1784246267&width=1000"
+      }
+    ],
+    "actions": [
+      "Update Status",
+      "Mark Shipped",
+      "Mark Preparing",
+      "Cancel Order"
+    ]
+  },
+  {
     "id": "#GOGO-173987",
     "username": "12",
     "customer": "หำเดะห ฟหกดฟห",

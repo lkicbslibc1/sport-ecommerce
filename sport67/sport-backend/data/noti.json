@@ -302,6 +302,60 @@
   ],
   "__employee__": [
     {
+      "id": "noti_1784688008439_bsd3y",
+      "timestamp": "2026-07-22T02:40:08.439Z",
+      "read": false,
+      "type": "product_update",
+      "action": "updated",
+      "title": "🟡 Manager แก้ไขสินค้า",
+      "message": "\"Gogo Aero-Run V1\" ถูกแก้ไขโดย Manager\nรายละเอียด: สี: orange, black, green -> orange, black, green, brown | จำนวนรวม: 113 -> 127"
+    },
+    {
+      "id": "noti_1784687893997_2kk4j",
+      "timestamp": "2026-07-22T02:38:13.997Z",
+      "read": false,
+      "type": "new_order",
+      "title": "🛒 ออเดอร์ใหม่เข้ามาแล้ว!",
+      "message": "Order #GOGO-866379 จาก UAT man Lastname — ฿3,192.5",
+      "orderId": "#GOGO-866379"
+    },
+    {
+      "id": "noti_1784686900457_tha93",
+      "timestamp": "2026-07-22T02:21:40.456Z",
+      "read": true,
+      "type": "stale_order",
+      "title": "⏰ ออเดอร์ค้างนานกว่า 3 วัน!",
+      "message": "Order #GOGO-880210 (Tongmen JaiSaard) ยังเป็น \"Preparing\" — ไม่ได้รับการอัปเดตมากกว่า 3 วัน",
+      "orderId": "#GOGO-880210"
+    },
+    {
+      "id": "noti_1784686900457_tjg6y",
+      "timestamp": "2026-07-22T02:21:40.456Z",
+      "read": false,
+      "type": "stale_order",
+      "title": "⏰ ออเดอร์ค้างนานกว่า 3 วัน!",
+      "message": "Order #GOGO-576296 (วรศักดิ์  นิลห้อย) ยังเป็น \"Preparing\" — ไม่ได้รับการอัปเดตมากกว่า 3 วัน",
+      "orderId": "#GOGO-576296"
+    },
+    {
+      "id": "noti_1784686900457_ujtac",
+      "timestamp": "2026-07-22T02:21:40.456Z",
+      "read": false,
+      "type": "stale_order",
+      "title": "⏰ ออเดอร์ค้างนานกว่า 3 วัน!",
+      "message": "Order #GOGO-764396 (วรศักดิ์  นิลห้อย) ยังเป็น \"Shipped\" — ไม่ได้รับการอัปเดตมากกว่า 3 วัน",
+      "orderId": "#GOGO-764396"
+    },
+    {
+      "id": "noti_1784686900344_r5jmt",
+      "timestamp": "2026-07-22T02:21:40.344Z",
+      "read": false,
+      "type": "low_stock",
+      "title": "⚠️ สินค้าใกล้หมด Stock!",
+      "message": "\"roblox guy\" เหลือแค่ 2 ชิ้น",
+      "productId": 19
+    },
+    {
       "id": "noti_1784608368208_mazc3",
       "timestamp": "2026-07-21T04:32:48.208Z",
       "read": false,
@@ -583,6 +637,51 @@
   ],
   "__manager__": [
     {
+      "id": "noti_1784687893997_2kk4j",
+      "timestamp": "2026-07-22T02:38:13.997Z",
+      "read": false,
+      "type": "new_order",
+      "title": "🛒 ออเดอร์ใหม่เข้ามาแล้ว!",
+      "message": "Order #GOGO-866379 จาก UAT man Lastname — ฿3,192.5",
+      "orderId": "#GOGO-866379"
+    },
+    {
+      "id": "noti_1784686900457_0igwh",
+      "timestamp": "2026-07-22T02:21:40.456Z",
+      "read": false,
+      "type": "stale_order",
+      "title": "⏰ ออเดอร์ค้างนานกว่า 3 วัน!",
+      "message": "Order #GOGO-880210 (Tongmen JaiSaard) ยังเป็น \"Preparing\" — ไม่ได้รับการอัปเดตมากกว่า 3 วัน",
+      "orderId": "#GOGO-880210"
+    },
+    {
+      "id": "noti_1784686900457_8s5zm",
+      "timestamp": "2026-07-22T02:21:40.456Z",
+      "read": false,
+      "type": "stale_order",
+      "title": "⏰ ออเดอร์ค้างนานกว่า 3 วัน!",
+      "message": "Order #GOGO-576296 (วรศักดิ์  นิลห้อย) ยังเป็น \"Preparing\" — ไม่ได้รับการอัปเดตมากกว่า 3 วัน",
+      "orderId": "#GOGO-576296"
+    },
+    {
+      "id": "noti_1784686900457_8aj2h",
+      "timestamp": "2026-07-22T02:21:40.456Z",
+      "read": false,
+      "type": "stale_order",
+      "title": "⏰ ออเดอร์ค้างนานกว่า 3 วัน!",
+      "message": "Order #GOGO-764396 (วรศักดิ์  นิลห้อย) ยังเป็น \"Shipped\" — ไม่ได้รับการอัปเดตมากกว่า 3 วัน",
+      "orderId": "#GOGO-764396"
+    },
+    {
+      "id": "noti_1784686900344_kwo36",
+      "timestamp": "2026-07-22T02:21:40.344Z",
+      "read": false,
+      "type": "low_stock",
+      "title": "⚠️ สินค้าใกล้หมด Stock!",
+      "message": "\"roblox guy\" เหลือแค่ 2 ชิ้น",
+      "productId": 19
+    },
+    {
       "id": "noti_1784608368208_mazc3",
       "timestamp": "2026-07-21T04:32:48.208Z",
       "read": false,
@@ -852,6 +951,22 @@
       "title": "Purchase successful!",
       "status": "Preparing",
       "read": true
+    }
+  ],
+  "testfinal1": [
+    {
+      "id": "#GOGO-866379",
+      "date": "JUL 22, 2026",
+      "title": "Order status updated",
+      "status": "Shipped",
+      "read": false
+    },
+    {
+      "id": "#GOGO-866379",
+      "date": "JUL 22, 2026",
+      "title": "Purchase successful!",
+      "status": "Preparing",
+      "read": false
     }
   ]
 }

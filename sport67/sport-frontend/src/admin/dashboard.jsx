@@ -56,7 +56,7 @@ function DashboardInner({ onViewChange, user, setUser }) {
     setHighlightId(targetId);
   };
 
-// Restrict employee access
+  // Restrict employee access
   React.useEffect(() => {
     if (user?.role === 'employee' && !["dashboard", "orders", "products"].includes(currentPage)) {
       handleNavigate("dashboard");
@@ -67,7 +67,7 @@ function DashboardInner({ onViewChange, user, setUser }) {
   const { products } = useContext(ProductContext);
 
   const [ordersList, setOrdersList] = useState([]);
-  
+
   React.useEffect(() => {
     const loadOrders = async () => {
       const fetchedOrders = await getStoredOrders();
@@ -109,9 +109,9 @@ function DashboardInner({ onViewChange, user, setUser }) {
       name: p.name,
       sku: p.sku || `GA-PROD-${p.id}`,
       status: p.amount === 0 ? "OUT OF STOCK" : `${p.amount} LEFT`,
-      image: p.image || 
-             (p.colorVariants && p.colorVariants.length > 0 ? p.colorVariants[0].image : null) || 
-             (p.colorImages && Object.values(p.colorImages).length > 0 ? Object.values(p.colorImages)[0] : null)
+      image: p.image ||
+        (p.colorVariants && p.colorVariants.length > 0 ? p.colorVariants[0].image : null) ||
+        (p.colorImages && Object.values(p.colorImages).length > 0 ? Object.values(p.colorImages)[0] : null)
     })).slice(0, 5);
   }, [criticalProducts]);
 
@@ -126,12 +126,12 @@ function DashboardInner({ onViewChange, user, setUser }) {
   const staleOrders = useMemo(() => {
     const threeDaysAgo = new Date();
     threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
-    threeDaysAgo.setHours(0,0,0,0);
+    threeDaysAgo.setHours(0, 0, 0, 0);
     return ordersList.filter(o => {
       if (o.status !== "Preparing") return false;
       if (!o.date) return false;
       const orderDate = new Date(o.date);
-      orderDate.setHours(0,0,0,0);
+      orderDate.setHours(0, 0, 0, 0);
       return orderDate <= threeDaysAgo;
     });
   }, [ordersList]);
@@ -139,7 +139,7 @@ function DashboardInner({ onViewChange, user, setUser }) {
   // Compute last 7 days or 7 weeks of revenue from real orders
   const chartData = useMemo(() => {
     const today = new Date();
-    
+
     if (range === "daily") {
       const days = Array.from({ length: 7 }, (_, i) => {
         const d = new Date(today);
@@ -172,20 +172,20 @@ function DashboardInner({ onViewChange, user, setUser }) {
       const results = weeks.map((weekEnd, i) => {
         const weekStart = new Date(weekEnd);
         weekStart.setDate(weekEnd.getDate() - 6);
-        
+
         let label = "";
         if (i === 6) label = "THIS WK";
         else if (i === 5) label = "LAST WK";
         else label = `W-${6 - i}`;
-        
+
         const weekOrders = ordersList.filter(o => {
-            if (o.status === "Cancelled" || !o.date) return false;
-            const orderDate = new Date(o.date);
-            const orderTime = new Date(orderDate.getFullYear(), orderDate.getMonth(), orderDate.getDate()).getTime();
-            const startTime = new Date(weekStart.getFullYear(), weekStart.getMonth(), weekStart.getDate()).getTime();
-            const endTime = new Date(weekEnd.getFullYear(), weekEnd.getMonth(), weekEnd.getDate()).getTime();
-            
-            return orderTime >= startTime && orderTime <= endTime;
+          if (o.status === "Cancelled" || !o.date) return false;
+          const orderDate = new Date(o.date);
+          const orderTime = new Date(orderDate.getFullYear(), orderDate.getMonth(), orderDate.getDate()).getTime();
+          const startTime = new Date(weekStart.getFullYear(), weekStart.getMonth(), weekStart.getDate()).getTime();
+          const endTime = new Date(weekEnd.getFullYear(), weekEnd.getMonth(), weekEnd.getDate()).getTime();
+
+          return orderTime >= startTime && orderTime <= endTime;
         });
 
         const total = weekOrders.reduce((sum, o) => sum + (o.total || 0), 0);
@@ -209,7 +209,7 @@ function DashboardInner({ onViewChange, user, setUser }) {
   const bestSellers = useMemo(() => {
     // Calculate quantity from actual orders
     const productRevenue = {};
-    
+
     ordersList.forEach(order => {
       if (order.status !== 'Cancelled' && order.items) {
         order.items.forEach(item => {
@@ -219,7 +219,7 @@ function DashboardInner({ onViewChange, user, setUser }) {
             const price = parseFloat((item.price || "0").replace(/,/g, '').replace(' ฿', '')) || 0;
             const qty = item.qty || 1;
             const revenue = price * qty;
-            
+
             if (!productRevenue[productId]) {
               productRevenue[productId] = {
                 totalRevenue: 0,
@@ -232,14 +232,14 @@ function DashboardInner({ onViewChange, user, setUser }) {
         });
       }
     });
-    
+
     // Create product lookup by id and sku
     const productMap = {};
     products.forEach(p => {
       productMap[p.id] = p;
       if (p.sku) productMap[p.sku] = p;
     });
-    
+
     // Sort products by quantity and get top 4
     const sortedProducts = Object.entries(productRevenue)
       .map(([key, data]) => {
@@ -256,7 +256,7 @@ function DashboardInner({ onViewChange, user, setUser }) {
       .filter(Boolean)
       .sort((a, b) => b.totalQty - a.totalQty)
       .slice(0, 4);
-    
+
     return sortedProducts.map((item, idx) => ({
       rank: idx + 1,
       name: item.product.name,
@@ -297,22 +297,24 @@ function DashboardInner({ onViewChange, user, setUser }) {
         onNavigate={setCurrentPage}
         onViewChange={onViewChange}
         actionButton={
-          <div className="flex flex-col gap-2">
-            <button
-              onClick={() => setCurrentPage("products")}
-              className="w-full bg-orange-600 text-white py-3 text-xs font-bold uppercase tracking-widest hover:scale-105 transition-transform flex items-center justify-center gap-2"
-            >
-              <Plus size={16} />
-              New Product
-            </button>
-            <button
-              onClick={() => setCurrentPage("orders")}
-              className="w-full bg-indigo-600 text-white py-3 text-xs font-bold uppercase tracking-widest hover:scale-105 transition-transform flex items-center justify-center gap-2"
-            >
-              <ShoppingCart size={16} />
-              View Orders
-            </button>
-          </div>
+          user?.role === 'employee' ? null : (
+            <div className="flex flex-col gap-2">
+              {/* <button
+                onClick={() => setCurrentPage("products")}
+                className="w-full bg-orange-600 text-white py-3 text-xs font-bold uppercase tracking-widest hover:scale-105 transition-transform flex items-center justify-center gap-2"
+              >
+                <Plus size={16} />
+                New Product
+              </button>
+              <button
+                onClick={() => setCurrentPage("orders")}
+                className="w-full bg-indigo-600 text-white py-3 text-xs font-bold uppercase tracking-widest hover:scale-105 transition-transform flex items-center justify-center gap-2"
+              >
+                <ShoppingCart size={16} />
+                View Orders
+              </button> */}
+            </div>
+          )
         }
       />
 
@@ -326,17 +328,7 @@ function DashboardInner({ onViewChange, user, setUser }) {
           </div>
 
           <div className="flex items-center gap-8">
-            <div className="relative hidden lg:block">
-              <input
-                type="text"
-                placeholder="GLOBAL SEARCH..."
-                className="bg-transparent border-0 border-b border-white/10 focus:ring-0 focus:border-orange-300 text-neutral-100 w-64 text-xs placeholder:text-neutral-600 pb-1"
-              />
-              <Search
-                size={14}
-                className="absolute right-0 bottom-2 text-neutral-500"
-              />
-            </div>
+
             <div className="flex items-center gap-6">
               <button
                 onClick={() => setPanelOpen(true)}
@@ -413,7 +405,7 @@ function DashboardInner({ onViewChange, user, setUser }) {
                   </GlassPanel>
                 </div>
               ))}
-              
+
               <div className="col-span-12 lg:col-span-6 flex flex-col gap-6">
                 <GlassPanel className="p-8 bg-red-950/20 border-red-500/20 flex-1">
                   <div className="flex items-center justify-between mb-6">
@@ -448,7 +440,7 @@ function DashboardInner({ onViewChange, user, setUser }) {
                       <div key={sku} onClick={() => handleNavigate("products", id)} className="flex items-center justify-between py-3 px-4 -mx-4 border-b border-white/5 last:border-b-0 last:pb-3 cursor-pointer hover:bg-white/5 transition-colors rounded">
                         <div className="flex items-center gap-4">
                           <div className="w-16 h-16 bg-white/5 border border-white/10 shrink-0 flex items-center justify-center overflow-hidden p-2 rounded">
-                             {image ? <img src={image.startsWith('http') ? image : `/${image}`} alt={name} className="w-full h-full object-contain" /> : <Package size={24} className="text-neutral-600" />}
+                            {image ? <img src={image.startsWith('http') ? image : `/${image}`} alt={name} className="w-full h-full object-contain" /> : <Package size={24} className="text-neutral-600" />}
                           </div>
                           <div>
                             <p className="font-bold text-sm uppercase">{name}</p>
@@ -466,249 +458,251 @@ function DashboardInner({ onViewChange, user, setUser }) {
               </div>
             </div>
           ) : (
-          <div className="grid grid-cols-12 gap-6">
-            {/* KPI CARDS */}
-            {[
-              {
-                label: "Store Revenue",
-                value: totalRevenue.toLocaleString("th-TH") + " ฿",
-                icon: Banknote,
-                trend: `From ${ordersList.length} total orders`,
-                trendIcon: TrendingUp,
-                trendColor: "text-orange-300",
-              },
-              {
-                label: "Active Shipments",
-                value: activeShipments.toString(),
-                icon: Truck,
-                trend: "Fulfillment In Progress",
-                trendIcon: Truck,
-                trendColor: "text-indigo-300",
-              },
-              {
-                label: "Stock Efficiency",
-                value: stockEfficiency,
-                icon: Package,
-                trend: `${criticalProducts.length} items critical`,
-                trendIcon: AlertTriangle,
-                trendColor: criticalProducts.length > 0 ? "text-red-400" : "text-green-400",
-              }
-            ].map(
-              ({ label, value, icon: Icon, trend, trendIcon: TrendIcon, trendColor }) => (
-                <div
-                  key={label}
-                  className="col-span-12 lg:col-span-4 relative overflow-hidden group"
-                >
-                  <GlassPanel className="p-8 relative overflow-hidden h-full">
-                    <div className="relative z-10">
-                      <p className="text-[11px] text-neutral-400 uppercase tracking-widest mb-2">
-                        {label}
-                      </p>
-                      <h4 className="text-4xl italic tracking-tighter font-black mb-4">
-                        {value}
-                      </h4>
-                      <div className={"flex items-center gap-2 font-bold " + trendColor}>
-                        <TrendIcon size={18} />
-                        <span className="text-sm">{trend}</span>
+            <div className="grid grid-cols-12 gap-6">
+              {/* KPI CARDS */}
+              {[
+                {
+                  label: "Store Revenue",
+                  value: totalRevenue.toLocaleString("th-TH") + " ฿",
+                  icon: Banknote,
+                  trend: `From ${ordersList.length} total orders`,
+                  trendIcon: TrendingUp,
+                  trendColor: "text-orange-300",
+                },
+                {
+                  label: "Active Shipments",
+                  value: activeShipments.toString(),
+                  icon: Truck,
+                  trend: "Fulfillment In Progress",
+                  trendIcon: Truck,
+                  trendColor: "text-indigo-300",
+                },
+                {
+                  label: "Stock Efficiency",
+                  value: stockEfficiency,
+                  icon: Package,
+                  trend: `${criticalProducts.length} items critical`,
+                  trendIcon: AlertTriangle,
+                  trendColor: criticalProducts.length > 0 ? "text-red-400" : "text-green-400",
+                }
+              ].map(
+                ({ label, value, icon: Icon, trend, trendIcon: TrendIcon, trendColor }) => (
+                  <div
+                    key={label}
+                    className="col-span-12 lg:col-span-4 relative overflow-hidden group"
+                  >
+                    <GlassPanel className="p-8 relative overflow-hidden h-full">
+                      <div className="relative z-10">
+                        <p className="text-[11px] text-neutral-400 uppercase tracking-widest mb-2">
+                          {label}
+                        </p>
+                        <h4 className="text-4xl italic tracking-tighter font-black mb-4">
+                          {value}
+                        </h4>
+                        <div className={"flex items-center gap-2 font-bold " + trendColor}>
+                          <TrendIcon size={18} />
+                          <span className="text-sm">{trend}</span>
+                        </div>
                       </div>
+                      <Icon
+                        size={160}
+                        className="absolute -right-10 -bottom-10 opacity-10 scale-150 group-hover:rotate-12 transition-transform duration-700 text-neutral-500"
+                      />
+                    </GlassPanel>
+                  </div>
+                )
+              )}
+
+              {/* VELOCITY MATRIX CHART */}
+              <div className="col-span-12 lg:col-span-8">
+                <GlassPanel className="p-8 min-h-[400px] h-full">
+                  <div className="flex justify-between items-start mb-8">
+                    <div>
+                      <h5 className="text-2xl uppercase italic font-black tracking-tight">
+                        Velocity Matrix
+                      </h5>
+                      <p className="text-neutral-500 text-[10px] uppercase tracking-widest mt-1">
+                        {range === 'daily' ? '7-Day Transaction Volume' : '7-Week Transaction Volume'}
+                      </p>
                     </div>
-                    <Icon
-                      size={160}
-                      className="absolute -right-10 -bottom-10 opacity-10 scale-150 group-hover:rotate-12 transition-transform duration-700 text-neutral-500"
-                    />
-                  </GlassPanel>
-                </div>
-              )
-            )}
-
-            {/* VELOCITY MATRIX CHART */}
-            <div className="col-span-12 lg:col-span-8">
-              <GlassPanel className="p-8 min-h-[400px] h-full">
-                <div className="flex justify-between items-start mb-8">
-                  <div>
-                    <h5 className="text-2xl uppercase italic font-black tracking-tight">
-                      Velocity Matrix
-                    </h5>
-                    <p className="text-neutral-500 text-[10px] uppercase tracking-widest mt-1">
-                      {range === 'daily' ? '7-Day Transaction Volume' : '7-Week Transaction Volume'}
-                    </p>
-                  </div>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => setRange("daily")}
-                      className={
-                        "text-xs px-4 py-1 uppercase font-bold transition-colors " +
-                        (range === "daily"
-                          ? "bg-orange-300 text-neutral-950"
-                          : "border border-white/10 text-neutral-300 hover:bg-white/5")
-                      }
-                    >
-                      Daily
-                    </button>
-                    <button
-                      onClick={() => setRange("weekly")}
-                      className={
-                        "text-xs px-4 py-1 uppercase font-bold transition-colors " +
-                        (range === "weekly"
-                          ? "bg-orange-300 text-neutral-950"
-                          : "border border-white/10 text-neutral-300 hover:bg-white/5")
-                      }
-                    >
-                      Weekly
-                    </button>
-                  </div>
-                </div>
-
-                <div className="h-64 w-full flex items-end gap-2 px-2">
-                  {displayData.map(({ label, heightPct, amount, isCurrent }) => (
-                    <div
-                      key={label}
-                      className={
-                        "flex-1 relative group cursor-pointer transition-colors border-t-2 " +
-                        (isCurrent
-                          ? "bg-orange-300 border-white"
-                          : "bg-orange-300/20 hover:bg-orange-300/40 border-orange-300")
-                      }
-                      style={{ height: heightPct + "%" }}
-                    >
-                      <div
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setRange("daily")}
                         className={
-                          "absolute -top-8 left-1/2 -translate-x-1/2 transition-opacity text-[10px] px-2 py-1 font-bold whitespace-nowrap z-10 " +
-                          (isCurrent
-                            ? "opacity-100 bg-white text-neutral-950 italic"
-                            : "opacity-0 group-hover:opacity-100 bg-orange-300 text-neutral-950")
+                          "text-xs px-4 py-1 uppercase font-bold transition-colors " +
+                          (range === "daily"
+                            ? "bg-orange-300 text-neutral-950"
+                            : "border border-white/10 text-neutral-300 hover:bg-white/5")
                         }
                       >
-                        {isCurrent ? `${range === 'daily' ? 'TODAY' : 'THIS WK'}: ${amount}` : `${label.toUpperCase()}: ${amount}`}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <div className="flex justify-between mt-4 text-[10px] font-bold text-neutral-500 uppercase tracking-widest opacity-70">
-                  {displayData.map(({ label }) => (
-                    <span key={label}>{label}</span>
-                  ))}
-                </div>
-              </GlassPanel>
-            </div>
-
-            {/* CRITICAL STOCK ALERTS */}
-            <div className="col-span-12 lg:col-span-4 flex flex-col gap-6">
-              <GlassPanel className="p-8 bg-red-950/20 border-red-500/20 flex-1">
-                <div className="flex items-center justify-between mb-6">
-                  <h5 className="text-sm text-red-400 uppercase italic tracking-widest font-black flex items-center gap-2">
-                    <AlertTriangle size={18} className="fill-red-400/20" />
-                    Critical Alerts
-                  </h5>
-                  <span className="text-[10px] bg-red-400 text-red-950 px-2 py-0.5 font-bold">
-                    {criticalProducts.length} SKUs
-                  </span>
-                </div>
-                <div className="space-y-4">
-                  {dynamicAlerts.length > 0 ? (
-                    dynamicAlerts.map(({ id, name, sku, status, image }) => (
-                      <div
-                        key={sku}
-                        onClick={() => handleNavigate("products", id)}
-                        className="flex items-center justify-between py-3 px-4 -mx-4 border-b border-white/5 last:border-b-0 last:pb-3 cursor-pointer hover:bg-white/5 transition-colors rounded"
+                        Daily
+                      </button>
+                      <button
+                        onClick={() => setRange("weekly")}
+                        className={
+                          "text-xs px-4 py-1 uppercase font-bold transition-colors " +
+                          (range === "weekly"
+                            ? "bg-orange-300 text-neutral-950"
+                            : "border border-white/10 text-neutral-300 hover:bg-white/5")
+                        }
                       >
-                        <div className="flex items-center gap-4">
-                          <div className="w-16 h-16 bg-white/5 border border-white/10 shrink-0 flex items-center justify-center overflow-hidden p-2 rounded">
-                             {image ? <img src={image.startsWith('http') ? image : `/${image}`} alt={name} className="w-full h-full object-contain" /> : <Package size={24} className="text-neutral-600" />}
-                          </div>
-                          <div>
-                            <p className="font-bold text-sm uppercase">{name}</p>
-                            <p className="text-[10px] text-neutral-500">SKU: {sku}</p>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-red-400 font-black">{status}</p>
-                          <span className="text-orange-300 text-[10px] font-bold underline uppercase tracking-widest">
-                            Restock
-                          </span>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-neutral-500 text-xs italic">All stock levels normal.</p>
-                  )}
-                </div>
-              </GlassPanel>
-            </div>
+                        Weekly
+                      </button>
+                    </div>
+                  </div>
 
-            {/* BEST SELLERS */}
-            <div className="col-span-12">
-              <GlassPanel className="p-6 sm:p-10 mt-6">
-                <div className="flex justify-between items-center mb-10 flex-wrap gap-4">
-                  <h5 className="text-2xl sm:text-3xl uppercase italic font-black tracking-tight">
-                    Best Sellers{" "}
-                    <span className="text-transparent [-webkit-text-stroke:1px_rgba(255,255,255,0.2)]">
-                      Leaderboard
-                    </span>
-                  </h5>
-                  <button
-                    onClick={() => setCurrentPage("products")}
-                    className="text-neutral-400 hover:text-orange-300 text-xs font-bold uppercase tracking-widest border-b border-neutral-500"
-                  >
-                    View Full Catalog
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                  {bestSellers.map(({ rank, name, series, quantity, image, rankBg }) => (
-                    <div key={rank} className="group">
-                      <div className="relative aspect-square bg-neutral-900 overflow-hidden mb-4 border border-white/5 transition-all duration-500 group-hover:border-orange-300/50 flex items-center justify-center">
-                        {image ? (
-                          <img src={image.startsWith('http') ? image : `/${image}`} className="w-full h-full object-cover group-hover:scale-110 duration-700 transition-transform" alt={name} />
-                        ) : (
-                          <Boxes
-                            size={72}
-                            strokeWidth={1}
-                            className="text-neutral-700 group-hover:text-orange-300/60 transition-colors duration-500 group-hover:scale-110 duration-700"
-                          />
-                        )}
+                  <div className="h-64 w-full flex items-end gap-2 px-2">
+                    {displayData.map(({ label, heightPct, amount, isCurrent }) => (
+                      <div
+                        key={label}
+                        className={
+                          "flex-1 relative group cursor-pointer transition-colors border-t-2 " +
+                          (isCurrent
+                            ? "bg-orange-300 border-white"
+                            : "bg-orange-300/20 hover:bg-orange-300/40 border-orange-300")
+                        }
+                        style={{ height: heightPct + "%" }}
+                      >
                         <div
                           className={
-                            "absolute top-0 right-0 font-black p-3 text-lg italic " +
-                            rankBg
+                            "absolute -top-8 left-1/2 -translate-x-1/2 transition-opacity text-[10px] px-2 py-1 font-bold whitespace-nowrap z-10 " +
+                            (isCurrent
+                              ? "opacity-100 bg-white text-neutral-950 italic"
+                              : "opacity-0 group-hover:opacity-100 bg-orange-300 text-neutral-950")
                           }
                         >
-                          #{rank}
+                          {isCurrent ? `${range === 'daily' ? 'TODAY' : 'THIS WK'}: ${amount}` : `${label.toUpperCase()}: ${amount}`}
                         </div>
                       </div>
-                      <div className="flex justify-between items-start gap-2">
-                        <div>
-                          <h6 className="font-bold text-sm uppercase tracking-tight">
-                            {name}
-                          </h6>
-                          <p className="text-[10px] text-neutral-500 uppercase tracking-widest mt-1 max-w-[150px] overflow-hidden text-ellipsis whitespace-nowrap">
-                            {series}
-                          </p>
+                    ))}
+                  </div>
+                  <div className="flex justify-between mt-4 text-[10px] font-bold text-neutral-500 uppercase tracking-widest opacity-70">
+                    {displayData.map(({ label }) => (
+                      <span key={label}>{label}</span>
+                    ))}
+                  </div>
+                </GlassPanel>
+              </div>
+
+              {/* CRITICAL STOCK ALERTS */}
+              <div className="col-span-12 lg:col-span-4 flex flex-col gap-6">
+                <GlassPanel className="p-8 bg-red-950/20 border-red-500/20 flex-1">
+                  <div className="flex items-center justify-between mb-6">
+                    <h5 className="text-sm text-red-400 uppercase italic tracking-widest font-black flex items-center gap-2">
+                      <AlertTriangle size={18} className="fill-red-400/20" />
+                      Critical Alerts
+                    </h5>
+                    <span className="text-[10px] bg-red-400 text-red-950 px-2 py-0.5 font-bold">
+                      {criticalProducts.length} SKUs
+                    </span>
+                  </div>
+                  <div className="space-y-4">
+                    {dynamicAlerts.length > 0 ? (
+                      dynamicAlerts.map(({ id, name, sku, status, image }) => (
+                        <div
+                          key={sku}
+                          onClick={() => handleNavigate("products", id)}
+                          className="flex items-center justify-between py-3 px-4 -mx-4 border-b border-white/5 last:border-b-0 last:pb-3 cursor-pointer hover:bg-white/5 transition-colors rounded"
+                        >
+                          <div className="flex items-center gap-4">
+                            <div className="w-16 h-16 bg-white/5 border border-white/10 shrink-0 flex items-center justify-center overflow-hidden p-2 rounded">
+                              {image ? <img src={image.startsWith('http') ? image : `/${image}`} alt={name} className="w-full h-full object-contain" /> : <Package size={24} className="text-neutral-600" />}
+                            </div>
+                            <div>
+                              <p className="font-bold text-sm uppercase">{name}</p>
+                              <p className="text-[10px] text-neutral-500">SKU: {sku}</p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-red-400 font-black">{status}</p>
+                            <span className="text-orange-300 text-[10px] font-bold underline uppercase tracking-widest">
+                              Restock
+                            </span>
+                          </div>
                         </div>
-                        <div className="text-right shrink-0">
-                          <p className="text-orange-300 font-black">{quantity}</p>
-                          <p className="text-[10px] text-neutral-500 uppercase">
-                            จำนวนสั่งซื้อ
-                          </p>
+                      ))
+                    ) : (
+                      <p className="text-neutral-500 text-xs italic">All stock levels normal.</p>
+                    )}
+                  </div>
+                </GlassPanel>
+              </div>
+
+              {/* BEST SELLERS */}
+              <div className="col-span-12">
+                <GlassPanel className="p-6 sm:p-10 mt-6">
+                  <div className="flex justify-between items-center mb-10 flex-wrap gap-4">
+                    <h5 className="text-2xl sm:text-3xl uppercase italic font-black tracking-tight">
+                      Best Sellers{" "}
+                      <span className="text-transparent [-webkit-text-stroke:1px_rgba(255,255,255,0.2)]">
+                        Leaderboard
+                      </span>
+                    </h5>
+                    <button
+                      onClick={() => setCurrentPage("products")}
+                      className="text-neutral-400 hover:text-orange-300 text-xs font-bold uppercase tracking-widest border-b border-neutral-500"
+                    >
+                      View Full Catalog
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    {bestSellers.map(({ rank, name, series, quantity, image, rankBg }) => (
+                      <div key={rank} className="group">
+                        <div className="relative aspect-square bg-neutral-900 overflow-hidden mb-4 border border-white/5 transition-all duration-500 group-hover:border-orange-300/50 flex items-center justify-center">
+                          {image ? (
+                            <img src={image.startsWith('http') ? image : `/${image}`} className="w-full h-full object-cover group-hover:scale-110 duration-700 transition-transform" alt={name} />
+                          ) : (
+                            <Boxes
+                              size={72}
+                              strokeWidth={1}
+                              className="text-neutral-700 group-hover:text-orange-300/60 transition-colors duration-500 group-hover:scale-110 duration-700"
+                            />
+                          )}
+                          <div
+                            className={
+                              "absolute top-0 right-0 font-black p-3 text-lg italic " +
+                              rankBg
+                            }
+                          >
+                            #{rank}
+                          </div>
+                        </div>
+                        <div className="flex justify-between items-start gap-2">
+                          <div>
+                            <h6 className="font-bold text-sm uppercase tracking-tight">
+                              {name}
+                            </h6>
+                            <p className="text-[10px] text-neutral-500 uppercase tracking-widest mt-1 max-w-[150px] overflow-hidden text-ellipsis whitespace-nowrap">
+                              {series}
+                            </p>
+                          </div>
+                          <div className="text-right shrink-0">
+                            <p className="text-orange-300 font-black">{quantity}</p>
+                            <p className="text-[10px] text-neutral-500 uppercase">
+                              จำนวนสั่งซื้อ
+                            </p>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              </GlassPanel>
+                    ))}
+                  </div>
+                </GlassPanel>
+              </div>
             </div>
-          </div>
           )}
         </main>
       </div>
 
       {/* FLOATING ACTION BUTTON */}
-      <button
-        onClick={() => setCurrentPage("products")}
-        className="fixed bottom-10 right-10 w-16 h-16 bg-orange-300 text-neutral-950 shadow-2xl flex items-center justify-center hover:scale-110 transition-transform z-50"
-      >
-        <Plus size={28} />
-      </button>
+      {user?.role !== 'employee' && (
+        <button
+          onClick={() => setCurrentPage("products")}
+          className="fixed bottom-10 right-10 w-16 h-16 bg-orange-300 text-neutral-950 shadow-2xl flex items-center justify-center hover:scale-110 transition-transform z-50"
+        >
+          <Plus size={28} />
+        </button>
+      )}
     </div>
   );
 }

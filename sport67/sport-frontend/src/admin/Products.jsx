@@ -1043,7 +1043,7 @@ export default function GogoAthleticProducts({ onNavigate, onViewChange, user, s
                                                             className="bg-neutral-900 border border-white/10 py-3 px-4 uppercase text-sm"
                                                         >
                                                             <option value="">Select Color</option>
-                                                            {COLOR_NAMES.map(c => <option key={c} value={c}>{c}</option>)}
+                                                            {COLOR_NAMES.filter(c => c === variant.color || !colorVariants.some(v => v.color === c)).map(c => <option key={c} value={c}>{c}</option>)}
                                                         </select>
                                                     </div>
 

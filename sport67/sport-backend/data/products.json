@@ -18,27 +18,28 @@
     "colorNames": [
       "Orange",
       "Black",
-      "Green"
+      "Green",
+      "Brown"
     ],
-    "badge": "Best Seller",
-    "badgeType": "primary",
     "colors": [
       "bg-primary",
       "bg-black border border-white/20",
-      "bg-green-500"
+      "bg-green-500",
+      "bg-[#8b4513]"
     ],
     "image": "image/nikeOr01.png",
     "colorImages": {
       "orange": "image/nikeOr01.png",
       "black": "image/nikeB01.png",
-      "green": "image/1784285570957.png"
+      "green": "image/1784285570957.png",
+      "brown": "image/1784688003787.png"
     },
     "productType": "clothes",
     "clothesType": "shoes",
     "sportType": "Running",
     "targetGroup": "men",
     "fabricMaterial": "polyester",
-    "amount": 113,
+    "amount": 127,
     "review": 4.9,
     "description": "Premium carbon-plated road racing shoe built for speed.",
     "sku": "GA-FW-2024-001",
@@ -83,6 +84,15 @@
         "amount": 0,
         "stock": {
           "40": 4
+        }
+      },
+      {
+        "color": "brown",
+        "colorClass": "bg-[#8b4513]",
+        "image": "image/1784688003787.png",
+        "amount": 0,
+        "stock": {
+          "40": 10
         }
       }
     ]
@@ -161,8 +171,6 @@
       "Red",
       "Yellow"
     ],
-    "badge": "New Arrival",
-    "badgeType": "tertiary",
     "colors": [
       "bg-[#e53935]",
       "bg-[#eeff00ff]"
@@ -674,8 +682,6 @@
       "bg-[#e5ded4]",
       "bg-gray-500"
     ],
-    "badge": "New Arrival",
-    "badgeType": "tertiary",
     "image": "image/adidas10P.png",
     "productType": "clothes",
     "clothesType": "shoes",
